@@ -1,0 +1,30 @@
+Parameter,unit
+WMO block,
+WMO station number,
+WMO member state identifier,
+National station number,
+WIGOS identifier series,
+WIGOS issuer of identifier,
+WIGOS issue number,
+WIGOS local identifier (character),
+Station name,
+Year,UTC 
+Month,UTC 
+Day,UTC 
+Observation hour,UTC 
+Observation minute,UTC 
+Latitude,degree 
+Longitude,degree 
+Elevation,m 
+Temperature,K 
+Relative humidity,% 
+Dew point,K 
+Pressure,Pa 
+Mean sea level pressure,Pa 
+Wind speed,m/s 
+Wind direction,degree 
+Maximum wind gust speed,m/s 
+Maximum wind gust direction,degree 
+Total Precipitation/water equivalent for specified period,kg m-2 
+Visibility,m 
+Total snow depth,m 
