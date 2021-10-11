@@ -1,0 +1,28 @@
+def bufr_encode():
+    ibufr = codes_bufr_new_from_samples('BUFR4')
+    ivalues = (
+        0, 0 ,)
+    codes_set_array(ibufr, 'inputDelayedDescriptorReplicationFactor', ivalues)
+    codes_set(ibufr, 'edition', 4)
+    codes_set(ibufr, 'masterTableNumber', 0)
+    codes_set(ibufr, 'bufrHeaderCentre', 43)
+    codes_set(ibufr, 'bufrHeaderSubCentre', 0)
+    codes_set(ibufr, 'updateSequenceNumber', 0)
+    codes_set(ibufr, 'dataCategory', 0)
+    codes_set(ibufr, 'internationalDataSubCategory', 2)
+    codes_set(ibufr, 'dataSubCategory', 2)
+    codes_set(ibufr, 'masterTablesVersionNumber', 28)
+    codes_set(ibufr, 'localTablesVersionNumber', 0)
+    codes_set(ibufr, 'typicalYear', 2018)
+    codes_set(ibufr, 'typicalMonth', 10)
+    codes_set(ibufr, 'typicalDay', 16)
+    codes_set(ibufr, 'typicalHour', 0)
+    codes_set(ibufr, 'typicalMinute', 0)
+    codes_set(ibufr, 'typicalSecond', 0)
+    codes_set(ibufr, 'numberOfSubsets', 1)
+    codes_set(ibufr, 'observedData', 1)
+    codes_set(ibufr, 'compressedData', 0)
+    ivalues = (
+        301150, 307080,)
+    # Create the structure of the data section
+    codes_set_array(ibufr, 'unexpandedDescriptors', ivalues)
