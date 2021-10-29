@@ -14,8 +14,9 @@ CSV to a BUFR message.
 
     # run the converter
     python3 ./main.py  
+       --config ./config
        --mapping mapping.json \
-       --input ./DATA/Namitambo_TableHour.csv \
+       --input ./data/Namitambo_TableHour.csv \
        --output ./OUTPUT/ \
        --wigos-id 0-454-2-AWSNAMITAMBO 
 
