@@ -20,16 +20,30 @@ def encode( mapping_dict , data_dict):
     # ===================
     # Now encode the data
     # ===================
+
+    # This section needs to change to reflect changed json structure.
+
     for element in mapping_dict:
-        if isinstance(mapping_dict[element], list):
-            codes_set_array(msg, element, mapping_dict[element]  )
+        #
+        # We are now iterating over array/list, each item
+        # is a dict. We need key, column / value, min and max
+        key = element["key"]
+        if "value" in element:
+            value = element["value"]
         else:
-            if isinstance( mapping_dict[element], str ):
-                value = data_dict[ mapping_dict[element] ]
+            value = data_dict[ element["column"] ]
+            # add QC code here, e.g.
+            if element["min"] is not None:
+                assert value >= element["min"]
+            if element["max"] is not None:
+                assert value <= element["max"]
+
+        if value is not None:
+            if isinstance(value, list):
+                codes_set_array(msg, key, value  )
             else:
-                value = mapping_dict[element]
-            if value is not None:
-                codes_set(msg, element, value )
+                codes_set(msg, key, value)
+
     # =============================
     # Message now read to be packed
     # =============================

@@ -1,0 +1,36 @@
+3-01-150
+3-01-001
+3-01-021
+0-07-030
+0-08-095
+0-08-096
+0-08-094
+3-01-011
+0-04-023
+3-01-013
+2-04-008	Add associated field	8 bits long
+0-31-021	Associated field significance	Set as 5 for 8-bit indicator of quality control
+0-13-060	Total accumulated precipitation (kg m-2)	 
+2-04-000
+0-04-023
+3-01-013
+2-04-008	Add associated field	8 bits long
+0-31-021	Associated field significance	Set as 5 for 8-bit indicator of quality control
+0-13-012
+2-04-000
+0-04-023
+3-01-013
+2-04-008	Add associated field	8 bits long
+0-31-021	Associated field significance	Set as 5 for 8-bit indicator of quality control
+0-13-013
+2-04-000
+0-07-032
+1-07-003
+0-04-023
+3-01-013
+0-08-023
+2-04-008	Add associated field	8 bits long
+0-31-021	Associated field significance	Set as 5 for 8-bit indicator of quality control
+0-12-101
+2-04-000
+0-08-023
