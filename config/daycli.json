@@ -1,25 +1,35 @@
-3-01-150
-3-01-001
-3-01-021
+001125,
+001126,
+001127,
+001128
+001001
+001002
+005001,
+006001
 0-07-030
 0-08-095
 0-08-096
 0-08-094
-3-01-011
+004001
+004002
+004003 ]
 0-04-023
-3-01-013
+004004,
+004005,
+004006 ]
 2-04-008	Add associated field	8 bits long
 0-31-021	Associated field significance	Set as 5 for 8-bit indicator of quality control
 0-13-060	Total accumulated precipitation (kg m-2)	 
 2-04-000
 0-04-023
-3-01-013
+004004,
+004005, 004006 ]
 2-04-008	Add associated field	8 bits long
 0-31-021	Associated field significance	Set as 5 for 8-bit indicator of quality control
 0-13-012
 2-04-000
 0-04-023
-3-01-013
+"301013" = [  004004, 004005, 004006 ]
 2-04-008	Add associated field	8 bits long
 0-31-021	Associated field significance	Set as 5 for 8-bit indicator of quality control
 0-13-013
@@ -27,10 +37,14 @@
 0-07-032
 1-07-003
 0-04-023
-3-01-013
+"301013" = [  004004, 004005, 004006 ]
 0-08-023
 2-04-008	Add associated field	8 bits long
 0-31-021	Associated field significance	Set as 5 for 8-bit indicator of quality control
 0-12-101
 2-04-000
 0-08-023
+
+globalNavigationSatelliteSystemAltitude=MISSING
+globalNavigationSatelliteSystemAltitude->associatedField = 3
+globalNavigationSatelliteSystemAltitude->associatedField->associatedFieldSignificance = 8
