@@ -67,6 +67,10 @@ def main( argv ):
                 # now add / update values in dict with data not in CSV, e.g. station name or WIGOS ID
                 # values specified in station file
                 data_dict = { **data_dict, **station['data'] }
+                # ================================================================
+                # This next section will be moved to pre-processing function
+                # preprocessing to convert hPa to Pa and deg C to K
+                # ================================================================
                 # any parameters that need to be calculate from the data file 'could' also be calculated here
                 # but it would be better for them to be included in the file. E.g. pressure reduced to MSL.
                 # similarly, we can extract information from other fields such as timestamps, e.g.
@@ -75,20 +79,19 @@ def main( argv ):
                 data_dict['day']   = int(data_dict['TIMESTAMP'][8:10])
                 data_dict['hour']  = int(data_dict['TIMESTAMP'][11:13])
                 data_dict['min']   = int(data_dict['TIMESTAMP'][14:16])
-
-                # This next section will be moved to pre-processing function
-                # preprocessing to convert hPa to Pa and deg C to K
+                # unit conversions
                 if data_dict['AirTemp_Avg'] is not None:
                     data_dict['AirTemp_Avg'] = data_dict['AirTemp_Avg'] + 273.15
                 if data_dict['BP_hPa_Avg'] is not None:
                     data_dict['BP_hPa_Avg'] = data_dict['BP_hPa_Avg']*100
+                # ================================================================
                 # end of code to be moved pre-processing function. this will be data / file specific
-
+                # ================================================================
                 # now encode the data
                 msg = encode( mapping, data_dict)
                 # for testing purposes set file name to write data to
                 # we will wnat to write to virtual in file in future to pass blob of data to calling function
-                outfile = args.output + "/" + args.wsi + "_{:04d}-{:02d}-{:02d}_{:02d}-{:02d}.bufr".format(
+                outfile = args.output + "/" + (args.wsi.lower()) + "_{:04d}-{:02d}-{:02d}_{:02d}{:02d}.bufr".format(
                     data_dict['year'],data_dict['month'],data_dict['day'],data_dict['hour'],data_dict['min'] )
                 # save data to file
                 fh = open( outfile, 'wb' )
@@ -96,7 +99,7 @@ def main( argv ):
                 codes_release( msg )
                 fh.close()
             # only do first few rows for demo purposes
-            if rows_read > 5:
+            if rows_read > 10:
                 break
     return 0
 
