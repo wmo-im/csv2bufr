@@ -35,25 +35,25 @@ CSV to a BUFR message.
 
 ### Usage
 ````bash
-    # first build the docker image
-    docker build -t eccodes_v23 .
-    
-    # now start the docker a container based on the image
-    docker run -it -v ${pwd}:/app eccodes_v23
+# first build the docker image
+docker build -t eccodes_v23 .
 
-    # export path to python modules for this script
-    export PYTHONPATH="${PYTHONPATH}:/app/src/map2bufr/"
+# now start the docker a container based on the image
+docker run -it -v ${pwd}:/app eccodes_v23
 
-    # now go to app directory
-    cd /app
+# export path to python modules for this script
+export PYTHONPATH="${PYTHONPATH}:/app/src/map2bufr/"
 
-    # run the converter
-    python3 ./scripts/csv2bufr.py \
-       --config ./config \
-       --mapping mapping-simple.json \
-       --input ./DATA/Namitambo_preprocessed.csv \
-       --output ./OUTPUT/ \
-       --wigos-id 0-454-2-AWSNAMITAMBO 
+# now go to app directory
+cd /app
+
+# run the converter
+python3 ./scripts/csv2bufr.py \
+   --config ./config \
+   --mapping mapping-simple.json \
+   --input ./DATA/Namitambo_preprocessed.csv \
+   --output ./OUTPUT/ \
+   --wigos-id 0-454-2-AWSNAMITAMBO 
 ````
 ### Configuration
 
@@ -66,23 +66,23 @@ With the current version 2 configuration files are used.
 Where {WSI} is the WIGOS station ID, e.g. 0-454-2-AWSNAMITAMBO. 
 The first file provides information extracted from OSCAR Surface, e.g.:
 ````json
-    {
-      "metadata": {
-        "last-sync": "2021-10-22"
-      },
-      "data": {
-        "wigos-id-series": 0,
-        "wigos-id-issuer": 454,
-        "wigos-id-issue-number": 2,
-        "wigos-id-local": "AWSNAMITAMBO",
-        "latitude": -15.84052,
-        "longitude": 35.27428,
-        "height-asl": 806.0,
-        "station-name": "Namitambo",
-        "type-of-station": 0,
-        "wind-sensor": 0
-      }
-    }
+{
+  "metadata": {
+    "last-sync": "2021-10-22"
+  },
+  "data": {
+    "wigos-id-series": 0,
+    "wigos-id-issuer": 454,
+    "wigos-id-issue-number": 2,
+    "wigos-id-local": "AWSNAMITAMBO",
+    "latitude": -15.84052,
+    "longitude": 35.27428,
+    "height-asl": 806.0,
+    "station-name": "Namitambo",
+    "type-of-station": 0,
+    "wind-sensor": 0
+  }
+}
 ````
 
 
@@ -96,25 +96,25 @@ value is used or whether the element is mapped to a column in the csv file and o
 values to check when converting to BUFR. Note that the name of the file is specified on the command line / call to 
 *csv2bufr.py*. A truncated example is given below, see *mapping-simple.json* for full example:
 ````json
-    [
-       {"key":"#1#wigosIdentifierSeries", "value":null, "column":"wigos-id-series", "valid-min":null, "valid-max":null},
-       {"key":"#1#wigosIssuerOfIdentifier", "value":null, "column":"wigos-id-issuer", "valid-min":null, "valid-max":null},
-       {"key":"#1#wigosIssueNumber", "value":null, "column":"wigos-id-issue-number", "valid-min":null, "valid-max":null},
-       {"key":"#1#wigosLocalIdentifierCharacter", "value":null, "column":"wigos-id-local", "valid-min":null, "valid-max":null},
-       {"key":"#1#stationOrSiteName", "value":null, "column":"station-name", "valid-min":null, "valid-max":null},
-       {"key":"#1#stationType", "value":null, "column":"type-of-station", "valid-min":null, "valid-max":null},
-       {"key":"#1#year", "value":null, "column":"year", "valid-min":null, "valid-max":null},
-       {"key":"#1#month", "value":null, "column":"month", "valid-min":null, "valid-max":null},
-       {"key":"#1#day", "value":null, "column":"day", "valid-min":null, "valid-max":null},
-       {"key":"#1#hour", "value":null, "column":"hour", "valid-min":null, "valid-max":null},
-       {"key":"#1#minute", "value":null, "column":"valid-min", "valid-min":null, "valid-max":null},
-       {"key":"#1#latitude", "value":null, "column":"latitude", "valid-min":null, "valid-max":null},
-       {"key":"#1#longitude", "value":null, "column":"longitude", "valid-min":null, "valid-max":null},
-       {"key":"#1#heightOfStationGroundAboveMeanSeaLevel", "value":null, "column":"height-asl", "valid-min":null, "valid-max":null},
-       {"key":"#1#nonCoordinatePressure", "value":null, "column":"BP_hPa_Avg", "valid-min":null, "valid-max":null},
-       {"key":"#1#airTemperature", "value":null, "column":"AirTemp_Avg", "valid-min":250, "valid-max":350},
-       {"key":"#1#dewpointTemperature", "value":null, "column":"DewPointTemp_Avg", "valid-min":250, "valid-max":350}
-    ]
+[
+   {"key":"#1#wigosIdentifierSeries", "value":null, "column":"wigos-id-series", "valid-min":null, "valid-max":null},
+   {"key":"#1#wigosIssuerOfIdentifier", "value":null, "column":"wigos-id-issuer", "valid-min":null, "valid-max":null},
+   {"key":"#1#wigosIssueNumber", "value":null, "column":"wigos-id-issue-number", "valid-min":null, "valid-max":null},
+   {"key":"#1#wigosLocalIdentifierCharacter", "value":null, "column":"wigos-id-local", "valid-min":null, "valid-max":null},
+   {"key":"#1#stationOrSiteName", "value":null, "column":"station-name", "valid-min":null, "valid-max":null},
+   {"key":"#1#stationType", "value":null, "column":"type-of-station", "valid-min":null, "valid-max":null},
+   {"key":"#1#year", "value":null, "column":"year", "valid-min":null, "valid-max":null},
+   {"key":"#1#month", "value":null, "column":"month", "valid-min":null, "valid-max":null},
+   {"key":"#1#day", "value":null, "column":"day", "valid-min":null, "valid-max":null},
+   {"key":"#1#hour", "value":null, "column":"hour", "valid-min":null, "valid-max":null},
+   {"key":"#1#minute", "value":null, "column":"valid-min", "valid-min":null, "valid-max":null},
+   {"key":"#1#latitude", "value":null, "column":"latitude", "valid-min":null, "valid-max":null},
+   {"key":"#1#longitude", "value":null, "column":"longitude", "valid-min":null, "valid-max":null},
+   {"key":"#1#heightOfStationGroundAboveMeanSeaLevel", "value":null, "column":"height-asl", "valid-min":null, "valid-max":null},
+   {"key":"#1#nonCoordinatePressure", "value":null, "column":"BP_hPa_Avg", "valid-min":null, "valid-max":null},
+   {"key":"#1#airTemperature", "value":null, "column":"AirTemp_Avg", "valid-min":250, "valid-max":350},
+   {"key":"#1#dewpointTemperature", "value":null, "column":"DewPointTemp_Avg", "valid-min":250, "valid-max":350}
+]
 ````
 The following fields are defined:
 - *key*: the key used by ecCodes to access / set the BUFR elements.
