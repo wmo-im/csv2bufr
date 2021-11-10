@@ -57,7 +57,7 @@ def main( argv ):
                 # values specified in station file
                 data_dict = { **data_dict, **station['data'] }
                 # now encode the data
-                msg = encode( mapping, data_dict)
+                msg = encode( mapping, data_dict, failInvalid = False)
 
                 # for testing purposes set file name to write data to
                 # we will wnat to write to virtual in file in future to pass blob of data to calling function

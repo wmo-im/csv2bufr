@@ -42,6 +42,8 @@ def main( argv ):
                     # unit conversions
                     if data_dict['AirTemp_Avg'] is not None:
                         data_dict['AirTemp_Avg'] = data_dict['AirTemp_Avg'] + 273.15
+                    if data_dict['DewPointTemp_Avg'] is not None:
+                        data_dict['DewPointTemp_Avg'] = data_dict['DewPointTemp_Avg'] + 273.15
                     if data_dict['BP_hPa_Avg'] is not None:
                         data_dict['BP_hPa_Avg'] = data_dict['BP_hPa_Avg'] * 100
                     if rows_written == 0:
