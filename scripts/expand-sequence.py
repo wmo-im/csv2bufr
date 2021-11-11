@@ -97,11 +97,13 @@ def main( argv ):
     seq = bufr_sequence( sequence["unexpandedSequence"], args.version )
     expanded_sequence = seq.expandedSequence()
 
-    print( expanded_sequence )
+
     eccodes_tableB = pd.read_csv("/opt/eccodes/share/eccodes/definitions/bufr/tables/0/wmo/36/element.table" ,
                                    dtype='object' , sep="|")
 
     keyCount = dict()
+
+    print("[")
 
     for elem in expanded_sequence:
         if elem[0] == "0":
@@ -137,8 +139,8 @@ def main( argv ):
     eccodes_tableB = eccodes_tableB.sort_values( by = "#code" )
     eccodes_tableB.to_csv( "test.txt", sep = "|", index = False, na_rep='NA')
 
-    return 0
-
+    print("]")
+    return( 0 )
 
 if __name__ == "__main__":
     main( sys.argv[1:] )

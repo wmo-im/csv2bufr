@@ -15,7 +15,7 @@ CSV to a BUFR message.
 |   |-- Namitambo_preprocessed.csv
 |-- output
 |-- scripts
-|   |-- encode-csv.py
+|   |-- csv2bufr.py
 |   |-- expand-sequence.py
 |   `-- preprocess-malawi-data.py
 |-- src

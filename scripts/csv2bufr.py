@@ -1,6 +1,5 @@
 #!/usr/bin/python3
 import json
-from eccodes import *
 import sys
 import argparse
 import csv
@@ -17,6 +16,8 @@ def main( argv ):
     parser.add_argument("--input", dest="input", required=True, help="CSV file containing data to encode")
     parser.add_argument("--output", dest="output", required=True, help="Name of output file")
     parser.add_argument("--wigos-id", dest="wsi", required=True, help="WIGOS station identifier, hyphen separated. e.g. 0-20000-0-ABCDEF")
+    parser.add_argument("--fail-on-invalid", dest="invalid", default=True,
+                        help="Flag indicating whether to fail on invalid values. If true invalid values are set to missing")
     args = parser.parse_args()
 
     # ==========================================
@@ -30,7 +31,7 @@ def main( argv ):
     # now do something if stale, this is just for illustration
     if time_delta.days > 7:
         print( "Stale metadata")
-    # It may be better to force a sync or update by connecting to OSCAR
+        # It may be better to force a sync or update by connecting to OSCAR
 
     # ========================
     # read in mapping template
@@ -38,6 +39,7 @@ def main( argv ):
     with open( "{}/{}".format(args.config, args.mapping) ) as fh:
         mapping = json.load( fh )
 
+    print( args.invalid )
     # ========================
     # now load csv and process
     # ========================
@@ -56,21 +58,17 @@ def main( argv ):
                 # now add / update values in dict with data not in CSV, e.g. station name or WIGOS ID
                 # values specified in station file
                 data_dict = { **data_dict, **station['data'] }
-                # now encode the data
-                msg = encode( mapping, data_dict, failInvalid = False)
-
+                # now encode the data (this one line is where the magic happens once the dictionaries have been read in)
+                msg = encode( mapping, data_dict, failInvalid = args.invalid)
+                # we now have bytesIO object containing BUFR data, now save it to file
                 # for testing purposes set file name to write data to
-                # we will wnat to write to virtual in file in future to pass blob of data to calling function
+                # we will want to write to virtual in file in future to pass blob of data to calling function
                 outfile = args.output + "/" + (args.wsi.lower()) + "_{:04.0f}-{:02.0f}-{:02.0f}_{:02.0f}{:02.0f}.bufr4".format(
                     data_dict['year'],data_dict['month'],data_dict['day'],data_dict['hour'],data_dict['min'] )
                 # save data to file
                 fh = open( outfile, 'wb' )
-                codes_write( msg, fh )
-                codes_release( msg )
+                fh.write( msg.read() )
                 fh.close()
-            # only do first few rows for demo purposes
-            #if rows_read > 10:
-            #    break
             rows_read += 1
     return 0
 
