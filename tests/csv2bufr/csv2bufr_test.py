@@ -1,17 +1,11 @@
 from eccodes import *
-from map2bufr import *
-
-from jsonschema import validate
-from io import StringIO, BytesIO
-import csv
-
+from csv2bufr import *
 import logging
 import hashlib
 import pytest
 
 _LOGGER = logging.getLogger( __name__ )
 _LOGGER.setLevel( "DEBUG" )
-
 
 # test data
 @pytest.fixture

@@ -7,31 +7,36 @@ CSV to a BUFR message.
 .
 |-- Dockerfile
 |-- README.md
+|-- setup.cfg
+|-- setup.py
 |-- config
 |   |-- 0-454-2-AWSNAMITAMBO.json
-|   |-- mapping-simple.json
+|   |-- synop-full.json
 |-- data
-|   |-- Namitambo_TableHour.csv
-|   |-- Namitambo_preprocessed.csv
-|-- output
+|   |-- input
+|       |-- Namitambo.SYNOP.csv
+|   |-- output
+|       |-- 0-454-2-awsnamitambo_2011-11-18_0955.bufr
 |-- scripts
-|   |-- csv2bufr.py
-|   |-- expand-sequence.py
-|   `-- preprocess-malawi-data.py
+|   |-- main.py
 |-- src
-|   `-- map2bufr
-|       `-- map2bufr.py
+|   `-- csv2bufr
+|       `-- csv2bufr.py
+|-- tests
+|   |-- csv2bufr
+|       |-- csv2bufr_test.py
 ````
 - The *Dockerfile* file contains the commands to build a docker image containing the required libraries (eccodes) to run.
 - The *README.md* file contains this README.
+- *setup.cfg* file used in packaging
+- *setup.py* file used in packaging
+- *LICENSE.txt* Software license (Apache v2)
 - The *config* directory contains example *json* files for the mapping between csv and BUFR and storing station metadata.
-- The *data* directory contains sample csv data files, before and after pre-processings (see notes below).
-- The *output* directory is used to write BUFR files to. this can be changes as an argument to the csv2bufr script.
-- The *scripts* directory contains 3 scripts
-  - *csv2bufr.py*: The main script that converts the csv file to BUFR
-  - *expand-sequence.py*: A script under development to expand a BUFR sequence and to create the mapping file.
-  - *preprocess-malawi.py*: A script to preprocess the Malawi CSV data and convert to SI units etc (see notes below).
-- The *src* directory contains the map2bufr python module used to encode / map to BUFR.
+- The *data* directory contains sample csv data file and example output data file
+- The *scripts* directory contains 1 scripts
+  - *main.py*: The main script that converts the csv file to BUFR
+- The *src* directory contains the csv2bufr python module used to encode / map to BUFR.
+- The *tests* directory contains testing code
 
 ### Usage
 ````bash
@@ -42,13 +47,13 @@ docker build -t eccodes_v23 .
 docker run -it -v ${pwd}:/app eccodes_v23
 
 # export path to python modules for this script
-export PYTHONPATH="${PYTHONPATH}:/app/src/map2bufr/"
+export PYTHONPATH="${PYTHONPATH}:/app/src/csv2bufr/"
 
 # now go to app directory
 cd /app
 
 # run the converter
-python3 ./scripts/csv2bufr.py \
+python3 ./scripts/main.py \
    --config ./config \
    --mapping mapping-simple.json \
    --input ./DATA/Namitambo_preprocessed.csv \
@@ -60,7 +65,7 @@ python3 ./scripts/csv2bufr.py \
 With the current version 2 configuration files are used.
 
 - {WIS}.json
-- mapping-simple.json
+- synop-full.json
 
 
 Where {WSI} is the WIGOS station ID, e.g. 0-454-2-AWSNAMITAMBO. 
@@ -84,8 +89,6 @@ The first file provides information extracted from OSCAR Surface, e.g.:
   }
 }
 ````
-
-
 The keys in the file are currently arbitrary and some standardisation will be required. Note that these keys also
 appear in the mapping file below. The 'last-sync' field gives the date the data were last updated and is used within
 the *csv2bufr.py* script to check for stale metadata.
@@ -95,6 +98,9 @@ the key used within ecCodes, see e.g. https://confluence.ecmwf.int/display/ECC/W
 value is used or whether the element is mapped to a column in the csv file and optional valid minimum and maximum 
 values to check when converting to BUFR. Note that the name of the file is specified on the command line / call to 
 *csv2bufr.py*. A truncated example is given below, see *mapping-simple.json* for full example:
+
+**NOTE**: this is currently out of date and needs to be updated.
+
 ````json
 [
    {"key":"#1#wigosIdentifierSeries", "value":null, "column":"wigos-id-series", "valid-min":null, "valid-max":null},
@@ -122,17 +128,4 @@ The following fields are defined:
 - *column*: the column in the CSV file to use if the *value* field is null. These data in the CSV need to be converted to units supported by BUFR, e.g. Kelvin or Pa, not degC of hPa.
 - *valid-min*: the minimum valid value allowed for the element. Currently, the script throws an assertion error if a value is specified and the data to be encoded is less than (<) the specified value.
 - *valid-max*: the maximum valid value allowed for the element. Currently, the script throws an assertion error if a value is specified and the data to be encoded is greater than (>) the specified value.
-
-### Prerequisites
-
-1) python3+
-2) installation of eccodes, including python eccodes package 
-
-Note, these are installed by the Dockerfile.
-
-### Notes 
-
-1) For the case of the Malawi data it has been necessary to preprocess the CSV files to ensure the units are in SI units
-for the BUFR encoding and to split the timestamp field into year, month, date, hour, minute. This is performed by the
-script *preprocess-malawi-data.py* in the scripts directory.
-2) To help setup new data types / BUFR sequences a script is in development to write out a mapping json file given a specified unexpanded BUFR sequence. This is work in progress. 
+ 
