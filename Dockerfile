@@ -12,7 +12,7 @@ WORKDIR /tmp/eccodes
 RUN curl https://confluence.ecmwf.int/download/attachments/45757960/eccodes-${ECCODES_VER}-Source.tar.gz --output eccodes-${ECCODES_VER}-Source.tar.gz
 RUN tar xzf eccodes-${ECCODES_VER}-Source.tar.gz
 RUN mkdir build && cd build && cmake -DCMAKE_INSTALL_PREFIX=${ECCODES_DIR} ../eccodes-${ECCODES_VER}-Source && make && ctest && make install
-RUN pip3 install eccodes numpy
+RUN pip3 install eccodes numpy pytest jsonschema
 RUN export PATH="$PATH;/opt/eccodes/bin"
 RUN cd / && rm -rf /tmp/eccodes
 WORKDIR /
