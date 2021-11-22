@@ -2,7 +2,7 @@
 import json
 import sys
 import argparse
-from map2bufr import transform
+from csv2bufr import transform
 import logging
 
 _log_level = "DEBUG"

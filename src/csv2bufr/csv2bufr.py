@@ -1,30 +1,34 @@
-from eccodes import *
+from eccodes import codes_bufr_new_from_samples, codes_set_array, codes_set, codes_get_native_type, codes_write, \
+    codes_release
 from jsonschema import validate
 from io import StringIO, BytesIO
 import csv
 import logging
 import hashlib
 
-_log_level = "INFO" # change to read in from environment variable
-# set format of logger
-formatter = logging.Formatter("%(asctime)s\t%(name)s\t%(levelname)s\t%(message)s","%Y-%m-%d %H:%M:%S")
-ch = logging.StreamHandler()
-ch.setFormatter( formatter )
-ch.setLevel( _log_level )
-
-_LOGGER = logging.getLogger( __name__ )
-_LOGGER.setLevel( _log_level )
-_LOGGER.addHandler( ch )
-
 # some 'constants'
 SUCCESS = True
 NUMBERS = (float, int, complex)
 MISSING = ("NA", "NaN", "NAN", "None")
+
 NULLIFY_INVALID = True # move to env. variable
+_log_level = "INFO" # change to read in from environment variable
 
+# set format of logger
+formatter = logging.Formatter("%(asctime)s\t%(name)s\t%(levelname)s\t%(message)s","%Y-%m-%d %H:%M:%S")
+ch = logging.StreamHandler()
+ch.setFormatter( formatter )
+
+# set log level
+ch.setLevel( _log_level )
+
+# now logger for this module
+_LOGGER = logging.getLogger( __name__ )
+_LOGGER.setLevel( _log_level )
+_LOGGER.addHandler( ch )
+
+# function to validate mapping dictionary
 def validate_mapping_dict( mapping_dict ):
-
-    # define (file) schema expected
     file_schema = {
         "type": "object",
         "properties":{
@@ -40,6 +44,7 @@ def validate_mapping_dict( mapping_dict ):
         _LOGGER.error(message)
         raise e
     # now schema for each element in the sequence array
+    # ToDo make optional elements optional
     element_schema = {
         "type": "object",
         "properties":{
@@ -52,6 +57,7 @@ def validate_mapping_dict( mapping_dict ):
             "offset": {"type": ["number", "null"]}
         }
     }
+
     # now iterate over elements and validate each
     for element in mapping_dict["sequence"]:
         try:
@@ -66,7 +72,6 @@ def validate_mapping_dict( mapping_dict ):
             _LOGGER.error( message )
             e = ValueError(message)
             raise e
-            assert False
     return SUCCESS
 
 # function to apply simple scaling and offsets
@@ -114,19 +119,15 @@ def encode(mapping_dict, data_dict):
     This is the primary function that does the conversion to BUFR
 
     :param mapping_dict: dictionary containing eccodes key and mapping to data dict, includes option to specify
-                         valid min and max
+                         valid min and max, scale and offset.
     :param data_dict: dictionary containing data values
 
     :return: bytesio object containing BUFR message
-
-    To Do
-        - improve this documentation
-        - logging
-
     """
-    # set up message to be encoded
+
+    # initialise message to be encoded
     bufr_msg = codes_bufr_new_from_samples('BUFR4')
-    # set delayed replication factors
+    # set delayed replication factors if present
     if mapping_dict["inputDelayedDescriptorReplicationFactor"] is not None:
         codes_set_array( bufr_msg, "inputDelayedDescriptorReplicationFactor",
                      mapping_dict["inputDelayedDescriptorReplicationFactor"] )
@@ -158,7 +159,7 @@ def encode(mapping_dict, data_dict):
                 try:
                     _LOGGER.debug("calling codes_set")
                     nt = codes_get_native_type( bufr_msg, key)
-                    # convert to native type
+                    # convert to native type, required as in Malawi data 0 encoded as "0" for some elements.
                     if (nt is int) and (not isinstance( value, int )):
                         _LOGGER.warning( "int expected for {} but received {} ({})".format( key, type(value) , value) )
                         if isinstance(value, float):
