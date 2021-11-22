@@ -17,7 +17,8 @@ setup(
           'BytesIO',
           'hashlib',
           'logging',
-          'csv'
+          'csv',
+          'pytest'
       ],
   classifiers=[
     'Development Status :: 3 - Alpha',

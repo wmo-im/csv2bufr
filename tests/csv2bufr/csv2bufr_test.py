@@ -1,5 +1,5 @@
-from eccodes import *
-from csv2bufr import *
+from eccodes import codes_bufr_new_from_samples, codes_release
+from csv2bufr import validate_mapping_dict, apply_scaling, validate_value, encode, transform, SUCCESS
 import logging
 import hashlib
 import pytest

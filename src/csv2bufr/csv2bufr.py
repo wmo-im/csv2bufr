@@ -1,4 +1,5 @@
-from eccodes import *
+from eccodes import codes_bufr_new_from_samples, codes_set_array, codes_set, codes_get_native_type, codes_write, \
+    codes_release
 from jsonschema import validate
 from io import StringIO, BytesIO
 import csv
