@@ -128,4 +128,3 @@ The following fields are defined:
 - *column*: the column in the CSV file to use if the *value* field is null. These data in the CSV need to be converted to units supported by BUFR, e.g. Kelvin or Pa, not degC of hPa.
 - *valid-min*: the minimum valid value allowed for the element. Currently, the script throws an assertion error if a value is specified and the data to be encoded is less than (<) the specified value.
 - *valid-max*: the maximum valid value allowed for the element. Currently, the script throws an assertion error if a value is specified and the data to be encoded is greater than (>) the specified value.
- 
