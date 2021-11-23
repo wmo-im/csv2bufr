@@ -1,13 +1,16 @@
-## CSV 2 BUFR
-Python script to read in CSV file and to convert data to BUFR. Currently, the script converts each line in a 
+## csv2bufr
+
+[![Tests](https://github.com/wmo-im/csv2bufr/workflows/tests%20%E2%9A%99%EF%B8%8F/badge.svg)](https://github.com/wmo-im/csv2bufr/actions/workflows/tests.yml)
+
+csv2bufr is a Python package to transform CSV data into WMO BUFR.  Currently, csv2bufr converts each row in a 
 CSV to a BUFR message.
 
 ### Contents
-````bash
+
+```bash
 .
 |-- Dockerfile
 |-- README.md
-|-- setup.cfg
 |-- setup.py
 |-- config
 |   |-- 0-454-2-AWSNAMITAMBO.json
@@ -17,60 +20,56 @@ CSV to a BUFR message.
 |       |-- Namitambo.SYNOP.csv
 |   |-- output
 |       |-- 0-454-2-awsnamitambo_2011-11-18_0955.bufr
-|-- scripts
-|   |-- main.py
-|-- src
-|   `-- csv2bufr
-|       `-- csv2bufr.py
+|-- csv2bufr
+|   |-- __init__.py
 |-- tests
-|   |-- csv2bufr
-|       |-- csv2bufr_test.py
-````
+|   |-- test_csv2bufr.py
+```
+
 - The *Dockerfile* file contains the commands to build a docker image containing the required libraries (eccodes) to run.
 - The *README.md* file contains this README.
-- *setup.cfg* file used in packaging
 - *setup.py* file used in packaging
-- *LICENSE.txt* Software license (Apache v2)
+- *LICENSE* Software license (Apache v2)
 - The *config* directory contains example *json* files for the mapping between csv and BUFR and storing station metadata.
 - The *data* directory contains sample csv data file and example output data file
-- The *scripts* directory contains 1 scripts
-  - *main.py*: The main script that converts the csv file to BUFR
 - The *src* directory contains the csv2bufr python module used to encode / map to BUFR.
-- The *tests* directory contains testing code
+- The *tests* directory contains regression tests and sample data/configurations
 
 ### Usage
-````bash
-# first build the docker image
+
+```bash
+# first build the Docker image
 docker build -t eccodes_v23 .
 
-# now start the docker a container based on the image
+# now start the Docker container based on the image
 docker run -it -v ${pwd}:/app eccodes_v23
 
-# export path to python modules for this script
+# export path to Python modules for this script
 export PYTHONPATH="${PYTHONPATH}:/app/src/csv2bufr/"
 
 # now go to app directory
 cd /app
 
 # run the converter
-python3 ./scripts/main.py \
-   --config ./config \
-   --mapping mapping-simple.json \
+csv2bufr \
+   --mapping ./mapping-simple.json \
    --input ./DATA/Namitambo_preprocessed.csv \
    --output ./OUTPUT/ \
    --wigos-id 0-454-2-AWSNAMITAMBO 
-````
+```
+
 ### Configuration
 
 With the current version 2 configuration files are used.
 
-- {WIS}.json
+- {WSI}.json
 - synop-full.json
 
 
 Where {WSI} is the WIGOS station ID, e.g. 0-454-2-AWSNAMITAMBO. 
 The first file provides information extracted from OSCAR Surface, e.g.:
-````json
+
+```json
 {
   "metadata": {
     "last-sync": "2021-10-22"
@@ -88,7 +87,8 @@ The first file provides information extracted from OSCAR Surface, e.g.:
     "wind-sensor": 0
   }
 }
-````
+```
+
 The keys in the file are currently arbitrary and some standardisation will be required. Note that these keys also
 appear in the mapping file below. The 'last-sync' field gives the date the data were last updated and is used within
 the *csv2bufr.py* script to check for stale metadata.
@@ -101,7 +101,7 @@ values to check when converting to BUFR. Note that the name of the file is speci
 
 **NOTE**: this is currently out of date and needs to be updated.
 
-````json
+```json
 [
    {"key":"#1#wigosIdentifierSeries", "value":null, "column":"wigos-id-series", "valid-min":null, "valid-max":null},
    {"key":"#1#wigosIssuerOfIdentifier", "value":null, "column":"wigos-id-issuer", "valid-min":null, "valid-max":null},
@@ -121,7 +121,8 @@ values to check when converting to BUFR. Note that the name of the file is speci
    {"key":"#1#airTemperature", "value":null, "column":"AirTemp_Avg", "valid-min":250, "valid-max":350},
    {"key":"#1#dewpointTemperature", "value":null, "column":"DewPointTemp_Avg", "valid-min":250, "valid-max":350}
 ]
-````
+```
+
 The following fields are defined:
 - *key*: the key used by ecCodes to access / set the BUFR elements.
 - *value*: if not null, the value to set the BUFR element to.
