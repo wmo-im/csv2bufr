@@ -1,18 +1,17 @@
 {
-  "metadata": {
-    "last-sync": "2021-10-22"
-  },
-  "data": {
-    "wigos-id-series": 0,
-    "wigos-id-issuer": 454,
-    "wigos-id-issue-number": 2,
-    "wigos-id-local": "AWSNAMITAMBO",
-    "latitude": -15.84052,
-    "longitude": 35.27428,
-    "height-asl": 806.0,
-    "station-name": "Namitambo",
-    "type-of-station": 0,
-    "wind-sensor": 0
-  }
+    "metadata": {
+        "last-sync": "2021-10-22"
+    },
+    "data": {
+        "wigos-id-series": 0,
+        "wigos-id-issuer": 454,
+        "wigos-id-issue-number": 2,
+        "wigos-id-local": "AWSNAMITAMBO",
+        "latitude": -15.84052,
+        "longitude": 35.27428,
+        "height-asl": 806.0,
+        "station-name": "Namitambo",
+        "type-of-station": 0,
+        "wind-sensor": 0
+    }
 }
-
