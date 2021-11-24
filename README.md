@@ -55,7 +55,7 @@ csv2bufr \
    --mapping ./mapping-simple.json \
    --input ./DATA/Namitambo_preprocessed.csv \
    --output ./OUTPUT/ \
-   --wigos-id 0-454-2-AWSNAMITAMBO 
+   --station-metadata ./config/0-454-2-AWSNAMITAMBO.json
 ```
 
 ### Configuration
