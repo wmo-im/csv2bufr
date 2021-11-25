@@ -90,9 +90,10 @@ setup(
     url='https://github.com/wmo-im/csv2bufr',
     install_requires=read('requirements.txt').splitlines(),
     packages=find_packages(),
+    include_package_data=True,
     entry_points={
         'console_scripts': [
-            'csv2bufr=csv2bufr:cli'
+            'csv2bufr=csv2bufr.cli:cli'
         ]
     },
     classifiers=[
