@@ -19,17 +19,13 @@
 #
 ###############################################################################
 
-__version__ = '0.1.0'
+__version__ = "0.1.0"
 
-import argparse
 import csv
 import hashlib
-import json
 from io import StringIO, BytesIO
 import logging
-import os
 from typing import Union
-import sys
 
 from jsonschema import validate
 
@@ -364,57 +360,7 @@ def transform(data: str, mappings: dict, station_metadata: dict) -> dict:
 
         rows_read += 1
 
-    LOGGER.info(f"{rows_read - 1} rows read and converted to BUFR")
+    num_messages = rows_read - 1
+    LOGGER.info(f"{num_messages} row{'s'[:num_messages^1]} read and converted to BUFR")  # noqa
 
     return messages
-
-
-def cli():
-    # =============
-    # get arguments
-    # =============
-    parser = argparse.ArgumentParser(description='csv2bufr')
-
-    parser.add_argument("--mapping", dest="mapping", required=True,
-                        help="JSON file mapping from CSV to BUFR")
-    parser.add_argument("--input", dest="input", required=True,
-                        help="CSV file containing data to encode")
-    parser.add_argument("--output", dest="output", required=True,
-                        help="Name of output file")
-    parser.add_argument("--station-metadata", dest="wsi", required=True,
-                        help="WIGOS station identifier JSON file")
-    parser.add_argument("--fail-on-invalid", dest="invalid", default=True,
-                        help="Flag indicating whether to fail on invalid values. If true invalid values are set to missing")  # noqa
-
-    args = parser.parse_args()
-
-    # now set paths from arguments
-    csv_file = args.input
-    station_metadata_file = args.wsi
-    mappings_file = args.mapping
-    result = None
-
-    # ===========================
-    # now the code to be executed
-    # ===========================
-    with open(csv_file) as fh1, open(mappings_file) as fh2, open(station_metadata_file) as fh3:  # noqa
-        try:
-            result = transform(fh1.read(),
-                               mappings=json.load(fh2),
-                               station_metadata=json.load(fh3))
-        except Exception as err:
-            LOGGER.error(err)
-
-    # ======================
-    # now write data to file
-    # ======================
-    for item in result:
-        filename = f"{args.output}{os.sep}{item}.bufr4"
-        with open(filename, "wb") as fh:
-            fh.write(result[item].read())
-
-    return 0
-
-
-if __name__ == '__main__':
-    sys.exit(cli())

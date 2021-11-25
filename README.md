@@ -51,11 +51,14 @@ export PYTHONPATH="${PYTHONPATH}:/app/src/csv2bufr/"
 cd /app
 
 # run the converter
-csv2bufr \
+csv2bufr data transform \
+   ./DATA/Namitambo_preprocessed.csv \
    --mapping ./mapping-simple.json \
-   --input ./DATA/Namitambo_preprocessed.csv \
-   --output ./OUTPUT/ \
+   --output-dir ./OUTPUT/ \
    --station-metadata ./config/0-454-2-AWSNAMITAMBO.json
+
+# list stored mappings
+csv2bufr mappings list
 ```
 
 ### Configuration
