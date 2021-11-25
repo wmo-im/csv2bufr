@@ -27,6 +27,7 @@ import hashlib
 import json
 from io import StringIO, BytesIO
 import logging
+import os
 from typing import Union
 import sys
 
@@ -42,19 +43,7 @@ MISSING = ("NA", "NaN", "NAN", "None")
 
 NULLIFY_INVALID = True  # TODO: move to env. variable
 
-# logging
-LOGLEVEL = "INFO"  # TODO: change to read in from environment variable
-
-# set format of logger and loglevel
-formatter = logging.Formatter("%(asctime)s\t%(name)s\t%(levelname)s\t%(message)s", "%Y-%m-%d %H:%M:%S")  # noqa
-ch = logging.StreamHandler()
-ch.setFormatter(formatter)
-ch.setLevel(LOGLEVEL)
-
-# now logger for this module
 LOGGER = logging.getLogger(__name__)
-LOGGER.setLevel(LOGLEVEL)
-LOGGER.addHandler(ch)
 
 
 def validate_mapping_dict(mapping_dict: dict) -> bool:
@@ -392,8 +381,8 @@ def cli():
                         help="CSV file containing data to encode")
     parser.add_argument("--output", dest="output", required=True,
                         help="Name of output file")
-    parser.add_argument("--wigos-id", dest="wsi", required=True,
-                        help="WIGOS station identifier, hyphen separated. e.g. 0-20000-0-ABCDEF")  # noqa
+    parser.add_argument("--station-metadata", dest="wsi", required=True,
+                        help="WIGOS station identifier JSON file")
     parser.add_argument("--fail-on-invalid", dest="invalid", default=True,
                         help="Flag indicating whether to fail on invalid values. If true invalid values are set to missing")  # noqa
 
@@ -401,8 +390,8 @@ def cli():
 
     # now set paths from arguments
     csv_file = args.input
-    station_metadata_file = f"{args.config}/{args.wsi}.json"
-    mappings_file = f"{args.config}/{args.mapping}"
+    station_metadata_file = args.wsi
+    mappings_file = args.mapping
     result = None
 
     # ===========================
@@ -420,7 +409,7 @@ def cli():
     # now write data to file
     # ======================
     for item in result:
-        filename = f"{args.output}{item}.bufr4"
+        filename = f"{args.output}{os.sep}{item}.bufr4"
         with open(filename, "wb") as fh:
             fh.write(result[item].read())
 
