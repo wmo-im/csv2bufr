@@ -158,21 +158,12 @@ def validate_value(key: str, value: Union[NUMBERS],
     if not isinstance(value, NUMBERS):
         # TODO: add checking against code / flag table here?
         return(value)
-    if valid_min is not None:
-        if value < valid_min:
-            e = ValueError(f"{key}: Value ({value}) < valid min ({valid_min}).")  # noqa
+
+    if None not in [valid_min, valid_max]:
+        if value > valid_max or value < valid_min:
+            e = ValueError(f"{key}: Value ({value}) out of valid range ({valid_min} - {valid_max}).")  # noqa
             if nullify_on_fail:
-                message = str(e) + " Element set to missing"
-                LOGGER.warning(message)
-                return None
-            else:
-                LOGGER.error(str(e))
-                raise e
-    if valid_max is not None:
-        if value > valid_max:
-            e = ValueError(f"{key}: Value ({value}) < valid max ({valid_max}).")  # noqa
-            if nullify_on_fail:
-                message = str(e) + " Element set to missing"
+                message = f"{e} Element set to missing"
                 LOGGER.warning(message)
                 return None
             else:
@@ -315,7 +306,7 @@ def transform(data: str, mappings: dict, station_metadata: dict) -> dict:
                 data_dict = {**data_dict, **station_metadata['data']}
             except Exception as e:
                 message = "issue merging station and data dictionaries."
-                LOGGER.error(message + str(e))
+                LOGGER.error(f"{message}{e}")
                 raise e
             # Iterate over items to map, perform unit conversions and validate
             for element in mappings["sequence"]:
