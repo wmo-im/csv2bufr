@@ -101,7 +101,7 @@ def transform(ctx, csv_file, mapping, output_dir, station_metadata, template, ve
 
     click.echo(f"Transforming {csv_file.name} to BUFR")
 
-    print( mapping )
+    print(mapping)
 
     if not os.path.isfile(mapping):
         mappings_file = f"{MAPPINGS}{os.sep}{mapping}.json"
@@ -121,13 +121,13 @@ def transform(ctx, csv_file, mapping, output_dir, station_metadata, template, ve
 
     # load JSON template
     if template is not None:
-        if not os.path.isfile( template ):
+        if not os.path.isfile(template):
             template_file = f"{MAPPINGS}{os.sep}{template}.json"
         else:
             template_file = template
         try:
-            with open( template_file ) as fh:
-                template = json.load( fh )
+            with open(template_file) as fh:
+                template = json.load(fh)
         except Exception as err:
             raise click.ClickException(err)
 
@@ -139,17 +139,17 @@ def transform(ctx, csv_file, mapping, output_dir, station_metadata, template, ve
 
         # convert to JSON, ideally we would do this from in memory object
         # but I can't figure out how to do this with eccodes.
-        fh = open( filename, "rb")
-        handle = codes_bufr_new_from_file( fh )
+        fh = open(filename, "rb")
+        handle = codes_bufr_new_from_file(fh)
         fh.close()
 
         if template is not None:
-            json_dict = bufr_to_json( handle, template )
-            json_dict[ "md5sum" ] = item
-            json_dict[ "bufr_string_b64"] = base64.b64encode( result[item].read() ).decode( "utf-8" )
+            json_dict = bufr_to_json(handle, template)
+            json_dict["md5sum"] = item
+            json_dict["bufr_string_b64"] = base64.b64encode(result[item].read()).decode("utf-8")
             filename = f"{output_dir}{os.sep}{item}.json"
             with open(filename, "w") as fh:
-                json.dump( json_dict, fh , indent = 2)
+                json.dump(json_dict, fh, indent = 2)
 
     click.echo("Done")
     return 0
@@ -162,4 +162,5 @@ cli.add_command(data)
 cli.add_command(mappings)
 
 if __name__ == "__main__":
-    transform( )
+    transform()
+    

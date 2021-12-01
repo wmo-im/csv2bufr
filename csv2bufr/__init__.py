@@ -23,15 +23,15 @@ __version__ = "0.1.0"
 
 import csv
 import hashlib
-import json
 from io import StringIO, BytesIO
 import logging
 from typing import Union
 
 from jsonschema import validate
 
-from eccodes import (codes_bufr_new_from_samples, codes_set_array, codes_set, codes_get,
-                     codes_get_native_type, codes_write, codes_release, codes_bufr_new_from_file)
+from eccodes import (codes_bufr_new_from_samples, codes_set_array, codes_set,
+                     codes_get_native_type, codes_write, codes_release,
+                     codes_get)
 
 # some 'constants'
 SUCCESS = True
