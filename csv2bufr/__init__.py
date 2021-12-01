@@ -269,34 +269,34 @@ def encode(mapping_dict: dict, data_dict: dict) -> BytesIO:
     return fh
 
 
-def bufr_to_json( bufr_msg, template  ):
+def bufr_to_json(bufr_msg, template ):
     # unpack the data for reading
     codes_set(bufr_msg, "unpack", True)
-    result = unpack( bufr_msg, template )
+    result = unpack(bufr_msg, template)
     # repack
-    codes_set( bufr_msg, "pack", True )
-    return( result )
+    codes_set(bufr_msg, "pack", True)
+    return(result)
 
-def unpack( bufr_msg, object ):
-    if isinstance( object, dict ):
+def unpack(bufr_msg, object):
+    if isinstance(object, dict):
         # check if format or eccodes in object
         if "format" in object:
             assert "args" in object
-            args = unpack( bufr_msg, object["args"] )
-            result = object["format"].format( *args )
+            args = unpack(bufr_msg, object["args"])
+            result = object["format"].format(*args)
         elif "eccodes_key" in object:
             result = codes_get(bufr_msg, object["eccodes_key"])
         else:
             for k in object:
-                object[k] = unpack( bufr_msg, object[k])
+                object[k] = unpack(bufr_msg, object[k])
             result = object
-    elif isinstance( object, list ):
-        for idx in range( len( object ) ):
-            object[ idx ] = unpack( bufr_msg, object[idx] )
+    elif isinstance(object, list):
+        for idx in range(len(object)):
+            object[ idx ] = unpack(bufr_msg, object[idx])
         result = object
     else:
         result = object
-    return( result )
+    return(result)
 
 
 

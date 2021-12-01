@@ -25,7 +25,6 @@ import os.path
 import sys
 
 import click
-from io import BytesIO
 
 from csv2bufr import __version__
 from csv2bufr import transform as transform_csv
@@ -92,13 +91,13 @@ def list_mappings(ctx):
               help="Name of output file")
 @click.option("--station-metadata", "station_metadata", required=True,
               help="WIGOS station identifier JSON file")
-@click.option("--json-template", "template", required=False, default = None,
+@click.option("--json-template", "template", required=False, default=None,
               help="Template for GeoJSON containing mapping from BUFR to GeoJSON")
 
 @cli_option_verbosity
-def transform(ctx, csv_file, mapping, output_dir, station_metadata, template, verbosity):
+def transform(ctx, csv_file, mapping, output_dir, station_metadata,
+              template, verbosity):
     result = None
-
     click.echo(f"Transforming {csv_file.name} to BUFR")
 
     print(mapping)
