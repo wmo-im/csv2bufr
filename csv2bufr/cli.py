@@ -92,7 +92,7 @@ def list_mappings(ctx):
 @click.option("--station-metadata", "station_metadata", required=True,
               help="WIGOS station identifier JSON file")
 @click.option("--json-template", "template", required=False, default=None,
-              help="Template for GeoJSON containing "+
+              help="Template for GeoJSON containing " +
                    "mapping from BUFR to GeoJSON")
 @cli_option_verbosity
 def transform(ctx, csv_file, mapping, output_dir, station_metadata,
@@ -117,7 +117,6 @@ def transform(ctx, csv_file, mapping, output_dir, station_metadata,
                                    station_metadata=json.load(fh3))
         except Exception as err:
             raise click.ClickException(err)
-
 
     # load JSON template
     if template is not None:
@@ -150,7 +149,7 @@ def transform(ctx, csv_file, mapping, output_dir, station_metadata,
                 base64.b64encode(result[item].read()).decode("utf-8")
             filename = f"{output_dir}{os.sep}{item}.json"
             with open(filename, "w") as fh:
-                json.dump(json_dict, fh, indent = 2)
+                json.dump(json_dict, fh, indent=2)
 
     click.echo("Done")
     return 0
@@ -164,4 +163,3 @@ cli.add_command(mappings)
 
 if __name__ == "__main__":
     transform()
-
