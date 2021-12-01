@@ -269,13 +269,14 @@ def encode(mapping_dict: dict, data_dict: dict) -> BytesIO:
     return fh
 
 
-def bufr_to_json(bufr_msg, template ):
+def bufr_to_json(bufr_msg, template):
     # unpack the data for reading
     codes_set(bufr_msg, "unpack", True)
     result = unpack(bufr_msg, template)
     # repack
     codes_set(bufr_msg, "pack", True)
     return(result)
+
 
 def unpack(bufr_msg, object):
     if isinstance(object, dict):
@@ -292,12 +293,11 @@ def unpack(bufr_msg, object):
             result = object
     elif isinstance(object, list):
         for idx in range(len(object)):
-            object[ idx ] = unpack(bufr_msg, object[idx])
+            object[idx] = unpack(bufr_msg, object[idx])
         result = object
     else:
         result = object
     return(result)
-
 
 
 def transform(data: str, mappings: dict, station_metadata: dict) -> dict:

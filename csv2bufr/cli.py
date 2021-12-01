@@ -92,8 +92,8 @@ def list_mappings(ctx):
 @click.option("--station-metadata", "station_metadata", required=True,
               help="WIGOS station identifier JSON file")
 @click.option("--json-template", "template", required=False, default=None,
-              help="Template for GeoJSON containing mapping from BUFR to GeoJSON")
-
+              help="Template for GeoJSON containing "+
+                   "mapping from BUFR to GeoJSON")
 @cli_option_verbosity
 def transform(ctx, csv_file, mapping, output_dir, station_metadata,
               template, verbosity):
@@ -105,7 +105,8 @@ def transform(ctx, csv_file, mapping, output_dir, station_metadata,
     if not os.path.isfile(mapping):
         mappings_file = f"{MAPPINGS}{os.sep}{mapping}.json"
         if not os.path.isfile(mappings_file):
-            raise click.ClickException("Invalid stored mapping ({})".format(mappings_file))
+            raise click.ClickException(
+                f"Invalid stored mapping ({mappings_file})")
     else:
         mappings_file = mapping
 
@@ -145,7 +146,8 @@ def transform(ctx, csv_file, mapping, output_dir, station_metadata,
         if template is not None:
             json_dict = bufr_to_json(handle, template)
             json_dict["md5sum"] = item
-            json_dict["bufr_string_b64"] = base64.b64encode(result[item].read()).decode("utf-8")
+            json_dict["bufr_string_b64"] = \
+                base64.b64encode(result[item].read()).decode("utf-8")
             filename = f"{output_dir}{os.sep}{item}.json"
             with open(filename, "w") as fh:
                 json.dump(json_dict, fh, indent = 2)
@@ -162,4 +164,4 @@ cli.add_command(mappings)
 
 if __name__ == "__main__":
     transform()
-    
+
