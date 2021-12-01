@@ -142,6 +142,7 @@ def transform(ctx, csv_file, mapping, output_dir, station_metadata,
         handle = codes_bufr_new_from_file(fh)
         fh.close()
 
+        result[item].seek(0)
         if template is not None:
             json_dict = bufr_to_json(handle, template)
             json_dict["md5sum"] = item
