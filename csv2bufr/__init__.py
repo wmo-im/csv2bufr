@@ -23,14 +23,15 @@ __version__ = "0.1.0"
 
 import csv
 import hashlib
+import json
 from io import StringIO, BytesIO
 import logging
 from typing import Union
 
 from jsonschema import validate
 
-from eccodes import (codes_bufr_new_from_samples, codes_set_array, codes_set,
-                     codes_get_native_type, codes_write, codes_release)
+from eccodes import (codes_bufr_new_from_samples, codes_set_array, codes_set, codes_get,
+                     codes_get_native_type, codes_write, codes_release, codes_bufr_new_from_file)
 
 # some 'constants'
 SUCCESS = True
@@ -266,6 +267,37 @@ def encode(mapping_dict: dict, data_dict: dict) -> BytesIO:
     # Return BytesIO object containing BUFR message
     # =============================================
     return fh
+
+
+def bufr_to_json( bufr_msg, template  ):
+    # unpack the data for reading
+    codes_set(bufr_msg, "unpack", True)
+    result = unpack( bufr_msg, template )
+    # repack
+    codes_set( bufr_msg, "pack", True )
+    return( result )
+
+def unpack( bufr_msg, object ):
+    if isinstance( object, dict ):
+        # check if format or eccodes in object
+        if "format" in object:
+            assert "args" in object
+            args = unpack( bufr_msg, object["args"] )
+            result = object["format"].format( *args )
+        elif "eccodes_key" in object:
+            result = codes_get(bufr_msg, object["eccodes_key"])
+        else:
+            for k in object:
+                object[k] = unpack( bufr_msg, object[k])
+            result = object
+    elif isinstance( object, list ):
+        for idx in range( len( object ) ):
+            object[ idx ] = unpack( bufr_msg, object[idx] )
+        result = object
+    else:
+        result = object
+    return( result )
+
 
 
 def transform(data: str, mappings: dict, station_metadata: dict) -> dict:
