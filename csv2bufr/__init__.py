@@ -21,6 +21,7 @@
 
 __version__ = "0.1.0"
 
+from copy import deepcopy
 import csv
 import hashlib
 from io import StringIO, BytesIO
@@ -40,6 +41,42 @@ MISSING = ("NA", "NaN", "NAN", "None")
 NULLIFY_INVALID = True  # TODO: move to env. variable
 
 LOGGER = logging.getLogger(__name__)
+
+
+def wigos2stationmetadata(wigos_metadata: dict) -> dict:
+    """
+    Transform OSCAR/Surface station metadata JSON
+    to internal mapping values
+
+    :param wigos_metadata: `dict` of WIGOS station metadata
+
+    :returns: `dict` of internal station metadata mapping
+    """
+
+    tokens = wigos_metadata['wigosIds'][0]['wid'].split('-')  # noqa
+    series = int(tokens[0])
+    issuer = int(tokens[1])
+    issue_number = int(tokens[2])
+    local_id = tokens[3]
+
+    station_mappings = {
+        "metadata": {
+            "last-sync": wigos_metadata['lastModifiedOn']
+        },
+        "data": {
+            "wigos-id-series": series,
+            "wigos-id-issuer": issuer,
+            "wigos-id-issue-number": issue_number,
+            "wigos-id-local": local_id,
+            "latitude": wigos_metadata['locations'][0]['latitude'],
+            "longitude": wigos_metadata['locations'][0]['longitude'],
+            "height-asl": wigos_metadata['locations'][0]['elevation'],
+            "station-name": wigos_metadata['name'],
+            "type-of-station": wigos_metadata['typeId'],
+        }
+    }
+
+    return station_mappings
 
 
 def validate_mapping_dict(mapping_dict: dict) -> bool:
@@ -286,7 +323,14 @@ def transform(data: str, mappings: dict, station_metadata: dict) -> dict:
 
     LOGGER.debug("mapping dictionary validated")
 
-    # TODO: add in code to validate station_metadata
+    if 'data' not in station_metadata and 'id' in station_metadata:
+        LOGGER.debug('OSCAR/Surface station metadata JSON detected')
+        LOGGER.debug('Transforming to internal mapping')
+        station_metadata2 = wigos2stationmetadata(station_metadata)
+    else:
+        station_metadata2 = deepcopy(station_metadata)
+
+    # TODO: add in code to validate station_metadata2
 
     # we may have multiple rows in the file, create list object to return
     # one item per message
@@ -303,7 +347,7 @@ def transform(data: str, mappings: dict, station_metadata: dict) -> dict:
             data = row
             data_dict = dict(zip(col_names, data))
             try:
-                data_dict = {**data_dict, **station_metadata['data']}
+                data_dict = {**data_dict, **station_metadata2['data']}
             except Exception as e:
                 message = "issue merging station and data dictionaries."
                 LOGGER.error(f"{message}{e}")

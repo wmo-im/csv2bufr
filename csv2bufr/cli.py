@@ -111,10 +111,10 @@ def transform(ctx, csv_file, mapping, output_dir, station_metadata, verbosity):
             raise click.ClickException(err)
 
     click.echo("Writing data to file")
-    for item in result:
-        filename = f"{output_dir}{os.sep}{item}.bufr4"
+    for key, value in result.items():
+        filename = f"{output_dir}{os.sep}{key}.bufr4"
         with open(filename, "wb") as fh:
-            fh.write(result[item].read())
+            fh.write(value.read())
 
     click.echo("Done")
     return 0

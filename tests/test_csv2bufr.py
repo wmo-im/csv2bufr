@@ -27,8 +27,9 @@ import logging
 import pytest
 
 from eccodes import codes_bufr_new_from_samples, codes_release
-from csv2bufr import (validate_mapping_dict, apply_scaling, validate_value,
-                      encode, transform, SUCCESS)
+from csv2bufr import (apply_scaling, encode, SUCCESS, transform,
+                      validate_mapping_dict, validate_value,
+                      wigos2stationmetadata)
 
 LOGGER = logging.getLogger(__name__)
 LOGGER.setLevel("DEBUG")
@@ -97,6 +98,38 @@ def station_dict():
             "station-name": "test data"
         }
     }
+
+
+@pytest.fixture
+def wigos_station_dict():
+    return {
+        "name": "NAMITAMBO",
+        "typeId": 1,
+        "lastModifiedOn": "2018-10-08T22:00:00.000+00:00",
+        "wigosIds": [{
+            "wid": "0-454-2-NAMITAMBO"
+        }],
+        "locations": [{
+            "latitude": -15.84052,
+            "longitude": 35.27428,
+            "elevation": 806
+        }]
+    }
+
+
+# test to check conversion from OSCAR/Surface API to internal
+# station metadata transforms correctly
+def test_wigos2stationmetadata(wigos_station_dict):
+    station_metadata = wigos2stationmetadata(wigos_station_dict)
+    assert station_metadata['data']['wigos-id-series'] == 0
+    assert station_metadata['data']['wigos-id-issuer'] == 454
+    assert station_metadata['data']['wigos-id-issue-number'] == 2
+    assert station_metadata['data']['wigos-id-local'] == 'NAMITAMBO'
+    assert station_metadata['data']['latitude'] == -15.84052
+    assert station_metadata['data']['longitude'] == 35.27428
+    assert station_metadata['data']['height-asl'] == 806
+    assert station_metadata['data']['station-name'] == 'NAMITAMBO'
+    assert station_metadata['data']['type-of-station'] == 1
 
 
 # test to check whether eccodes is installed
