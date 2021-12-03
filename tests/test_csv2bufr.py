@@ -87,6 +87,7 @@ def data_dict():
         "minute": 0
     }
 
+
 @pytest.fixture
 def json_template():
     return {
@@ -130,7 +131,8 @@ def json_template():
                     },
                     "cf_standard_name": "pressure_at_mean_sea_level",
                     "units": {
-                        "eccodes_key": "#1#pressureReducedToMeanSeaLevel->units"
+                        "eccodes_key":
+                            "#1#pressureReducedToMeanSeaLevel->units"
                     },
                     "sensor_height_above_local_ground": None,
                     "sensor_height_above_mean_sea_level": None,
@@ -309,7 +311,7 @@ def test_json(data_dict, mapping_dict, station_dict, json_template,
 
         # next  read and convert to JSON
         with open("test.bufr4", "rb") as fh:
-            handle = codes_bufr_new_from_file(fh )
+            handle = codes_bufr_new_from_file(fh)
         json_dict = bufr_to_json(handle, json_template)
 
         # copy id and resulttime to expected result, these are generated at the
