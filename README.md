@@ -56,7 +56,8 @@ pip install .
 # run the converter
 csv2bufr data transform \
    ./data/input/Namitambo.SYNOP.csv \
-   --mapping synop-full \
+   --mapping malawi_bufr \
+   --json-template malawi_json \
    --output-dir ./data/output \
    --station-metadata ./config/0-454-2-AWSNAMITAMBO.json
 
@@ -70,6 +71,7 @@ With the current version 2 required and one optional configuration files are use
 
 - {WSI}.json
 - {source}_bufr.json
+- {source}_json.json
 
 
 Where {WSI} is the WIGOS station ID, e.g. 0-454-2-AWSNAMITAMBO. 
