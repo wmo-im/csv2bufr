@@ -86,6 +86,102 @@ def data_dict():
         "minute": 0
     }
 
+@pytest.fixture
+def json_template():
+    return {
+        "id": None,
+        "type": "Feature",
+        "geometry": {
+            "type": "Point",
+            "coordinates": [{"eccodes_key": "#1#longitude"},
+                            {"eccodes_key": "#1#latitude"}]
+        },
+        "properties": {
+            "phenomenonTime": {
+                "format": "{:04d}-{:02d}-{:02d}T{:02d}:{:02d}:00+00:00",
+                "args": [
+                    {"eccodes_key": "#1#year"},
+                    {"eccodes_key": "#1#month"},
+                    {"eccodes_key": "#1#day"},
+                    {"eccodes_key": "#1#hour"},
+                    {"eccodes_key": "#1#minute"}
+                ]},
+            "resultTime": None,
+            "observations": {
+                "#1#airTemperature": {
+                    "value": {
+                        "eccodes_key": "#1#airTemperature"
+                    },
+                    "cf_standard_name": "air_temperature",
+                    "units": {
+                        "eccodes_key": "#1#airTemperature->units"
+                    },
+                    "sensor_height_above_local_ground": None,
+                    "sensor_height_above_mean_sea_level": None,
+                    "valid_min": None,
+                    "valid_max": None,
+                    "scale": None,
+                    "offset": None
+                },
+                "#1#pressureReducedToMeanSeaLevel": {
+                    "value": {
+                        "eccodes_key": "#1#pressureReducedToMeanSeaLevel"
+                    },
+                    "cf_standard_name": "pressure_at_mean_sea_level",
+                    "units": {
+                        "eccodes_key": "#1#pressureReducedToMeanSeaLevel->units"
+                    },
+                    "sensor_height_above_local_ground": None,
+                    "sensor_height_above_mean_sea_level": None,
+                    "valid_min": None,
+                    "valid_max": None,
+                    "scale": None,
+                    "offset": None
+                }
+            }
+        }
+    }
+
+
+@pytest.fixture
+def json_result():
+    return {
+        "id": None,
+        "type": "Feature",
+        "geometry": {
+            "type": "Point",
+            "coordinates": [0.0, 55.154]
+        },
+        "properties": {
+            "phenomenonTime": "2021-11-18 18:00:00+00:00",
+            "resultTime": None,
+            "observations": {
+                "#1#airTemperature": {
+                    "value": 290.31,
+                    "cf_standard_name": "air_temperature",
+                    "units": "K",
+                    "sensor_height_above_local_ground": None,
+                    "sensor_height_above_mean_sea_level": None,
+                    "valid_min": None,
+                    "valid_max": None,
+                    "scale": None,
+                    "offset": None
+                },
+                "#1#pressureReducedToMeanSeaLevel": {
+                    "value": 100130,
+                    "cf_standard_name": "pressure_at_mean_sea_level",
+                    "units": "Pa",
+                    "sensor_height_above_local_ground": None,
+                    "sensor_height_above_mean_sea_level": None,
+                    "valid_min": None,
+                    "valid_max": None,
+                    "scale": None,
+                    "offset": None
+                }
+            }
+        }
+    }
+
 
 @pytest.fixture
 def station_dict():
@@ -193,3 +289,32 @@ def test_transform(data_dict, mapping_dict, station_dict):
     assert isinstance(result, dict)
     assert list(result.keys())[0] == '981938dbd97be3e5adc8e7b1c6eb642c'
     assert len(list(result.keys())) == 1
+
+
+def test_json(data_dict, mapping_dict, station_dict, json_template,
+              json_result):
+    # first encode BUFR
+    output = StringIO()
+    writer = csv.DictWriter(output, quoting=csv.QUOTE_NONNUMERIC,
+                            fieldnames=data_dict.keys())
+    writer.writeheader()
+    writer.writerow(data_dict)
+    data = output.getvalue()
+    result = transform(data, mapping_dict, station_dict)
+    # write to file
+    with open("test.bufr4", "wb") as fh:
+        fh.write(result[0].read())
+
+    # next  read and convert to JSON
+    with open("test.bufr4", "rb") as fh:
+        handle = codes_bufr_new_from_file(fh )
+    json_dict = bufr_to_json(handle, json_template)
+
+    # copy id and resulttime to expected result, these are generated at the
+    # time of testing.
+    json_result['id'] = json_dict['id']
+    json_result['properties']['resultTime'] = \
+        json_dict['properties']['resultTime']
+
+    # now compare
+    assert json_result == json_dict

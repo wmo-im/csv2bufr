@@ -44,6 +44,17 @@ NULLIFY_INVALID = True  # TODO: move to env. variable
 
 LOGGER = logging.getLogger(__name__)
 
+def parse_wigos_id( wigos_id: str) -> dict:
+    tokens = wigos_id.split("-")
+    assert len(tokens) == 4
+    result = {
+        "wigos-id-series": int(tokens[0]),
+        "wigos-id-issuer": int(tokens[1]),
+        "wigos-id-issue-number": int(tokens[2]),
+        "wigos-id-local": tokens[3]
+    }
+    return result
+
 
 def validate_mapping_dict(mapping_dict: dict) -> bool:
     """
