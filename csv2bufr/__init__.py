@@ -27,12 +27,13 @@ from io import StringIO, BytesIO
 import logging
 from typing import Union
 from uuid import uuid4
+from datetime import timezone, datetime
 
 from jsonschema import validate
 
 from eccodes import (codes_bufr_new_from_samples, codes_set_array, codes_set,
                      codes_get_native_type, codes_write, codes_release,
-                     codes_get)
+                     codes_get, CODES_MISSING_LONG, CODES_MISSING_DOUBLE)
 
 # some 'constants'
 SUCCESS = True
@@ -281,11 +282,17 @@ def bufr_to_json(bufr_msg: int, template: dict) -> dict:
     :return: dict containing the data from the BUFR message
     """
 
+
+    # code to validate template here
+
     # unpack the data for reading
     codes_set(bufr_msg, "unpack", True)
     result = extract(bufr_msg, template)
     # add unique ID to json
     result['id'] = uuid4().hex
+    # now set resultTime
+    result["properties"]["resultTime"] = datetime.now(timezone.utc).isoformat(
+        timespec="seconds")
     # repack
     codes_set(bufr_msg, "pack", True)
     return(result)
@@ -308,9 +315,14 @@ def extract(bufr_msg: int, object):
         if "format" in object:
             assert "args" in object
             args = extract(bufr_msg, object["args"])
-            result = object["format"].format(*args)
+            if None not in args:
+                result = object["format"].format(*args)
+            else:
+                result = None
         elif "eccodes_key" in object:
             result = codes_get(bufr_msg, object["eccodes_key"])
+            if result in (CODES_MISSING_LONG, CODES_MISSING_DOUBLE):
+                result = None
         else:
             for k in object:
                 object[k] = extract(bufr_msg, object[k])
