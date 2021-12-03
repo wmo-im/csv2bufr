@@ -18,7 +18,6 @@
 # under the License.
 #
 ###############################################################################
-import base64
 import json
 import logging
 import os.path
@@ -138,18 +137,16 @@ def transform(ctx, csv_file, mapping, output_dir, station_metadata,
         # convert to JSON if template specified
         if json_template is not None:
             click.echo("Writing JSON data to file")
-            # read from BUFR file, ideally we would do this from in memory object
-            # but I can't figure out how to do this with eccodes.
+            # read from BUFR file, ideally we would do this from in memory
+            # object but I can't figure out how to do this with eccodes.
             with open(filename, "rb") as fh:
                 handle = codes_bufr_new_from_file(fh)
             json_dict = bufr_to_json(handle, json_template)
             # convert to string
-            json_str = json.dumps( json_dict, indent=2)
+            json_str = json.dumps(json_dict, indent=2)
             json_filename = f"{output_dir}{os.sep}{item}.json"
             with open(json_filename, "w") as fh:
-                fh.write( json_str )
-                #json.dump(json_dict, fh, indent=2)
-
+                fh.write(json_str)
 
     click.echo("Done")
     return 0
