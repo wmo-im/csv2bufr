@@ -23,12 +23,13 @@ import csv
 import hashlib
 from io import StringIO
 import logging
-
+import json
 import pytest
 
-from eccodes import codes_bufr_new_from_samples, codes_release
+from eccodes import (codes_bufr_new_from_samples, codes_release,
+                     codes_bufr_new_from_file)
 from csv2bufr import (validate_mapping_dict, apply_scaling, validate_value,
-                      encode, transform, SUCCESS)
+                      encode, transform, SUCCESS, bufr_to_json)
 
 LOGGER = logging.getLogger(__name__)
 LOGGER.setLevel("DEBUG")
@@ -153,7 +154,7 @@ def json_result():
             "coordinates": [0.0, 55.154]
         },
         "properties": {
-            "phenomenonTime": "2021-11-18 18:00:00+00:00",
+            "phenomenonTime": "2021-11-18T18:00:00+00:00",
             "resultTime": None,
             "observations": {
                 "#1#airTemperature": {
@@ -168,7 +169,7 @@ def json_result():
                     "offset": None
                 },
                 "#1#pressureReducedToMeanSeaLevel": {
-                    "value": 100130,
+                    "value": 100130.0,
                     "cf_standard_name": "pressure_at_mean_sea_level",
                     "units": "Pa",
                     "sensor_height_above_local_ground": None,
@@ -301,20 +302,21 @@ def test_json(data_dict, mapping_dict, station_dict, json_template,
     writer.writerow(data_dict)
     data = output.getvalue()
     result = transform(data, mapping_dict, station_dict)
-    # write to file
-    with open("test.bufr4", "wb") as fh:
-        fh.write(result[0].read())
+    for key in result:
+        # write to file
+        with open("test.bufr4", "wb") as fh:
+            fh.write(result[key].read())
 
-    # next  read and convert to JSON
-    with open("test.bufr4", "rb") as fh:
-        handle = codes_bufr_new_from_file(fh )
-    json_dict = bufr_to_json(handle, json_template)
+        # next  read and convert to JSON
+        with open("test.bufr4", "rb") as fh:
+            handle = codes_bufr_new_from_file(fh )
+        json_dict = bufr_to_json(handle, json_template)
 
-    # copy id and resulttime to expected result, these are generated at the
-    # time of testing.
-    json_result['id'] = json_dict['id']
-    json_result['properties']['resultTime'] = \
-        json_dict['properties']['resultTime']
+        # copy id and resulttime to expected result, these are generated at the
+        # time of testing.
+        json_result['id'] = json_dict['id']
+        json_result['properties']['resultTime'] = \
+            json_dict['properties']['resultTime']
 
-    # now compare
-    assert json_result == json_dict
+        # now compare
+        assert json.dumps(json_result) == json.dumps(json_dict)
