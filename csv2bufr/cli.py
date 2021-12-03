@@ -86,21 +86,20 @@ def list_mappings(ctx):
 @click.pass_context
 @click.argument("csv_file", type=click.File())
 @click.option("--mapping", required=True,
-              help="Name of mapping template to use to map from CSV to BUFR")
+              help="Name of file or mapping template to " +
+                   "use to map from CSV to BUFR")
 @click.option("--output-dir", "output_dir", required=True,
               help="Name of output file")
 @click.option("--station-metadata", "station_metadata", required=True,
               help="WIGOS station identifier JSON file")
-@click.option("--json-template", "template", required=False, default=None,
-              help="Template for GeoJSON containing " +
+@click.option("--json-template", "json_template", required=False, default=None,
+              help="Name of file or template for GeoJSON containing " +
                    "mapping from BUFR to GeoJSON")
 @cli_option_verbosity
 def transform(ctx, csv_file, mapping, output_dir, station_metadata,
-              template, verbosity):
+              json_template, verbosity):
     result = None
     click.echo(f"Transforming {csv_file.name} to BUFR")
-
-    print(mapping)
 
     if not os.path.isfile(mapping):
         mappings_file = f"{MAPPINGS}{os.sep}{mapping}.json"
@@ -118,15 +117,15 @@ def transform(ctx, csv_file, mapping, output_dir, station_metadata,
         except Exception as err:
             raise click.ClickException(err)
 
-    # load JSON template
-    if template is not None:
-        if not os.path.isfile(template):
-            template_file = f"{MAPPINGS}{os.sep}{template}.json"
+    # load JSON json_template
+    if json_template is not None:
+        if not os.path.isfile(json_template):
+            json_template_file = f"{MAPPINGS}{os.sep}{json_template}.json"
         else:
-            template_file = template
+            json_template_file = json_template
         try:
-            with open(template_file) as fh:
-                template = json.load(fh)
+            with open(json_template_file) as fh:
+                json_template = json.load(fh)
         except Exception as err:
             raise click.ClickException(err)
 
@@ -136,21 +135,21 @@ def transform(ctx, csv_file, mapping, output_dir, station_metadata,
         with open(filename, "wb") as fh:
             fh.write(result[item].read())
 
-        # convert to JSON, ideally we would do this from in memory object
-        # but I can't figure out how to do this with eccodes.
-        fh = open(filename, "rb")
-        handle = codes_bufr_new_from_file(fh)
-        fh.close()
+        # convert to JSON if template specified
+        if json_template is not None:
+            click.echo("Writing JSON data to file")
+            # read from BUFR file, ideally we would do this from in memory object
+            # but I can't figure out how to do this with eccodes.
+            with open(filename, "rb") as fh:
+                handle = codes_bufr_new_from_file(fh)
+            json_dict = bufr_to_json(handle, json_template)
+            # convert to string
+            json_str = json.dumps( json_dict, indent=2)
+            json_filename = f"{output_dir}{os.sep}{item}.json"
+            with open(json_filename, "w") as fh:
+                fh.write( json_str )
+                #json.dump(json_dict, fh, indent=2)
 
-        result[item].seek(0)
-        if template is not None:
-            json_dict = bufr_to_json(handle, template)
-            json_dict["md5sum"] = item
-            json_dict["bufr_string_b64"] = \
-                base64.b64encode(result[item].read()).decode("utf-8")
-            filename = f"{output_dir}{os.sep}{item}.json"
-            with open(filename, "w") as fh:
-                json.dump(json_dict, fh, indent=2)
 
     click.echo("Done")
     return 0
@@ -161,6 +160,3 @@ mappings.add_command(list_mappings)
 
 cli.add_command(data)
 cli.add_command(mappings)
-
-if __name__ == "__main__":
-    transform()

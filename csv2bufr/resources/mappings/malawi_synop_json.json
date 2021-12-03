@@ -1,17 +1,19 @@
 {
+  "id": null,
   "type": "Feature",
   "geometry": {
     "type": "Point",
     "coordinates": [{"eccodes_key":"#1#longitude"},{"eccodes_key":"#1#latitude"}]
   },
   "properties": {
-    "resultTime": {"format":"{:04d}-{:02d}-{:02d}T{:02d}:{:02d}:00.0Z", "args": [
+    "phenomenonTime": {"format":"{:04d}-{:02d}-{:02d}T{:02d}:{:02d}:00.0Z", "args": [
       {"eccodes_key":"#1#year"},
       {"eccodes_key":"#1#month"},
       {"eccodes_key":"#1#day"},
       {"eccodes_key":"#1#hour"},
       {"eccodes_key":"#1#minute"}
     ]},
+    "resultTime": null,
     "observations": {
       "#1#nonCoordinatePressure": {
         "value": {
@@ -235,7 +237,5 @@
         "offset": null
       }
     }
-  },
-  "bufr_string_b64": null,
-  "md5sum": null
+  }
 }

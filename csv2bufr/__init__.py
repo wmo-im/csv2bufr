@@ -26,6 +26,7 @@ import hashlib
 from io import StringIO, BytesIO
 import logging
 from typing import Union
+from uuid import uuid4
 
 from jsonschema import validate
 
@@ -269,31 +270,54 @@ def encode(mapping_dict: dict, data_dict: dict) -> BytesIO:
     return fh
 
 
-def bufr_to_json(bufr_msg, template):
+def bufr_to_json(bufr_msg: int, template: dict) -> dict:
+    """
+    Function to convert BUFR message to JSON
+
+    :param bufr_msg: Integer used by eccodes to access message
+    :param data_dict: dictionary contain template for GeoJSON data
+                      including mapping from BUFR elements to JSON
+
+    :return: dict containing the data from the BUFR message
+    """
+
     # unpack the data for reading
     codes_set(bufr_msg, "unpack", True)
-    result = unpack(bufr_msg, template)
+    result = extract(bufr_msg, template)
+    # add unique ID to json
+    result['id'] = uuid4().hex
     # repack
     codes_set(bufr_msg, "pack", True)
     return(result)
 
 
-def unpack(bufr_msg, object):
+def extract(bufr_msg: int, object):
+    """
+    Function to recursively traverse object and extract values from BUFR
+    message
+
+    :param bufr_msg: Integer used by eccodes to access message
+    :param object: dictionary, list, object specifying what to extract
+                   from the BUFR message.
+
+    :return: extracted object
+    """
+
     if isinstance(object, dict):
         # check if format or eccodes in object
         if "format" in object:
             assert "args" in object
-            args = unpack(bufr_msg, object["args"])
+            args = extract(bufr_msg, object["args"])
             result = object["format"].format(*args)
         elif "eccodes_key" in object:
             result = codes_get(bufr_msg, object["eccodes_key"])
         else:
             for k in object:
-                object[k] = unpack(bufr_msg, object[k])
+                object[k] = extract(bufr_msg, object[k])
             result = object
     elif isinstance(object, list):
         for idx in range(len(object)):
-            object[idx] = unpack(bufr_msg, object[idx])
+            object[idx] = extract(bufr_msg, object[idx])
         result = object
     else:
         result = object
