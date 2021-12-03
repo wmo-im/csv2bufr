@@ -282,7 +282,6 @@ def bufr_to_json(bufr_msg: int, template: dict) -> dict:
     :return: dict containing the data from the BUFR message
     """
 
-
     # code to validate template here
 
     # unpack the data for reading
