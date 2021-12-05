@@ -18,6 +18,7 @@
 # under the License.
 #
 ###############################################################################
+
 import json
 import logging
 import os.path
@@ -27,8 +28,7 @@ import click
 
 from csv2bufr import __version__
 from csv2bufr import transform as transform_csv
-from csv2bufr import bufr_to_json
-from eccodes import codes_bufr_new_from_file
+from csv2bufr import bufr2geojson
 
 THISDIR = os.path.dirname(os.path.realpath(__file__))
 MAPPINGS = f"{THISDIR}{os.sep}resources{os.sep}mappings"
@@ -91,12 +91,13 @@ def list_mappings(ctx):
               help="Name of output file")
 @click.option("--station-metadata", "station_metadata", required=True,
               help="WIGOS station identifier JSON file")
-@click.option("--json-template", "json_template", required=False, default=None,
+@click.option("--geojson-template", "geojson_template", required=False,
+              default=None,
               help="Name of file or template for GeoJSON containing " +
                    "mapping from BUFR to GeoJSON")
 @cli_option_verbosity
 def transform(ctx, csv_file, mapping, output_dir, station_metadata,
-              json_template, verbosity):
+              geojson_template, verbosity):
     result = None
     click.echo(f"Transforming {csv_file.name} to BUFR")
 
@@ -116,40 +117,34 @@ def transform(ctx, csv_file, mapping, output_dir, station_metadata,
         except Exception as err:
             raise click.ClickException(err)
 
-    # load JSON json_template
-    if json_template is not None:
-        if not os.path.isfile(json_template):
-            json_template_file = f"{MAPPINGS}{os.sep}{json_template}.json"
+    # load GeoJSON json_template
+    if geojson_template is not None:
+        if not os.path.isfile(geojson_template):
+            json_template_file = f"{MAPPINGS}{os.sep}{geojson_template}.geojson"  # noqa
         else:
-            json_template_file = json_template
+            json_template_file = geojson_template
         try:
             with open(json_template_file) as fh:
-                json_template = json.load(fh)
+                geojson_template = json.load(fh)
         except Exception as err:
             raise click.ClickException(err)
 
     click.echo("Writing data to file")
-    for item in result:
-        filename = f"{output_dir}{os.sep}{item}.bufr4"
-        with open(filename, "wb") as fh:
-            fh.write(result[item].read())
+    for key, value in result.items():
+        bufr_filename = f"{output_dir}{os.sep}{key}.bufr4"
+        with open(bufr_filename, "wb") as fh:
+            fh.write(value.read())
+        value.seek(0)
 
-        # convert to JSON if template specified
-        if json_template is not None:
-            click.echo("Writing JSON data to file")
-            # read from BUFR file, ideally we would do this from in memory
-            # object but I can't figure out how to do this with eccodes.
-            with open(filename, "rb") as fh:
-                handle = codes_bufr_new_from_file(fh)
-            json_dict = bufr_to_json(handle, json_template)
-            # convert to string
-            json_str = json.dumps(json_dict, indent=2)
-            json_filename = f"{output_dir}{os.sep}{item}.json"
+        # convert to GeoJSON if template specified
+        if geojson_template is not None:
+            click.echo("Writing GeoJSON data to file")
+            json_filename = f"{output_dir}{os.sep}{key}.json"
+            json_dict = bufr2geojson(key, value, geojson_template)
             with open(json_filename, "w") as fh:
-                fh.write(json_str)
+                fh.write(json.dumps(json_dict, indent=4))
 
     click.echo("Done")
-    return 0
 
 
 data.add_command(transform)

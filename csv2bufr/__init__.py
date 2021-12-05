@@ -22,18 +22,18 @@
 __version__ = "0.1.0"
 
 import csv
+from datetime import timezone, datetime
 import hashlib
 from io import StringIO, BytesIO
 import logging
+import tempfile
 from typing import Union
-from uuid import uuid4
-from datetime import timezone, datetime
 
+from eccodes import (codes_bufr_new_from_file, codes_bufr_new_from_samples,
+                     codes_set_array, codes_set, codes_get_native_type,
+                     codes_write, codes_release, codes_get,
+                     CODES_MISSING_LONG, CODES_MISSING_DOUBLE)
 from jsonschema import validate
-
-from eccodes import (codes_bufr_new_from_samples, codes_set_array, codes_set,
-                     codes_get_native_type, codes_write, codes_release,
-                     codes_get, CODES_MISSING_LONG, CODES_MISSING_DOUBLE)
 
 # some 'constants'
 SUCCESS = True
@@ -172,7 +172,7 @@ def validate_value(key: str, value: Union[NUMBERS],
         return value
     if not isinstance(value, NUMBERS):
         # TODO: add checking against code / flag table here?
-        return(value)
+        return value
 
     if None not in [valid_min, valid_max]:
         if value > valid_max or value < valid_min:
@@ -283,68 +283,77 @@ def encode(mapping_dict: dict, data_dict: dict) -> BytesIO:
     return fh
 
 
-def bufr_to_json(bufr_msg: int, template: dict) -> dict:
+def bufr2geojson(identifier: str, bufr_msg: BytesIO, template: dict) -> dict:
     """
-    Function to convert BUFR message to JSON
+    Function to convert BUFR message to GeoJSON
 
-    :param bufr_msg: Integer used by eccodes to access message
+    :param identifier: identifier of BUFR message
+    :param bufr_msg: Bytes of BUFR message
     :param data_dict: dictionary contain template for GeoJSON data
-                      including mapping from BUFR elements to JSON
+                      including mapping from BUFR elements to GeoJSON
 
-    :return: dict containing the data from the BUFR message
+    :return: dict of GeoJSON representation from the BUFR message
     """
 
     # code to validate template here
 
+    # FIXME: need eccodes function to init BUFR from bytes
+    with tempfile.TemporaryFile() as fh:
+        fh.write(bufr_msg.read())
+        fh.seek(0)
+        bufr_msg2 = codes_bufr_new_from_file(fh)
+
     # unpack the data for reading
-    codes_set(bufr_msg, "unpack", True)
-    result = extract(bufr_msg, template)
-    # add unique ID to json
-    result['id'] = uuid4().hex
+    codes_set(bufr_msg2, "unpack", True)
+
+    result = extract(bufr_msg2, template)
+
+    # add unique ID to GeoJSON
+    result["id"] = identifier
     # now set resultTime
     result["properties"]["resultTime"] = datetime.now(timezone.utc).isoformat(
         timespec="seconds")
-    # repack
-    codes_set(bufr_msg, "pack", True)
-    return(result)
+
+    return result
 
 
-def extract(bufr_msg: int, object):
+def extract(bufr_msg: int, object_: Union[dict, list]) -> Union[dict, list]:
     """
     Function to recursively traverse object and extract values from BUFR
     message
 
     :param bufr_msg: Integer used by eccodes to access message
-    :param object: dictionary, list, object specifying what to extract
+    :param object_: dictionary or list specifying what to extract
                    from the BUFR message.
 
-    :return: extracted object
+    :return: extracted dict or list
     """
 
-    if isinstance(object, dict):
+    if isinstance(object_, dict):
         # check if format or eccodes in object
-        if "format" in object:
-            assert "args" in object
-            args = extract(bufr_msg, object["args"])
+        if "format" in object_:
+            assert "args" in object_
+            args = extract(bufr_msg, object_["args"])
             if None not in args:
-                result = object["format"].format(*args)
+                result = object_["format"].format(*args)
             else:
                 result = None
-        elif "eccodes_key" in object:
-            result = codes_get(bufr_msg, object["eccodes_key"])
+        elif "eccodes_key" in object_:
+            result = codes_get(bufr_msg, object_["eccodes_key"])
             if result in (CODES_MISSING_LONG, CODES_MISSING_DOUBLE):
                 result = None
         else:
-            for k in object:
-                object[k] = extract(bufr_msg, object[k])
-            result = object
-    elif isinstance(object, list):
-        for idx in range(len(object)):
-            object[idx] = extract(bufr_msg, object[idx])
-        result = object
+            for k in object_:
+                object_[k] = extract(bufr_msg, object_[k])
+            result = object_
+    elif isinstance(object_, list):
+        for idx in range(len(object_)):
+            object_[idx] = extract(bufr_msg, object_[idx])
+        result = object_
     else:
-        result = object
-    return(result)
+        result = object_
+
+    return result
 
 
 def transform(data: str, mappings: dict, station_metadata: dict) -> dict:
