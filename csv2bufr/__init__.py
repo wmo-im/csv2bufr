@@ -46,6 +46,14 @@ LOGGER = logging.getLogger(__name__)
 
 
 def parse_wigos_id(wigos_id: str) -> dict:
+    """
+    Split a WSI into a mapping dictionary for use in subsequent processing
+
+    :param wigos_id: WIGOS Station Identifier (WSI)
+
+    :returns: `dict` of WIGOS series/issuer/issuer number/local id
+    """
+
     tokens = wigos_id.split("-")
     assert len(tokens) == 4
     result = {
