@@ -24,12 +24,12 @@ import hashlib
 from io import StringIO
 import logging
 import json
+
+from eccodes import (codes_bufr_new_from_samples, codes_release)
 import pytest
 
-from eccodes import (codes_bufr_new_from_samples, codes_release,
-                     codes_bufr_new_from_file)
 from csv2bufr import (validate_mapping_dict, apply_scaling, validate_value,
-                      encode, transform, SUCCESS, bufr_to_json)
+                      encode, transform, SUCCESS, bufr2geojson)
 
 LOGGER = logging.getLogger(__name__)
 LOGGER.setLevel("DEBUG")
@@ -87,6 +87,7 @@ def data_dict():
         "minute": 0
     }
 
+
 @pytest.fixture
 def json_template():
     return {
@@ -130,7 +131,8 @@ def json_template():
                     },
                     "cf_standard_name": "pressure_at_mean_sea_level",
                     "units": {
-                        "eccodes_key": "#1#pressureReducedToMeanSeaLevel->units"
+                        "eccodes_key":
+                            "#1#pressureReducedToMeanSeaLevel->units"
                     },
                     "sensor_height_above_local_ground": None,
                     "sensor_height_above_mean_sea_level": None,
@@ -294,23 +296,19 @@ def test_transform(data_dict, mapping_dict, station_dict):
 
 def test_json(data_dict, mapping_dict, station_dict, json_template,
               json_result):
-    # first encode BUFR
+    # create CSV
     output = StringIO()
     writer = csv.DictWriter(output, quoting=csv.QUOTE_NONNUMERIC,
                             fieldnames=data_dict.keys())
     writer.writeheader()
     writer.writerow(data_dict)
     data = output.getvalue()
+    # transform CSV to BUFR
     result = transform(data, mapping_dict, station_dict)
-    for key in result:
-        # write to file
-        with open("test.bufr4", "wb") as fh:
-            fh.write(result[key].read())
 
-        # next  read and convert to JSON
-        with open("test.bufr4", "rb") as fh:
-            handle = codes_bufr_new_from_file(fh )
-        json_dict = bufr_to_json(handle, json_template)
+    for key, value in result.items():
+        # transform BUFR to GeoJSON
+        json_dict = bufr2geojson(key, value, json_template)
 
         # copy id and resulttime to expected result, these are generated at the
         # time of testing.
