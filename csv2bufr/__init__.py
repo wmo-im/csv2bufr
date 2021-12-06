@@ -44,7 +44,8 @@ NULLIFY_INVALID = True  # TODO: move to env. variable
 
 LOGGER = logging.getLogger(__name__)
 
-def parse_wigos_id( wigos_id: str) -> dict:
+
+def parse_wigos_id(wigos_id: str) -> dict:
     tokens = wigos_id.split("-")
     assert len(tokens) == 4
     result = {
