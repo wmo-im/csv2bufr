@@ -56,8 +56,8 @@ pip install .
 # run the converter
 csv2bufr data transform \
    ./data/input/Namitambo.SYNOP.csv \
-   --mapping malawi_bufr \
-   --json-template malawi_json \
+   --mapping malawi_synop_bufr \
+   --geojson-template malawi_synop_json \
    --output-dir ./data/output \
    --station-metadata ./config/0-454-2-AWSNAMITAMBO.json
 
