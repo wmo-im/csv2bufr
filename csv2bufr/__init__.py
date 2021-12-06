@@ -22,15 +22,18 @@
 __version__ = "0.1.0"
 
 import csv
+from datetime import timezone, datetime
 import hashlib
 from io import StringIO, BytesIO
 import logging
+import tempfile
 from typing import Union
 
+from eccodes import (codes_bufr_new_from_file, codes_bufr_new_from_samples,
+                     codes_set_array, codes_set, codes_get_native_type,
+                     codes_write, codes_release, codes_get,
+                     CODES_MISSING_LONG, CODES_MISSING_DOUBLE)
 from jsonschema import validate
-
-from eccodes import (codes_bufr_new_from_samples, codes_set_array, codes_set,
-                     codes_get_native_type, codes_write, codes_release)
 
 # some 'constants'
 SUCCESS = True
@@ -40,6 +43,18 @@ MISSING = ("NA", "NaN", "NAN", "None")
 NULLIFY_INVALID = True  # TODO: move to env. variable
 
 LOGGER = logging.getLogger(__name__)
+
+
+def parse_wigos_id(wigos_id: str) -> dict:
+    tokens = wigos_id.split("-")
+    assert len(tokens) == 4
+    result = {
+        "wigos-id-series": int(tokens[0]),
+        "wigos-id-issuer": int(tokens[1]),
+        "wigos-id-issue-number": int(tokens[2]),
+        "wigos-id-local": tokens[3]
+    }
+    return result
 
 
 def validate_mapping_dict(mapping_dict: dict) -> bool:
@@ -157,7 +172,7 @@ def validate_value(key: str, value: Union[NUMBERS],
         return value
     if not isinstance(value, NUMBERS):
         # TODO: add checking against code / flag table here?
-        return(value)
+        return value
 
     if None not in [valid_min, valid_max]:
         if value > valid_max or value < valid_min:
@@ -266,6 +281,79 @@ def encode(mapping_dict: dict, data_dict: dict) -> BytesIO:
     # Return BytesIO object containing BUFR message
     # =============================================
     return fh
+
+
+def bufr2geojson(identifier: str, bufr_msg: BytesIO, template: dict) -> dict:
+    """
+    Function to convert BUFR message to GeoJSON
+
+    :param identifier: identifier of BUFR message
+    :param bufr_msg: Bytes of BUFR message
+    :param data_dict: dictionary contain template for GeoJSON data
+                      including mapping from BUFR elements to GeoJSON
+
+    :return: dict of GeoJSON representation from the BUFR message
+    """
+
+    # code to validate template here
+
+    # FIXME: need eccodes function to init BUFR from bytes
+    with tempfile.TemporaryFile() as fh:
+        fh.write(bufr_msg.read())
+        fh.seek(0)
+        bufr_msg2 = codes_bufr_new_from_file(fh)
+
+    # unpack the data for reading
+    codes_set(bufr_msg2, "unpack", True)
+
+    result = extract(bufr_msg2, template)
+
+    # add unique ID to GeoJSON
+    result["id"] = identifier
+    # now set resultTime
+    result["properties"]["resultTime"] = datetime.now(timezone.utc).isoformat(
+        timespec="seconds")
+
+    return result
+
+
+def extract(bufr_msg: int, object_: Union[dict, list]) -> Union[dict, list]:
+    """
+    Function to recursively traverse object and extract values from BUFR
+    message
+
+    :param bufr_msg: Integer used by eccodes to access message
+    :param object_: dictionary or list specifying what to extract
+                   from the BUFR message.
+
+    :return: extracted dict or list
+    """
+
+    if isinstance(object_, dict):
+        # check if format or eccodes in object
+        if "format" in object_:
+            assert "args" in object_
+            args = extract(bufr_msg, object_["args"])
+            if None not in args:
+                result = object_["format"].format(*args)
+            else:
+                result = None
+        elif "eccodes_key" in object_:
+            result = codes_get(bufr_msg, object_["eccodes_key"])
+            if result in (CODES_MISSING_LONG, CODES_MISSING_DOUBLE):
+                result = None
+        else:
+            for k in object_:
+                object_[k] = extract(bufr_msg, object_[k])
+            result = object_
+    elif isinstance(object_, list):
+        for idx in range(len(object_)):
+            object_[idx] = extract(bufr_msg, object_[idx])
+        result = object_
+    else:
+        result = object_
+
+    return result
 
 
 def transform(data: str, mappings: dict, station_metadata: dict) -> dict:

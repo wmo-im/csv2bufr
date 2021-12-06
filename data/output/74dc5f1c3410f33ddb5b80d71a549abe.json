@@ -1,0 +1,224 @@
+{
+  "id": "0372d54917654a51820bca3950ba4dbf",
+  "type": "Feature",
+  "geometry": {
+    "type": "Point",
+    "coordinates": [
+      35.274280000000005,
+      -15.840520000000001
+    ]
+  },
+  "properties": {
+    "phenomenonTime": "2021-11-18T09:55:00+00:00",
+    "resultTime": "2021-12-03T14:22:01+00:00",
+    "observations": {
+      "#1#nonCoordinatePressure": {
+        "value": 92430.0,
+        "cf_standard_name": "air_pressure",
+        "units": "Pa",
+        "sensor_height_above_local_ground": null,
+        "sensor_height_above_mean_sea_level": 807.0,
+        "valid_min": null,
+        "valid_max": null,
+        "scale": null,
+        "offset": null
+      },
+      "#1#pressureReducedToMeanSeaLevel": {
+        "value": 101810.0,
+        "cf_standard_name": "pressure_at_mean_sea_level",
+        "units": "Pa",
+        "sensor_height_above_local_ground": null,
+        "sensor_height_above_mean_sea_level": 807.0,
+        "valid_min": null,
+        "valid_max": null,
+        "scale": null,
+        "offset": null
+      },
+      "#1#3HourPressureChange": {
+        "value": -200.0,
+        "longname": "change_of_air_pressure_over_past_3_hours",
+        "units": "Pa",
+        "sensor_height_above_local_ground": null,
+        "sensor_height_above_mean_sea_level": 807.0,
+        "valid_min": null,
+        "valid_max": null,
+        "scale": null,
+        "offset": null
+      },
+      "#1#characteristicOfPressureTendency": {
+        "value": 7,
+        "longname": "characteristic_of_pressure_tendency",
+        "units": "CODE TABLE",
+        "valid_min": null,
+        "valid_max": null,
+        "scale": null,
+        "offset": null
+      },
+      "#1#airTemperature": {
+        "value": 307.90000000000003,
+        "cf_standard_name": "air_temperature",
+        "units": "K",
+        "sensor_height_above_local_ground": 1.5,
+        "sensor_height_above_mean_sea_level": null,
+        "valid_min": null,
+        "valid_max": null,
+        "scale": null,
+        "offset": null
+      },
+      "#1#dewpointTemperature": {
+        "value": 287.7,
+        "cf_standard_name": "dew_point_temperature",
+        "units": "K",
+        "sensor_height_above_local_ground": 1.5,
+        "sensor_height_above_mean_sea_level": null,
+        "valid_min": null,
+        "valid_max": null,
+        "scale": null,
+        "offset": null
+      },
+      "#1#relativeHumidity": {
+        "value": 30,
+        "cf_standard_name": "relative_humidity",
+        "units": "%",
+        "sensor_height_above_local_ground": 1.5,
+        "sensor_height_above_mean_sea_level": null,
+        "valid_min": null,
+        "valid_max": null,
+        "scale": null,
+        "offset": null
+      },
+      "#1#totalSunshine": {
+        "value": 25,
+        "cf_standard_name": "duration_of_sunshine",
+        "units": "min",
+        "time_period": "-1 h",
+        "sensor_height_above_local_ground": null,
+        "sensor_height_above_mean_sea_level": null,
+        "valid_min": null,
+        "valid_max": null,
+        "scale": null,
+        "offset": null
+      },
+      "#2#totalSunshine": {
+        "value": 102,
+        "cf_standard_name": "duration_of_sunshine",
+        "units": "min",
+        "time_period": "-24 h",
+        "sensor_height_above_local_ground": null,
+        "sensor_height_above_mean_sea_level": null,
+        "valid_min": null,
+        "valid_max": null,
+        "scale": null,
+        "offset": null
+      },
+      "#1#totalPrecipitationOrTotalWaterEquivalent": {
+        "value": 0.0,
+        "cf_standard_name": "precipitation_amount",
+        "units": "kg m-2",
+        "time_period": "-1 h",
+        "sensor_height_above_local_ground": 1.5,
+        "sensor_height_above_mean_sea_level": null,
+        "valid_min": null,
+        "valid_max": null,
+        "scale": null,
+        "offset": null
+      },
+      "#1#maximumTemperatureAtHeightAndOverPeriodSpecified": {
+        "value": 308.1,
+        "cf_standard_name": "air_temperature",
+        "cell_methods": "maximum",
+        "units": "K",
+        "time_period1": "-24 h",
+        "time_period2": "0 h",
+        "sensor_height_above_local_ground": 1.5,
+        "sensor_height_above_mean_sea_level": null,
+        "valid_min": null,
+        "valid_max": null,
+        "scale": null,
+        "offset": null
+      },
+      "#1#minimumTemperatureAtHeightAndOverPeriodSpecified": {
+        "value": 300.8,
+        "cf_standard_name": "air_temperature",
+        "cell_methods": "minimum",
+        "units": "K",
+        "time_period1": "-24 h",
+        "time_period2": "0 h",
+        "sensor_height_above_local_ground": 1.5,
+        "sensor_height_above_mean_sea_level": null,
+        "valid_min": null,
+        "valid_max": null,
+        "scale": null,
+        "offset": null
+      },
+      "#1#windDirection": {
+        "value": 67,
+        "cf_standard_name": "wind_from_direction",
+        "units": "deg",
+        "cell_methods": 2,
+        "time_period": "-10 min",
+        "sensor_height_above_local_ground": 2.0,
+        "sensor_height_above_mean_sea_level": null,
+        "wind_sensor_type": 0,
+        "valid_min": null,
+        "valid_max": null,
+        "scale": null,
+        "offset": null
+      },
+      "#1#windSpeed": {
+        "value": 2.2,
+        "cf_standard_name": "wind_speed",
+        "units": "m/s",
+        "cell_methods": 2,
+        "time_period": "-10 min",
+        "sensor_height_above_local_ground": 2.0,
+        "sensor_height_above_mean_sea_level": null,
+        "wind_sensor_type": 0,
+        "valid_min": null,
+        "valid_max": null,
+        "scale": null,
+        "offset": null
+      },
+      "#1#maximumWindGustSpeed": {
+        "value": 5.7,
+        "cf_standard_name": "wind_speed",
+        "units": "m/s",
+        "cell_methods": null,
+        "time_period": null,
+        "sensor_height_above_local_ground": 2.0,
+        "sensor_height_above_mean_sea_level": null,
+        "wind_sensor_type": 0,
+        "valid_min": null,
+        "valid_max": null,
+        "scale": null,
+        "offset": null
+      },
+      "#1#globalSolarRadiationIntegratedOverPeriodSpecified": {
+        "value": 3715700.0,
+        "cf_standard_name": "surface_downwelling_shortwave_flux_in_air",
+        "units": "J m-2",
+        "cell_methods": "sum",
+        "time_period": "-1 h",
+        "sensor_height_above_local_ground": null,
+        "sensor_height_above_mean_sea_level": null,
+        "valid_min": null,
+        "valid_max": null,
+        "scale": null,
+        "offset": null
+      },
+      "#2#globalSolarRadiationIntegratedOverPeriodSpecified": {
+        "value": 13350000.0,
+        "cf_standard_name": "surface_downwelling_shortwave_flux_in_air",
+        "units": "J m-2",
+        "cell_methods": "sum",
+        "time_period": "-24 h",
+        "sensor_height_above_local_ground": null,
+        "sensor_height_above_mean_sea_level": null,
+        "valid_min": null,
+        "valid_max": null,
+        "scale": null,
+        "offset": null
+      }
+    }
+  }
+}

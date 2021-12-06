@@ -28,6 +28,7 @@ import click
 
 from csv2bufr import __version__
 from csv2bufr import transform as transform_csv
+from csv2bufr import bufr2geojson
 
 THISDIR = os.path.dirname(os.path.realpath(__file__))
 MAPPINGS = f"{THISDIR}{os.sep}resources{os.sep}mappings"
@@ -84,23 +85,29 @@ def list_mappings(ctx):
 @click.pass_context
 @click.argument("csv_file", type=click.File())
 @click.option("--mapping", required=True,
-              help="JSON file mapping from CSV to BUFR")
+              help="Name of file or mapping template to " +
+                   "use to map from CSV to BUFR")
 @click.option("--output-dir", "output_dir", required=True,
               help="Name of output file")
 @click.option("--station-metadata", "station_metadata", required=True,
               help="WIGOS station identifier JSON file")
+@click.option("--geojson-template", "geojson_template", required=False,
+              default=None,
+              help="Name of file or template for GeoJSON containing " +
+                   "mapping from BUFR to GeoJSON")
 @cli_option_verbosity
-def transform(ctx, csv_file, mapping, output_dir, station_metadata, verbosity):
+def transform(ctx, csv_file, mapping, output_dir, station_metadata,
+              geojson_template, verbosity):
     result = None
-
     click.echo(f"Transforming {csv_file.name} to BUFR")
 
     if not os.path.isfile(mapping):
         mappings_file = f"{MAPPINGS}{os.sep}{mapping}.json"
         if not os.path.isfile(mappings_file):
-            raise click.ClickException("Invalid stored mapping")
+            raise click.ClickException(
+                f"Invalid stored mapping ({mappings_file})")
     else:
-        mappings_file = mappings
+        mappings_file = mapping
 
     with open(mappings_file) as fh2, open(station_metadata) as fh3:  # noqa
         try:
@@ -110,14 +117,34 @@ def transform(ctx, csv_file, mapping, output_dir, station_metadata, verbosity):
         except Exception as err:
             raise click.ClickException(err)
 
+    # load GeoJSON json_template
+    if geojson_template is not None:
+        if not os.path.isfile(geojson_template):
+            json_template_file = f"{MAPPINGS}{os.sep}{geojson_template}.geojson"  # noqa
+        else:
+            json_template_file = geojson_template
+        try:
+            with open(json_template_file) as fh:
+                geojson_template = json.load(fh)
+        except Exception as err:
+            raise click.ClickException(err)
+
     click.echo("Writing data to file")
-    for item in result:
-        filename = f"{output_dir}{os.sep}{item}.bufr4"
-        with open(filename, "wb") as fh:
-            fh.write(result[item].read())
+    for key, value in result.items():
+        bufr_filename = f"{output_dir}{os.sep}{key}.bufr4"
+        with open(bufr_filename, "wb") as fh:
+            fh.write(value.read())
+        value.seek(0)
+
+        # convert to GeoJSON if template specified
+        if geojson_template is not None:
+            click.echo("Writing GeoJSON data to file")
+            json_filename = f"{output_dir}{os.sep}{key}.json"
+            json_dict = bufr2geojson(key, value, geojson_template)
+            with open(json_filename, "w") as fh:
+                fh.write(json.dumps(json_dict, indent=4))
 
     click.echo("Done")
-    return 0
 
 
 data.add_command(transform)

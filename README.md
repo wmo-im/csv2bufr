@@ -50,11 +50,15 @@ export PYTHONPATH="${PYTHONPATH}:/app/src/csv2bufr/"
 # now go to app directory
 cd /app
 
+# install, note once released and uploaded to PyPI this will be changed (pip install csv2bufr)
+pip install .
+
 # run the converter
 csv2bufr data transform \
-   ./DATA/Namitambo_preprocessed.csv \
-   --mapping ./mapping-simple.json \
-   --output-dir ./OUTPUT/ \
+   ./data/input/Namitambo.SYNOP.csv \
+   --mapping malawi_synop_bufr \
+   --geojson-template malawi_synop_json \
+   --output-dir ./data/output \
    --station-metadata ./config/0-454-2-AWSNAMITAMBO.json
 
 # list stored mappings
@@ -63,10 +67,11 @@ csv2bufr mappings list
 
 ### Configuration
 
-With the current version 2 configuration files are used.
+With the current version 2 required and one optional configuration files are used.
 
 - {WSI}.json
-- synop-full.json
+- {source}_bufr.json
+- {source}_json.json
 
 
 Where {WSI} is the WIGOS station ID, e.g. 0-454-2-AWSNAMITAMBO. 
