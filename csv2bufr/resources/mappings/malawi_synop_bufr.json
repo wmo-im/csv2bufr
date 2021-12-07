@@ -1,6 +1,6 @@
 {
     "inputDelayedDescriptorReplicationFactor": [0,0],
-
+    "unexpandedDescriptors": [301150,307080],
     "header":[
         {"eccodes_key": "edition", "value": 4},
         {"eccodes_key": "masterTableNumber", "value": 0},

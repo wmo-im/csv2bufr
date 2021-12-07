@@ -440,14 +440,26 @@ class bufr_message:
 
 def transform(data: str, metadata: dict, mappings: dict, template: dict = None)\
         -> dict:
-    message = bufr_message([301150, 307080], [0,0] )
+
+    # we've not validated at this stage, do we want to make that the first
+    # thing we do?
+    unexpanded_descriptors = mappings["unexpandedDescriptors"]
+    delayed_replications = mappings["inputDelayedDescriptorReplicationFactor"]
+    # initialise new BUFR message
+    message = bufr_message( unexpanded_descriptors, delayed_replications)
+    # parse the data into an internal dict
     message.parse(data, metadata, mappings)
+    # now create a dict to store the return value
     result = dict()
+    # now md5 as the key for this obs.
     result[message.md5()] = dict()
+    # encode to bufr
     result[message.md5()]["bufr4"] = message.as_bufr()
     if template is not None:
+        # if template specified get geojson as well
         result[message.md5()]["geojson"] = message.as_geojson(message.md5(),
                                                           template)
+    # now add metadata elements
     result[message.md5()]["_meta"] = dict()
     result[message.md5()]["_meta"]["data_date"] = message.datetime()
     result[message.md5()]["_meta"]["originating_centre"] =\
