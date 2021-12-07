@@ -34,6 +34,7 @@ from csv2bufr import (validate_mapping_dict, apply_scaling, validate_value,
 LOGGER = logging.getLogger(__name__)
 LOGGER.setLevel("DEBUG")
 
+
 # test data
 @pytest.fixture
 def mapping_dict():

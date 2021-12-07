@@ -166,7 +166,7 @@ def encode(data_dict: dict, delayed_replications: list) -> BytesIO:
     # set delayed replication factor
     if len(delayed_replications) > 0:
         codes_set_array(bufr_msg, "inputDelayedDescriptorReplicationFactor",
-                delayed_replications)
+                        delayed_replications)
     # now iterate over keys to add
     for eccodes_key in data_dict:
         # get value
