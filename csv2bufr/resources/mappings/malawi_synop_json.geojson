@@ -3,7 +3,9 @@
   "type": "Feature",
   "geometry": {
     "type": "Point",
-    "coordinates": [{"eccodes_key":"#1#longitude"},{"eccodes_key":"#1#latitude"},
+    "coordinates": [
+        {"eccodes_key":"#1#longitude"},
+        {"eccodes_key":"#1#latitude"},
         {"eccodes_key":"#1#heightOfStationGroundAboveMeanSeaLevel"}]
   },
   "properties": {

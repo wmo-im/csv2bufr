@@ -1,12 +1,12 @@
 {
-    "inputDelayedDescriptorReplicationFactor": [0,0], 
+    "inputDelayedDescriptorReplicationFactor": [0,0],
+
     "header":[
         {"eccodes_key": "edition", "value": 4},
         {"eccodes_key": "masterTableNumber", "value": 0},
         {"eccodes_key": "bufrHeaderCentre", "value": 0},
         {"eccodes_key": "bufrHeaderSubCentre", "value": 0},
         {"eccodes_key": "updateSequenceNumber", "value": 0},
-        {"eccodes_key": "section1Flags", "value": 0},
         {"eccodes_key": "dataCategory", "value": 0},
         {"eccodes_key": "internationalDataSubCategory", "value": 6},
         {"eccodes_key": "masterTablesVersionNumber", "value": 36},
