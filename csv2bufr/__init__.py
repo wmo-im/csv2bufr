@@ -22,12 +22,15 @@
 __version__ = "0.1.0"
 
 import csv
+import json
 from datetime import timezone, datetime
 import hashlib
 from io import StringIO, BytesIO
 import logging
 import tempfile
+import os.path
 from typing import Union
+from jsonpath_ng.ext import parser
 
 from eccodes import (codes_bufr_new_from_file, codes_bufr_new_from_samples,
                      codes_set_array, codes_set, codes_get_native_type,
@@ -44,6 +47,9 @@ NULLIFY_INVALID = True  # TODO: move to env. variable
 
 LOGGER = logging.getLogger(__name__)
 
+THISDIR = os.path.dirname(os.path.realpath(__file__))
+MAPPINGS = f"{THISDIR}{os.sep}resources{os.sep}mappings"
+
 
 def parse_wigos_id(wigos_id: str) -> dict:
     """
@@ -57,10 +63,10 @@ def parse_wigos_id(wigos_id: str) -> dict:
     tokens = wigos_id.split("-")
     assert len(tokens) == 4
     result = {
-        "wigos-id-series": int(tokens[0]),
-        "wigos-id-issuer": int(tokens[1]),
-        "wigos-id-issue-number": int(tokens[2]),
-        "wigos-id-local": tokens[3]
+        "wid_series": int(tokens[0]),
+        "wid_issuer": int(tokens[1]),
+        "wid_issue_number": int(tokens[2]),
+        "wid_local": tokens[3]
     }
     return result
 
@@ -74,86 +80,38 @@ def validate_mapping_dict(mapping_dict: dict) -> bool:
     :returns: `bool` of validation result
     """
 
-    file_schema = {
-        "type": "object",
-        "properties": {
-            "inputDelayedDescriptorReplicationFactor": {
-                "type": ["array", "null"]
-            },
-            "sequence": {
-                "type": ["array"]
-            }
-        }
-    }
+    # load internal file schema for mappings
+    file_schema = f"{MAPPINGS}{os.sep}mapping_schema.json"
+    with open(file_schema) as fh:
+        schema = json.load(fh)
+
     # now validate
     try:
-        validate(mapping_dict, file_schema)
+        validate(mapping_dict, schema)
     except Exception as e:
         message = "invalid mapping dictionary"
         LOGGER.error(message)
         raise e
-    # now schema for each element in the sequence array
-    # TODO: make optional elements optional
-    element_schema = {
-        "type": "object",
-        "properties": {
-            "key": {
-                "type": "string"
-            },
-            "value": {
-                "type": [
-                    "boolean", "object", "array", "number", "string", "null"
-                ]
-            },
-            "column": {
-                "type": ["string", "null"]
-            },
-            "valid-min": {
-                 "type": ["number", "null"]
-            },
-            "valid-max": {
-                 "type": ["number", "null"]
-            },
-            "scale": {
-                "type": ["number", "null"]
-            },
-            "offset": {
-                "type": ["number", "null"]
-            }
-        }
-    }
-
-    # now iterate over elements and validate each
-    for element in mapping_dict["sequence"]:
-        try:
-            validate(element, schema=element_schema)
-        except Exception as e:
-            message = f"invalid element ({e.json_path}) for {element['key']} in mapping file: {e.message}"  # noqa
-            LOGGER.error(message)
-            raise e
-        if (element["scale"] is None) is not (element["offset"] is None):
-            message = f"scale and offset should either both be present or both set to missing for {element['key']} in mapping file"  # noqa
-            LOGGER.error(message)
-            e = ValueError(message)
-            raise e
 
     return SUCCESS
 
 
-def apply_scaling(value: Union[NUMBERS], element: dict) -> Union[NUMBERS]:
+def apply_scaling(value: Union[NUMBERS], scale: Union[NUMBERS],
+                  offset: Union[NUMBERS]) -> Union[NUMBERS]:
     """
     Apply simple scaling and offsets
 
     :param value: TODO describe
-    :param element: TODO describe
+    :param scale: TODO describe
+    :param offset: TODO describe
 
     :returns: scaled value
     """
 
     if isinstance(value, NUMBERS):
-        if None not in [element["scale"], element["offset"]]:
+        if None not in [scale, offset]:
             try:
-                value = value * pow(10, element["scale"]) + element["offset"]
+                value = value * pow(10, scale) + offset
             except Exception as e:
                 LOGGER.error(e.message)
                 raise e
@@ -195,75 +153,60 @@ def validate_value(key: str, value: Union[NUMBERS],
 
     return value
 
-
-def encode(mapping_dict: dict, data_dict: dict) -> BytesIO:
+def encode( data_dict: dict, delayed_replications: list) -> BytesIO:
     """
     This is the primary function that does the conversion to BUFR
-
-    :param mapping_dict: dictionary containing eccodes key and mapping to
-                         data dict, includes option to specify
-                         valid min and max, scale and offset.
-    :param data_dict: dictionary containing data values
+    :param data_dict: dictionary containing key (eccodes) / value pairs
+    :param delayed_replications: list containing delayed replications to set
 
     :return: BytesIO object containing BUFR message
     """
-
-    # initialise message to be encoded
     bufr_msg = codes_bufr_new_from_samples("BUFR4")
-
-    # set delayed replication factors if present
-    if mapping_dict["inputDelayedDescriptorReplicationFactor"] is not None:
+    # set delayed replication factor
+    if len( delayed_replications ) > 0:
         codes_set_array(bufr_msg, "inputDelayedDescriptorReplicationFactor",
-                        mapping_dict["inputDelayedDescriptorReplicationFactor"])  # noqa
-
-    # ===================
-    # Now encode the data
-    # ===================
-    for element in mapping_dict["sequence"]:
-        key = element["key"]
-        value = None
-        assert value is None
-        if element["value"] is not None:
-            value = element["value"]
-        elif element["column"] is not None:
-            value = data_dict[element["column"]]
-        else:
-            # change the following to debug or leave as warning?
-            LOGGER.debug(f"No value for {key} but included in mapping file, value set to missing")  # noqa
-        # now set
+            delayed_replications)
+    # now iterate over keys to add
+    for eccodes_key in data_dict:
+        # get value
+        value = data_dict[eccodes_key]
+        # set if not missing
         if value is not None:
-            LOGGER.debug(f"setting value {value} for element {key}.")
+            LOGGER.debug(f"setting value {value} for element {eccodes_key}.")
             if isinstance(value, list):
                 try:
                     LOGGER.debug("calling codes_set_array")
-                    codes_set_array(bufr_msg, key, value)
+                    codes_set_array(bufr_msg, eccodes_key, value)
                 except Exception as e:
-                    LOGGER.error(f"error calling codes_set_array({bufr_msg}, {key}, {value}): {e}")  # noqa
+                    LOGGER.error(
+                        f"error calling codes_set_array({bufr_msg}, {eccodes_key}, {value}): {e}")  # noqa
                     raise e
             else:
                 try:
                     LOGGER.debug("calling codes_set")
-                    nt = codes_get_native_type(bufr_msg, key)
+                    nt = codes_get_native_type(bufr_msg, eccodes_key)
                     # convert to native type, required as in Malawi data 0
                     # encoded as "0" for some elements.
                     if nt is int and not isinstance(value, int):
-                        LOGGER.warning(f"int expected for {key} but received {type(value)} ({value})")  # noqa
+                        LOGGER.warning(
+                            f"int expected for {eccodes_key} but received {type(value)} ({value})")  # noqa
                         if isinstance(value, float):
                             value = int(round(value))
                         else:
                             value = int(value)
                         LOGGER.warning(f"value converted to int ({value})")
                     elif nt is float and not isinstance(value, float):
-                        LOGGER.warning(f"float expected for {key} but received {type(value)} ({value})")  # noqa
+                        LOGGER.warning(
+                            f"float expected for {eccodes_key} but received {type(value)} ({value})")  # noqa
                         value = float(value)
                         LOGGER.warning(f"value converted to float ({value})")
                     else:
                         value = value
-                    codes_set(bufr_msg, key, value)
+                    codes_set(bufr_msg, eccodes_key, value)
                 except Exception as e:
-                    LOGGER.error(f"error calling codes_set({bufr_msg}, {key}, {value}): {e}")  # noqa
+                    LOGGER.error(
+                        f"error calling codes_set({bufr_msg}, {eccodes_key}, {value}): {e}")  # noqa
                     raise e
-
     # ==============================
     # Message now ready to be packed
     # ==============================
@@ -272,7 +215,6 @@ def encode(mapping_dict: dict, data_dict: dict) -> BytesIO:
     except Exception as e:
         LOGGER.error(f"error calling codes_set({bufr_msg}, 'pack', True): {e}")
         raise e
-
     # =======================================================
     # now write to in memory file and return object to caller
     # =======================================================
@@ -284,7 +226,6 @@ def encode(mapping_dict: dict, data_dict: dict) -> BytesIO:
     except Exception as e:
         LOGGER.error(f"error writing to internal BytesIO object, {e}")
         raise e
-
     # =============================================
     # Return BytesIO object containing BUFR message
     # =============================================
@@ -384,6 +325,12 @@ def transform(data: str, mappings: dict, station_metadata: dict) -> dict:
 
     # TODO: add in code to validate station_metadata
 
+    # now we need to parse WIGOS ID as stored as single string in metadata
+    wigosID = station_metadata["wigosIds"][0]["wid"]
+    tokens = parse_wigos_id( wigosID )
+    for token in tokens:
+        station_metadata["wigosIds"][0][token] = tokens[token]
+
     # we may have multiple rows in the file, create list object to return
     # one item per message
     messages = {}
@@ -392,54 +339,89 @@ def transform(data: str, mappings: dict, station_metadata: dict) -> dict:
     # now read csv data and iterate over rows
     reader = csv.reader(fh, delimiter=',', quoting=csv.QUOTE_NONNUMERIC)
     rows_read = 0
+
     for row in reader:
+        data_to_encode = dict()
         if rows_read == 0:
             col_names = row
         else:
             data = row
             data_dict = dict(zip(col_names, data))
-            try:
-                data_dict = {**data_dict, **station_metadata['data']}
-            except Exception as e:
-                message = "issue merging station and data dictionaries."
-                LOGGER.error(f"{message}{e}")
-                raise e
+            #try:
+            #    data_dict = {**data_dict, **station_metadata['data']}
+            #except Exception as e:
+            #    message = "issue merging station and data dictionaries."
+            #    LOGGER.error(f"{message}{e}")
+            #    raise e
             # Iterate over items to map, perform unit conversions and validate
-            for element in mappings["sequence"]:
-                value = element["value"]
-                column = element["column"]
-                # select between "value" and "column" fields.
-                if value is not None:
-                    value = element["value"]
-                elif column is not None:
-                    # get column name
-                    # make sure column is in data_dict
-                    if (column not in data_dict):
-                        message = f"column '{column}' not found in data dictionary"  # noqa
-                        raise ValueError(message)
-                    value = data_dict[column]
+            for section in ("header", "data"):
+                for element in mappings[section]:
+                    eccodes_key = element["eccodes_key"]
+                    # first identify source of data
+                    value = None
+                    column = None
+                    jsonpath = None
+                    if "value" in element:
+                        value = element["value"]
+                    if "csv_column" in element:
+                        column = element["csv_column"]
+                    if "jsonpath" in element:
+                        jsonpath = element["jsonpath"]
+                    # now get value from indicated source
+                    if value is not None:
+                        value = element["value"]
+                    elif column is not None:
+                        # get column name
+                        # make sure column is in data_dict
+                        if (column not in data_dict):
+                            message = f"column '{column}' not found in data dictionary"  # noqa
+                            raise ValueError(message)
+                        value = data_dict[column]
+                    elif jsonpath is not None:
+                        query = parser.parse(jsonpath).find(station_metadata)
+                        assert len(query) == 1
+                        value = query[0].value
+                    else:
+                        LOGGER.debug(f"value and column both None for element {element['eccodes_key']}")  # noqa
+
                     if value in MISSING:
                         value = None
                     else:
-                        value = apply_scaling(value, element)
-                else:
-                    LOGGER.debug(f"value and column both None for element {element['key']}")  # noqa
-                # now validate value
-                LOGGER.debug(f"validating value {value} for element {element['key']}")  # noqa
-                value = validate_value(element["key"], value,
-                                       element["valid-min"],
-                                       element["valid-max"],
-                                       NULLIFY_INVALID)
+                        scale = None
+                        offset = None
+                        if "scale" in element:
+                            scale = element["scale"]
+                        if "offset" in element:
+                            offset = element["offset"]
+                        value = apply_scaling(value, scale, offset)
 
-                LOGGER.debug(f"value {value} validated for element {element['key']}")  # noqa
-                # update data dictionary
-                if column is not None:
-                    data_dict[column] = value
-                LOGGER.debug(f"value {value} updated for element {element['key']}")  # noqa
+                    # now validate value
+                    valid_min = None
+                    valid_max = None
+                    if "valid_min" in element:
+                        valid_min = element["valid_min"]
+                    if "valid_max" in element:
+                        valid_max = element["valid_min"]
+                    LOGGER.debug(f"validating value {value} for element {element['eccodes_key']}")  # noqa
+                    value = validate_value(element["eccodes_key"], value,
+                                           valid_min, valid_max,
+                                           NULLIFY_INVALID)
 
-            # now encode the data (this one line is where the magic happens
-            # once the dictionaries have been read in)
-            msg = encode(mappings, data_dict)
+                    LOGGER.debug(f"value {value} validated for element {element['eccodes_key']}")  # noqa
+
+                    # at this point we should have the eccodes key and a
+                    # validated value to use, add to dict
+                    data_to_encode[eccodes_key] = value
+
+                    LOGGER.debug(f"value {value} updated for element {element['eccodes_key']}")  # noqa
+            # get delayed replications
+            delayed_replications = \
+                mappings["inputDelayedDescriptorReplicationFactor"]
+            # now encode the data
+            LOGGER.debug("encoding to BUFR")
+            print( json.dumps(data_to_encode, indent=4))
+            msg = encode(data_to_encode, delayed_replications)
+            LOGGER.debug("setting md5 hash")
             key = hashlib.md5(msg.read()).hexdigest()
             LOGGER.debug(key)
             msg.seek(0)

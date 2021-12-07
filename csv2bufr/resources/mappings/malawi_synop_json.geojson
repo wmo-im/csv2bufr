@@ -3,7 +3,8 @@
   "type": "Feature",
   "geometry": {
     "type": "Point",
-    "coordinates": [{"eccodes_key":"#1#longitude"},{"eccodes_key":"#1#latitude"}]
+    "coordinates": [{"eccodes_key":"#1#longitude"},{"eccodes_key":"#1#latitude"},
+        {"eccodes_key":"#1#heightOfStationGroundAboveMeanSeaLevel"}]
   },
   "properties": {
     "phenomenonTime": {"format":"{:04d}-{:02d}-{:02d}T{:02d}:{:02d}:00+00:00", "args": [
@@ -14,6 +15,10 @@
       {"eccodes_key":"#1#minute"}
     ]},
     "resultTime": null,
+    "wigos_identifier_series": {"eccodes_key":"#1#wigosIdentifierSeries"},
+    "wigos_identifier_issuer": {"eccodes_key":"#1#wigosIssuerOfIdentifier"},
+    "wigos_identifier_issue_number": {"eccodes_key":"#1#wigosIssueNumber"},
+    "wigos_identifier_local_identifier": {"eccodes_key":"#1#wigosLocalIdentifierCharacter"},
     "observations": {
       "#1#nonCoordinatePressure": {
         "value": {

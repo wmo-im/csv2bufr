@@ -139,7 +139,7 @@ def transform(ctx, csv_file, mapping, output_dir, station_metadata,
         # convert to GeoJSON if template specified
         if geojson_template is not None:
             click.echo("Writing GeoJSON data to file")
-            json_filename = f"{output_dir}{os.sep}{key}.json"
+            json_filename = f"{output_dir}{os.sep}{key}.geojson"
             json_dict = bufr2geojson(key, value, geojson_template)
             with open(json_filename, "w") as fh:
                 fh.write(json.dumps(json_dict, indent=4))

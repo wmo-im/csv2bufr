@@ -39,36 +39,37 @@ LOGGER.setLevel("DEBUG")
 @pytest.fixture
 def mapping_dict():
     return {
-        "inputDelayedDescriptorReplicationFactor": None,
-        "sequence": [
-            {"key": "edition", "value": 4, "column": None, "valid-min": None, "valid-max": None, "scale": None, "offset": None},  # noqa
-            {"key": "masterTableNumber", "value": 0, "column": None, "valid-min": None, "valid-max": None, "scale": None, "offset": None},  # noqa
-            {"key": "bufrHeaderCentre", "value": 0, "column": None, "valid-min": None, "valid-max": None, "scale": None, "offset": None},  # noqa
-            {"key": "bufrHeaderSubCentre", "value": 0, "column": None, "valid-min": None, "valid-max": None, "scale": None, "offset": None},  # noqa
-            {"key": "updateSequenceNumber", "value": 0, "column": None, "valid-min": None, "valid-max": None, "scale": None, "offset": None},  # noqa
-            {"key": "section1Flags", "value": 0, "column": None, "valid-min": None, "valid-max": None, "scale": None, "offset": None},  # noqa
-            {"key": "dataCategory", "value": 0, "column": None, "valid-min": None, "valid-max": None, "scale": None, "offset": None},  # noqa
-            {"key": "internationalDataSubCategory", "value": 6, "column": None, "valid-min": None, "valid-max": None, "scale": None, "offset": None},  # noqa
-            {"key": "dataSubCategory", "value": None, "column": None, "valid-min": None, "valid-max": None, "scale": None, "offset": None},  # noqa
-            {"key": "masterTablesVersionNumber", "value": 36, "column": None, "valid-min": None, "valid-max": None, "scale": None, "offset": None},  # noqa
-            {"key": "numberOfSubsets", "value": 1, "column": None, "valid-min": None, "valid-max": None, "scale": None, "offset": None},  # noqa
-            {"key": "observedData", "value": 1, "column": None, "valid-min": None, "valid-max": None, "scale": None, "offset": None},  # noqa
-            {"key": "compressedData", "value": 0, "column": None, "valid-min": None, "valid-max": None, "scale": None, "offset": None},  # noqa
-            {"key": "typicalYear", "value": None, "column": "year", "valid-min": None, "valid-max": None, "scale": None, "offset": None},  # noqa
-            {"key": "typicalMonth", "value": None, "column": "month", "valid-min": None, "valid-max": None, "scale": None, "offset": None},  # noqa
-            {"key": "typicalDay", "value": None, "column": "day", "valid-min": None, "valid-max": None, "scale": None, "offset": None},  # noqa
-            {"key": "typicalHour", "value": None, "column": "hour", "valid-min": None, "valid-max": None, "scale": None, "offset": None},  # noqa
-            {"key": "typicalMinute", "value": None, "column": "minute", "valid-min": None, "valid-max": None, "scale": None, "offset": None},  # noqa
-            {"key": "unexpandedDescriptors", "value": [301021, 301011, 301012, 10051, 12101], "column": None, "valid-min": None, "valid-max": None, "scale": None, "offset": None},  # noqa
-            {"key": "#1#year", "value": None, "column": "year", "valid-min": None, "valid-max": None, "scale": None, "offset": None},  # noqa
-            {"key": "#1#month", "value": None, "column": "month", "valid-min": None, "valid-max": None, "scale": None, "offset": None},  # noqa
-            {"key": "#1#day", "value": None, "column": "day", "valid-min": None, "valid-max": None, "scale": None, "offset": None},  # noqa
-            {"key": "#1#hour", "value": None, "column": "hour", "valid-min": None, "valid-max": None, "scale": None, "offset": None},  # noqa
-            {"key": "#1#minute", "value": None, "column": "minute", "valid-min": None, "valid-max": None, "scale": None, "offset": None},  # noqa
-            {"key": "#1#latitude", "value": None, "column": "latitude", "valid-min": None, "valid-max": None, "scale": None, "offset": None},  # noqa
-            {"key": "#1#longitude", "value": None, "column": "longitude", "valid-min": None, "valid-max": None, "scale": None, "offset": None},  # noqa
-            {"key": "#1#pressureReducedToMeanSeaLevel", "value": None, "column": "pressure", "valid-min": None, "valid-max": None, "scale": None, "offset": None},  # noqa
-            {"key": "#1#airTemperature", "value": None, "column": "air_temperature", "valid-min": None, "valid-max": None, "scale": None, "offset": None}  # noqa
+        "inputDelayedDescriptorReplicationFactor": [],
+        "header":[
+            {"eccodes_key": "edition", "value": 4},  # noqa
+            {"eccodes_key": "masterTableNumber", "value": 0},  # noqa
+            {"eccodes_key": "bufrHeaderCentre", "value": 0},  # noqa
+            {"eccodes_key": "bufrHeaderSubCentre", "value": 0},  # noqa
+            {"eccodes_key": "updateSequenceNumber", "value": 0},  # noqa
+            {"eccodes_key": "section1Flags", "value": 0},  # noqa
+            {"eccodes_key": "dataCategory", "value": 0},  # noqa
+            {"eccodes_key": "internationalDataSubCategory", "value": 6},  # noqa
+            {"eccodes_key": "masterTablesVersionNumber", "value": 36},  # noqa
+            {"eccodes_key": "numberOfSubsets", "value": 1},  # noqa
+            {"eccodes_key": "observedData", "value": 1},  # noqa
+            {"eccodes_key": "compressedData", "value": 0},  # noqa
+            {"eccodes_key": "typicalYear", "csv_column": "year"},  # noqa
+            {"eccodes_key": "typicalMonth", "csv_column": "month"},  # noqa
+            {"eccodes_key": "typicalDay", "csv_column": "day"},  # noqa
+            {"eccodes_key": "typicalHour", "csv_column": "hour"},  # noqa
+            {"eccodes_key": "typicalMinute", "csv_column": "minute"},  # noqa
+            {"eccodes_key": "unexpandedDescriptors","value": [301021, 301011, 301012, 10051, 12101]}  # noqa
+        ],
+        "data": [
+            {"eccodes_key": "#1#year", "csv_column": "year"},  # noqa
+            {"eccodes_key": "#1#month", "csv_column": "month"},  # noqa
+            {"eccodes_key": "#1#day", "csv_column": "day"},  # noqa
+            {"eccodes_key": "#1#hour", "csv_column": "hour"},  # noqa
+            {"eccodes_key": "#1#minute", "csv_column": "minute"},  # noqa
+            {"eccodes_key": "#1#latitude", "csv_column": "latitude"},  # noqa
+            {"eccodes_key": "#1#longitude", "csv_column": "longitude"},  # noqa
+            {"eccodes_key": "#1#pressureReducedToMeanSeaLevel", "csv_column": "pressure"},  # noqa
+            {"eccodes_key": "#1#airTemperature", "csv_column": "air_temperature"}  # noqa
         ]
     }
 
@@ -122,7 +123,7 @@ def json_template():
                     "sensor_height_above_mean_sea_level": None,
                     "valid_min": None,
                     "valid_max": None,
-                    "scale": None,
+                   
                     "offset": None
                 },
                 "#1#pressureReducedToMeanSeaLevel": {
@@ -138,7 +139,7 @@ def json_template():
                     "sensor_height_above_mean_sea_level": None,
                     "valid_min": None,
                     "valid_max": None,
-                    "scale": None,
+                   
                     "offset": None
                 }
             }
@@ -167,7 +168,7 @@ def json_result():
                     "sensor_height_above_mean_sea_level": None,
                     "valid_min": None,
                     "valid_max": None,
-                    "scale": None,
+                   
                     "offset": None
                 },
                 "#1#pressureReducedToMeanSeaLevel": {
@@ -178,11 +179,49 @@ def json_result():
                     "sensor_height_above_mean_sea_level": None,
                     "valid_min": None,
                     "valid_max": None,
-                    "scale": None,
+                   
                     "offset": None
                 }
             }
         }
+    }
+
+@pytest.fixture
+def data_to_encode():
+    return {
+            "edition": 4,
+            "masterTableNumber": 0,
+            "bufrHeaderCentre": 0,
+            "bufrHeaderSubCentre": 0,
+            "updateSequenceNumber": 0,
+            "section1Flags": 0,
+            "dataCategory": 0,
+            "internationalDataSubCategory": 6,
+            "masterTablesVersionNumber": 36,
+            "numberOfSubsets": 1,
+            "observedData": 1,
+            "compressedData": 0,
+            "typicalYear": 2021.0,
+            "typicalMonth": 11.0,
+            "typicalDay": 18.0,
+            "typicalHour": 18.0,
+            "typicalMinute": 0.0,
+            "unexpandedDescriptors": [
+                301021,
+                301011,
+                301012,
+                10051,
+                12101
+            ],
+            "#1#year": 2021.0,
+            "#1#month": 11.0,
+            "#1#day": 18.0,
+            "#1#hour": 18.0,
+            "#1#minute": 0.0,
+            "#1#latitude": 55.154,
+            "#1#longitude": 0.0,
+            "#1#pressureReducedToMeanSeaLevel": 100130.0,
+            "#1#airTemperature": 290.31
     }
 
 
@@ -194,7 +233,10 @@ def station_dict():
         },
         "data": {
             "station-name": "test data"
-        }
+        },
+        "wigosIds":[
+            {"wid": "0-1-2-ABCD"}
+        ]
     }
 
 
@@ -218,12 +260,13 @@ def test_validate_mapping_dict_fail():
     # not sure on this one, do we need this test and if so have many
     # different exceptions do we want to test?
     test_data = {
-        "inputDelayedDescriptorReplicationFactor": [0, 0],
-        "sequence": [
-            {"key": "abc", "value": 1, "column": None, "valid-min": None, "valid-max": None, "scale": None, "offset": 1},  # noqa
-            {"key": "def", "value": None, "column": "col1", "valid-min": 0, "valid-max": 10, "scale": None, "offset": None},  # noqa
-            {"key": "ghi", "value": None, "column": "col2", "valid-min": 250.0, "valid-max": 350.0, "scale": 0.0, "offset":  273.15},  # noqa
-            {"key": "jkl", "value": None, "column": "col3", "valid-min": 90000.0, "valid-max": 120000.0, "scale": 2.0, "offset": 0.0}  # noqa
+        "inputDelayedDescriptorReplicationFactor": [],
+        "header": [],
+        "data": [
+            {"eccodes_key": "abc", "value": 1, "offset": 1},  # noqa
+            {"eccodes_key": "def", "csv_column": "col1", "valid-min": 0, "valid-max": 10},  # noqa
+            {"eccodes_key": "ghi", "csv_column": "col2", "valid-min": 250.0, "valid-max": 350.0, "scale": 0.0, "offset":  273.15},  # noqa
+            {"eccodes_key": "jkl", "csv_column": "col3", "valid-min": 90000.0, "valid-max": 120000.0, "scale": 2.0, "offset": 0.0}  # noqa
         ]
     }
     try:
@@ -235,9 +278,10 @@ def test_validate_mapping_dict_fail():
 
 # test to make sure apply_scaling works as expected
 def test_apply_scaling():
-    test_element = {"scale": 1, "offset": 20.0}
+    scale = 1
+    offset = 20.0
     test_value = 10.0
-    assert 120.0 == apply_scaling(test_value, test_element)
+    assert 120.0 == apply_scaling(test_value, scale, offset)
 
 
 # test to check that valid_value works
@@ -271,8 +315,9 @@ def test_validate_value_nullify():
 
 
 # check that test encode works
-def test_encode(mapping_dict, data_dict):
-    msg = encode(mapping_dict, data_dict)
+def test_encode(data_to_encode):
+    delayed_replications = list()
+    msg = encode(data_to_encode, delayed_replications )
     key = hashlib.md5(msg.read()).hexdigest()
     assert key == "981938dbd97be3e5adc8e7b1c6eb642c"
 
