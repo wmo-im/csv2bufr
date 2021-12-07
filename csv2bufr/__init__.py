@@ -153,7 +153,7 @@ def validate_value(key: str, value: Union[NUMBERS],
 
     return value
 
-def encode( data_dict: dict, delayed_replications: list) -> BytesIO:
+def encode(data_dict: dict, delayed_replications: list) -> BytesIO:
     """
     This is the primary function that does the conversion to BUFR
     :param data_dict: dictionary containing key (eccodes) / value pairs
@@ -163,7 +163,7 @@ def encode( data_dict: dict, delayed_replications: list) -> BytesIO:
     """
     bufr_msg = codes_bufr_new_from_samples("BUFR4")
     # set delayed replication factor
-    if len( delayed_replications ) > 0:
+    if len(delayed_replications) > 0:
         codes_set_array(bufr_msg, "inputDelayedDescriptorReplicationFactor",
             delayed_replications)
     # now iterate over keys to add
@@ -327,7 +327,7 @@ def transform(data: str, mappings: dict, station_metadata: dict) -> dict:
 
     # now we need to parse WIGOS ID as stored as single string in metadata
     wigosID = station_metadata["wigosIds"][0]["wid"]
-    tokens = parse_wigos_id( wigosID )
+    tokens = parse_wigos_id(wigosID)
     for token in tokens:
         station_metadata["wigosIds"][0][token] = tokens[token]
 
@@ -347,12 +347,6 @@ def transform(data: str, mappings: dict, station_metadata: dict) -> dict:
         else:
             data = row
             data_dict = dict(zip(col_names, data))
-            #try:
-            #    data_dict = {**data_dict, **station_metadata['data']}
-            #except Exception as e:
-            #    message = "issue merging station and data dictionaries."
-            #    LOGGER.error(f"{message}{e}")
-            #    raise e
             # Iterate over items to map, perform unit conversions and validate
             for section in ("header", "data"):
                 for element in mappings[section]:
@@ -419,7 +413,6 @@ def transform(data: str, mappings: dict, station_metadata: dict) -> dict:
                 mappings["inputDelayedDescriptorReplicationFactor"]
             # now encode the data
             LOGGER.debug("encoding to BUFR")
-            print( json.dumps(data_to_encode, indent=4))
             msg = encode(data_to_encode, delayed_replications)
             LOGGER.debug("setting md5 hash")
             key = hashlib.md5(msg.read()).hexdigest()
