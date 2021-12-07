@@ -34,13 +34,12 @@ from csv2bufr import (validate_mapping_dict, apply_scaling, validate_value,
 LOGGER = logging.getLogger(__name__)
 LOGGER.setLevel("DEBUG")
 
-
 # test data
 @pytest.fixture
 def mapping_dict():
     return {
         "inputDelayedDescriptorReplicationFactor": [],
-        "header":[
+        "header": [
             {"eccodes_key": "edition", "value": 4},  # noqa
             {"eccodes_key": "masterTableNumber", "value": 0},  # noqa
             {"eccodes_key": "bufrHeaderCentre", "value": 0},  # noqa
@@ -123,7 +122,7 @@ def json_template():
                     "sensor_height_above_mean_sea_level": None,
                     "valid_min": None,
                     "valid_max": None,
-                   
+
                     "offset": None
                 },
                 "#1#pressureReducedToMeanSeaLevel": {
@@ -139,7 +138,7 @@ def json_template():
                     "sensor_height_above_mean_sea_level": None,
                     "valid_min": None,
                     "valid_max": None,
-                   
+
                     "offset": None
                 }
             }
@@ -168,7 +167,7 @@ def json_result():
                     "sensor_height_above_mean_sea_level": None,
                     "valid_min": None,
                     "valid_max": None,
-                   
+
                     "offset": None
                 },
                 "#1#pressureReducedToMeanSeaLevel": {
@@ -179,12 +178,13 @@ def json_result():
                     "sensor_height_above_mean_sea_level": None,
                     "valid_min": None,
                     "valid_max": None,
-                   
+
                     "offset": None
                 }
             }
         }
     }
+
 
 @pytest.fixture
 def data_to_encode():
@@ -234,7 +234,7 @@ def station_dict():
         "data": {
             "station-name": "test data"
         },
-        "wigosIds":[
+        "wigosIds": [
             {"wid": "0-1-2-ABCD"}
         ]
     }
@@ -317,7 +317,7 @@ def test_validate_value_nullify():
 # check that test encode works
 def test_encode(data_to_encode):
     delayed_replications = list()
-    msg = encode(data_to_encode, delayed_replications )
+    msg = encode(data_to_encode, delayed_replications)
     key = hashlib.md5(msg.read()).hexdigest()
     assert key == "981938dbd97be3e5adc8e7b1c6eb642c"
 
