@@ -115,6 +115,7 @@ def transform(ctx, csv_file, mapping, output_dir, station_metadata,
 
     # now identify geojson template to use
     template = None
+
     if geojson_template is not None:
         if not os.path.isfile(geojson_template):
             json_template_file = f"{MAPPINGS}{os.sep}{geojson_template}.geojson"  # noqa
