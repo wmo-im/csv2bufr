@@ -31,7 +31,7 @@ import os.path
 from typing import Union, Any
 from jsonpath_ng.ext import parser
 
-from eccodes import (codes_bufr_new_from_file, codes_bufr_new_from_samples,
+from eccodes import (codes_bufr_new_from_samples,
                      codes_set_array, codes_set, codes_get_native_type,
                      codes_write, codes_release, codes_get,
                      CODES_MISSING_LONG, CODES_MISSING_DOUBLE,
@@ -52,16 +52,16 @@ LOGGER = logging.getLogger(__name__)
 THISDIR = os.path.dirname(os.path.realpath(__file__))
 MAPPINGS = f"{THISDIR}{os.sep}resources{os.sep}mappings"
 
-BUFR_TABLE_VERSION=36
-ATTRIBUTES = ['code','units','scale','reference','width']
-HEADERS = ["edition","masterTableNumber","bufrHeaderCentre",
-             "bufrHeaderSubCentre","updateSequenceNumber","dataCategory",
-	         "internationalDataSubCategory","dataSubCategory",
-             "masterTablesVersionNumber","localTablesVersionNumber",
-             "typicalYear","typicalMonth","typicalDay","typicalHour",
-             "typicalMinute","typicalSecond","typicalDate","typicalTime",
-             "numberOfSubsets","observedData","compressedData",
-             "unexpandedDescriptors","subsetNumber"]
+BUFR_TABLE_VERSION = 36
+ATTRIBUTES = ['code', 'units', 'scale', 'reference', 'width']
+HEADERS = ["edition", "masterTableNumber", "bufrHeaderCentre",
+           "bufrHeaderSubCentre", "updateSequenceNumber", "dataCategory",
+           "internationalDataSubCategory", "dataSubCategory",
+           "masterTablesVersionNumber", "localTablesVersionNumber",
+           "typicalYear", "typicalMonth", "typicalDay", "typicalHour",
+           "typicalMinute", "typicalSecond", "typicalDate", "typicalTime",
+           "numberOfSubsets", "observedData", "compressedData",
+           "unexpandedDescriptors", "subsetNumber"]
 
 
 def parse_wigos_id(wigos_id: str) -> dict:
@@ -144,7 +144,7 @@ def validate_value(key: str, value: Union[NUMBERS],
     :param valid_min: Valid minimum value
     :param valid_max: Valid maximum value
     :param nullify_on_fail: Action to take on fail, either set to None
-                            (nullify_on_fail=True) or through an error (default)
+                           (nullify_on_fail=True) or through an error (default)
 
     :returns: validated value
     """
@@ -172,8 +172,8 @@ def validate_value(key: str, value: Union[NUMBERS],
 
 
 class BUFRMessage:
-    def __init__(self, descriptors: list, delayed_replications: list=list(),
-                 table_version:int=BUFR_TABLE_VERSION) -> None:
+    def __init__(self, descriptors: list, delayed_replications: list = list(),
+                 table_version: int = BUFR_TABLE_VERSION) -> None:
         """
         Constructor
 
@@ -182,7 +182,7 @@ class BUFRMessage:
         :param delayed_replications: delayed replicators to use in the sequence
                                      if not set ECCODES sets the delayed
                                      replicators to 1. Omit if unsure of value
-        :param table_version: which version of Master Table 0 to use, default 36
+        :param table_version: version of Master Table 0 to use, default 36
         """
         # ===============================
         # first create empty bufr message
@@ -192,7 +192,8 @@ class BUFRMessage:
         # set delayed replication factors
         # ===============================
         if len(delayed_replications) > 0:
-            codes_set_array(bufr_msg, "inputDelayedDescriptorReplicationFactor",
+            codes_set_array(bufr_msg,
+                            "inputDelayedDescriptorReplicationFactor",
                             delayed_replications)
         # ===============================
         # set master table version number
@@ -203,7 +204,7 @@ class BUFRMessage:
         # ================================================
         # now iterator over and add to internal dictionary
         # ================================================
-        self.dict = dict() # need a more descriptive / imaginative name :-)
+        self.dict = dict()  # need a more descriptive / imaginative name :-)
         iterator = codes_bufr_keys_iterator_new(bufr_msg)
         while codes_bufr_keys_iterator_next(iterator):
             key = codes_bufr_keys_iterator_get_name(iterator)
@@ -218,7 +219,7 @@ class BUFRMessage:
                 for attr in ATTRIBUTES:
                     try:
                         self.dict[key][attr] = \
-                            codes_get(bufr_msg,f"{key}->{attr}")
+                            codes_get(bufr_msg, f"{key}->{attr}")
                     except Exception as e:
                         raise(e)
         # ============================================
@@ -228,10 +229,9 @@ class BUFRMessage:
         # ============================================
         # finally add last few items to class
         # ============================================
-        self.delayed_replications = delayed_replications # used when encoding
-        self.bufr = None # placeholder for BUFR bytes
+        self.delayed_replications = delayed_replications  # used when encoding
+        self.bufr = None  # placeholder for BUFR bytes
         # ============================================
-
 
     def set_element(self, key: str, value: object) -> None:
         """
@@ -264,8 +264,7 @@ class BUFRMessage:
                 value = value
         self.dict[key]["value"] = value
 
-
-    def get_element(self, key:str) -> Any:
+    def get_element(self, key: str) -> Any:
         """
         Function to retrieve value from BUFR message
 
@@ -280,7 +279,6 @@ class BUFRMessage:
         else:
             result = self.dict[key]["value"]
         return result
-
 
     def as_bufr(self, use_cached=True) -> bytes:
         """
@@ -299,7 +297,8 @@ class BUFRMessage:
         # set delayed replications, this is needed again as we only used it the
         # first time to set the keys
         if len(self.delayed_replications) > 0:
-            codes_set_array(bufr_msg, "inputDelayedDescriptorReplicationFactor",
+            codes_set_array(bufr_msg,
+                            "inputDelayedDescriptorReplicationFactor",
                             self.delayed_replications)
         # ============================
         # iterate over keys and encode
@@ -330,7 +329,7 @@ class BUFRMessage:
         try:
             codes_set(bufr_msg, "pack", True)
         except Exception as e:
-            LOGGER.error(f"error calling codes_set({bufr_msg}, 'pack', True): {e}")
+            LOGGER.error(f"error calling codes_set({bufr_msg}, 'pack', True): {e}") # noqa
             raise e
         # =======================================================
         # now write to in memory file and return bytes to caller
@@ -348,7 +347,6 @@ class BUFRMessage:
         # =============================================
         self.bufr = fh.read()
         return self.bufr
-
 
     def md5(self) -> str:
         """
@@ -370,7 +368,7 @@ class BUFRMessage:
 
         result = self._extract(template)
         result["id"] = identifier
-        result["properties"]["resultTime"] = datetime.now(timezone.utc).isoformat(timespec="seconds") #noqa
+        result["properties"]["resultTime"] = datetime.now(timezone.utc).isoformat(timespec="seconds") # noqa
         return json.dumps(result, indent=2)
 
     def _extract(self, object_: Union[dict, list]) -> Union[dict, list]:
@@ -393,7 +391,7 @@ class BUFRMessage:
                 else:
                     result = None
             elif "eccodes_key" in object_:
-                result = self.get_element( object_["eccodes_key"] )
+                result = self.get_element(object_["eccodes_key"])
                 if result in (CODES_MISSING_LONG, CODES_MISSING_DOUBLE):
                     result = None
             else:
@@ -428,7 +426,7 @@ class BUFRMessage:
         # =====================
         e = validate_mapping_dict(mappings)
         if e is not SUCCESS:
-            raise ValueError(f"Invalid mappings for {target_format}")
+            raise ValueError("Invalid mappings")
         # ==================================================
         # TODO validate metadata here
         # ==================================================
@@ -454,7 +452,7 @@ class BUFRMessage:
                 data = row
                 # make dictionary from header row and data row
                 data_dict = dict(zip(col_names, data))
-                # Iterate over items to map, perform unit conversions and validate
+                # Iterate over items to map, perform unit conversions and validate # noqa
                 for section in ("header", "data"):
                     for element in mappings[section]:
                         eccodes_key = element["eccodes_key"]
@@ -520,22 +518,23 @@ class BUFRMessage:
                         LOGGER.debug(f"value {value} updated for element {element['eccodes_key']}")  # noqa
             rows_read += 1
 
-
     def get_datetime(self) -> str:
         """
         Function to extract characteristic date and time from the BUFR message
-        :return: String (ISO8601) representation of the characteristic date/time
+        :return: String (ISO8601) representation of the characteristic
+                date/time
         """
 
         "{:04d}-{:02d}-{:02d}T{:02d}:{:02d}:00+00:00".format(
-                                                             self.get_element("typicalYear"), #noqa
-                                                             self.get_element("typicalMonth"), #noqa
-                                                             self.get_element("typicalDay"), #noqa
-                                                             self.get_element("typicalHour"), #noqa
-                                                             self.get_element("typicalMinute")) #noqa
+                                                             self.get_element("typicalYear"), # noqa
+                                                             self.get_element("typicalMonth"), # noqa
+                                                             self.get_element("typicalDay"), # noqa
+                                                             self.get_element("typicalHour"), # noqa
+                                                             self.get_element("typicalMinute")) # noqa
 
 
-def transform(data: str, metadata: dict, mappings: dict, template: dict = None) -> dict: #noqa
+def transform(data: str, metadata: dict, mappings: dict,
+              template: dict = None) -> dict:
     """
     Function to drive conversion to BUFR and if specified to geojson
 
@@ -555,7 +554,7 @@ def transform(data: str, metadata: dict, mappings: dict, template: dict = None) 
     unexpanded_descriptors = mappings["unexpandedDescriptors"]
     delayed_replications = mappings["inputDelayedDescriptorReplicationFactor"]
     # initialise new BUFR message
-    message = BUFRMessage( unexpanded_descriptors, delayed_replications)
+    message = BUFRMessage(unexpanded_descriptors, delayed_replications)
     # parse the data into an internal dict
     message.parse(data, metadata, mappings)
     # now create a dict to store the return value
@@ -566,8 +565,8 @@ def transform(data: str, metadata: dict, mappings: dict, template: dict = None) 
     result[message.md5()]["bufr4"] = message.as_bufr()
     if template is not None:
         # if template specified get geojson as well
-        result[message.md5()]["geojson"] = message.as_geojson(message.md5(),
-                                                          template)
+        result[message.md5()]["geojson"] = \
+            message.as_geojson(message.md5(), template) # noqa
     # now add metadata elements
     result[message.md5()]["_meta"] = dict()
     result[message.md5()]["_meta"]["data_date"] = message.get_datetime()
