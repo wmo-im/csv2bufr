@@ -108,21 +108,29 @@ def transform(ctx, csv_file, mapping, output_dir, station_metadata,
                 f"Invalid stored mapping ({mappings_file})")
     else:
         mappings_file = mapping
+
+    # load mappings
+    with open(mappings_file) as fh:
+        mappings = json.load(fh)
+
     # now identify geojson template to use
+    template = None
     if geojson_template is not None:
         if not os.path.isfile(geojson_template):
             json_template_file = f"{MAPPINGS}{os.sep}{geojson_template}.geojson"  # noqa
         else:
             json_template_file = geojson_template
+        with open(json_template_file) as fh:
+            template = json.load(fh)
 
-    with open(mappings_file) as fh2, open(station_metadata) as fh3, open(json_template_file) as fh4:  # noqa
-        try:
-            result = transform_csv(csv_file.read(),
-                                   metadata=json.load(fh3),
-                                   mappings=json.load(fh2),
-                                   template=json.load(fh4))
-        except Exception as err:
-            raise click.ClickException(err)
+    metadata = None
+    with open(station_metadata) as fh:
+        metadata = json.load(fh)
+
+    try:
+        result = transform_csv(csv_file.read(), metadata, mappings, template)
+    except Exception as err:
+        raise click.ClickException(err)
 
     click.echo("Writing data to file")
     for key, value in result.items():
