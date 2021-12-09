@@ -20,7 +20,6 @@
 ###############################################################################
 
 import csv
-import hashlib
 from io import StringIO
 import logging
 import json
@@ -29,7 +28,7 @@ from eccodes import (codes_bufr_new_from_samples, codes_release)
 import pytest
 
 from csv2bufr import (validate_mapping_dict, apply_scaling, validate_value,
-                      BUFRMessage, transform, SUCCESS)
+                      transform, SUCCESS)
 
 LOGGER = logging.getLogger(__name__)
 LOGGER.setLevel("DEBUG")
@@ -40,7 +39,7 @@ LOGGER.setLevel("DEBUG")
 def mapping_dict():
     return {
         "inputDelayedDescriptorReplicationFactor": [],
-        "unexpandedDescriptors":[301021, 301011, 301012, 10051, 12101],
+        "unexpandedDescriptors": [301021, 301011, 301012, 10051, 12101],
         "header": [
             {"eccodes_key": "edition", "value": 4},  # noqa
             {"eccodes_key": "masterTableNumber", "value": 0},  # noqa
