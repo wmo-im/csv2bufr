@@ -27,9 +27,8 @@ from datetime import timezone, datetime
 import hashlib
 from io import StringIO, BytesIO
 import logging
-import tempfile
 import os.path
-from typing import Union
+from typing import Union, Any
 from jsonpath_ng.ext import parser
 
 from eccodes import (codes_bufr_new_from_file, codes_bufr_new_from_samples,
@@ -53,9 +52,9 @@ LOGGER = logging.getLogger(__name__)
 THISDIR = os.path.dirname(os.path.realpath(__file__))
 MAPPINGS = f"{THISDIR}{os.sep}resources{os.sep}mappings"
 
-_LATEST_=36
-_ATTRIBUTES_ = ['code','units','scale','reference','width']
-_HEADERS_ = ["edition","masterTableNumber","bufrHeaderCentre",
+BUFR_TABLE_VERSION=36
+ATTRIBUTES = ['code','units','scale','reference','width']
+HEADERS = ["edition","masterTableNumber","bufrHeaderCentre",
              "bufrHeaderSubCentre","updateSequenceNumber","dataCategory",
 	         "internationalDataSubCategory","dataSubCategory",
              "masterTablesVersionNumber","localTablesVersionNumber",
@@ -89,7 +88,8 @@ def validate_mapping_dict(mapping_dict: dict) -> bool:
     """
     Validate mapping dictionary
 
-    :param mapping_dict: TODO: describe
+    :param mapping_dict: dictionary containing mappings to specified BUFR
+                        sequence using ECCODES key.
 
     :returns: `bool` of validation result
     """
@@ -139,14 +139,17 @@ def validate_value(key: str, value: Union[NUMBERS],
     """
     Check numeric values lie within specified range (if specified)
 
-    :param key: TODO describe
-    :param value: TODO describe
-    :param valid_min: TODO describe
-    :param valid_max: TODO describe
-    :param nullify_on_fail: TODO describe
+    :param key: ECCODES key used when giving feedback / logging
+    :param value: The value to validate
+    :param valid_min: Valid minimum value
+    :param valid_max: Valid maximum value
+    :param nullify_on_fail: Action to take on fail, either set to None
+                            (nullify_on_fail=True) or through an error (default)
 
     :returns: validated value
     """
+
+    # TODO move this function to the class as part of set value
 
     if value is None:
         return value
@@ -168,42 +171,80 @@ def validate_value(key: str, value: Union[NUMBERS],
     return value
 
 
-class bufr_message:
-    def __init__(self, descriptors: list, delayed_replications: list = list(),
-                 table_version:int =_LATEST_):
+class BUFRMessage:
+    def __init__(self, descriptors: list, delayed_replications: list=list(),
+                 table_version:int=BUFR_TABLE_VERSION) -> None:
+        """
+        Constructor
+
+        :param descriptors: list of BUFR descriptors to use in this instance
+                            e.g. descriptors=[301150, 307014]
+        :param delayed_replications: delayed replicators to use in the sequence
+                                     if not set ECCODES sets the delayed
+                                     replicators to 1. Omit if unsure of value
+        :param table_version: which version of Master Table 0 to use, default 36
+        """
+        # ===============================
         # first create empty bufr message
+        # ===============================
         bufr_msg = codes_bufr_new_from_samples("BUFR4")
+        # ===============================
         # set delayed replication factors
+        # ===============================
         if len(delayed_replications) > 0:
             codes_set_array(bufr_msg, "inputDelayedDescriptorReplicationFactor",
                             delayed_replications)
+        # ===============================
         # set master table version number
+        # ===============================
         codes_set(bufr_msg, "masterTablesVersionNumber", table_version)
         # now set unexpanded descriptors
         codes_set_array(bufr_msg, "unexpandedDescriptors", descriptors)
-        self.dict = dict()
-        # now iterator over and add to dictionary
+        # ================================================
+        # now iterator over and add to internal dictionary
+        # ================================================
+        self.dict = dict() # need a more descriptive / imaginative name :-)
         iterator = codes_bufr_keys_iterator_new(bufr_msg)
         while codes_bufr_keys_iterator_next(iterator):
             key = codes_bufr_keys_iterator_get_name(iterator)
+            # place holder for data
             self.dict[key] = dict()
             self.dict[key]["value"] = None
+            # add native type, used when encoding later
             native_type = codes_get_native_type(bufr_msg, key)
             self.dict[key]["type"] = native_type.__name__
-            if key not in _HEADERS_:
-                for attr in _ATTRIBUTES_:
+            # now add attributes (excl. BUFR header elements)
+            if key not in HEADERS:
+                for attr in ATTRIBUTES:
                     try:
                         self.dict[key][attr] = \
                             codes_get(bufr_msg,f"{key}->{attr}")
                     except Exception as e:
                         raise(e)
-
+        # ============================================
+        # now release the BUFR message back to eccodes
+        # ============================================
         codes_release(bufr_msg)
-        self.delayed_replications = delayed_replications
-        self.bufr = None
+        # ============================================
+        # finally add last few items to class
+        # ============================================
+        self.delayed_replications = delayed_replications # used when encoding
+        self.bufr = None # placeholder for BUFR bytes
+        # ============================================
 
 
-    def set_element(self, key, value):
+    def set_element(self, key: str, value: object) -> None:
+        """
+        Function to set element in BUFR message
+
+        :param key: the key of the element to set (using ECCODES keys)
+        :param value: the value of the element
+
+        :return:
+        """
+
+        # TODO move value validation here
+
         if value is not None and not isinstance(value, list):
             expected_type = self.dict[key]["type"]
             if expected_type == "int" and not isinstance(value, int):
@@ -224,7 +265,14 @@ class bufr_message:
         self.dict[key]["value"] = value
 
 
-    def get_element(self, key:str):
+    def get_element(self, key:str) -> Any:
+        """
+        Function to retrieve value from BUFR message
+
+        :param key: the key of the element to set (using ECCODES keys)
+        :return: value of the element
+        """
+
         # check if we want value or an attribute (indicated by ->)
         if "->" in key:
             tokens = key.split("->")
@@ -234,8 +282,15 @@ class bufr_message:
         return result
 
 
-    def as_bufr(self, force=False) -> bytes:
-        if (self.bufr is not None) and (force == False):
+    def as_bufr(self, use_cached=True) -> bytes:
+        """
+        Function to get BUFR message encoded into bytes. Once called the bytes
+        are cached and the cached value returned unless specified otherwise.
+
+        :param use_cached: Boolean indicating whether to use cached value
+        :return: bytes containing BUFR data
+        """
+        if use_cached and (self.bufr is not None):
             return self.bufr
         # ===========================
         # initialise new BUFR message
@@ -295,16 +350,39 @@ class bufr_message:
         return self.bufr
 
 
-    def md5(self):
+    def md5(self) -> str:
+        """
+        Calculates and returns md5 of BUFR message
+
+        :return: md5 of BUFR message
+        """
         return hashlib.md5(self.as_bufr()).hexdigest()
 
     def as_geojson(self, identifier: str, template: dict) -> str:
+        """
+        Returns contents of BUFR message as a geoJSON string according to the
+        specified template.
+
+        :param identifier: unique ID used to identify the message
+        :param template: dictionary containing mapping from BUFR to geoJSON
+        :return: string containing geoJSON data (from json.dumps)
+        """
+
         result = self._extract(template)
         result["id"] = identifier
         result["properties"]["resultTime"] = datetime.now(timezone.utc).isoformat(timespec="seconds") #noqa
         return json.dumps(result, indent=2)
 
     def _extract(self, object_: Union[dict, list]) -> Union[dict, list]:
+        """
+        Internal function used to iterate over geoJSON template and to extract
+        data from the BUFR message into the goeJSON structure / dictionary.
+        Used by as_geojson
+
+        :param object_: the element in the geoJSON message to extract
+        :return: the element with the value set from the BUFR message
+        """
+
         if isinstance(object_, dict):
             # check if format or eccodes in object
             if "format" in object_:
@@ -330,7 +408,21 @@ class bufr_message:
             result = object_
         return result
 
-    def parse(self, data: str, metadata: dict, mappings: dict):
+    def parse(self, data: str, metadata: dict, mappings: dict) -> None:
+        """
+        Function to parse observation data and station metadata, mapping to the
+        specified BUFR sequence.
+
+        :param data: string containing csv separated data. First line should
+                    contain the column headers, second line the data
+        :param metadata: dictionary containing the metadata for the station
+                        from OSCAR surface
+        :param mappings: dictionary containing list of BUFR elements to
+                        encode (specified using ECCODES key) and whether
+                        to get the value from (fixed, csv or metadata)
+        :return:
+        """
+
         # =====================
         # validate mapping dict
         # =====================
@@ -429,7 +521,12 @@ class bufr_message:
             rows_read += 1
 
 
-    def datetime(self):
+    def get_datetime(self) -> str:
+        """
+        Function to extract characteristic date and time from the BUFR message
+        :return: String (ISO8601) representation of the characteristic date/time
+        """
+
         "{:04d}-{:02d}-{:02d}T{:02d}:{:02d}:00+00:00".format(
                                                              self.get_element("typicalYear"), #noqa
                                                              self.get_element("typicalMonth"), #noqa
@@ -438,15 +535,27 @@ class bufr_message:
                                                              self.get_element("typicalMinute")) #noqa
 
 
-def transform(data: str, metadata: dict, mappings: dict, template: dict = None)\
-        -> dict:
+def transform(data: str, metadata: dict, mappings: dict, template: dict = None) -> dict: #noqa
+    """
+    Function to drive conversion to BUFR and if specified to geojson
+
+    :param data: string containing csv separated data. First line should
+                contain the column headers, second line the data
+    :param metadata: dictionary containing the metadata for the station
+                    from OSCAR surface
+    :param mappings: dictionary containing list of BUFR elements to
+                    encode (specified using ECCODES key) and whether
+                    to get the value from (fixed, csv or metadata)
+    :param template: dictionary containing mapping from BUFR to geoJSON
+    :return:
+    """
 
     # we've not validated at this stage, do we want to make that the first
     # thing we do?
     unexpanded_descriptors = mappings["unexpandedDescriptors"]
     delayed_replications = mappings["inputDelayedDescriptorReplicationFactor"]
     # initialise new BUFR message
-    message = bufr_message( unexpanded_descriptors, delayed_replications)
+    message = BUFRMessage( unexpanded_descriptors, delayed_replications)
     # parse the data into an internal dict
     message.parse(data, metadata, mappings)
     # now create a dict to store the return value
@@ -461,7 +570,7 @@ def transform(data: str, metadata: dict, mappings: dict, template: dict = None)\
                                                           template)
     # now add metadata elements
     result[message.md5()]["_meta"] = dict()
-    result[message.md5()]["_meta"]["data_date"] = message.datetime()
+    result[message.md5()]["_meta"]["data_date"] = message.get_datetime()
     result[message.md5()]["_meta"]["originating_centre"] =\
         message.get_element("bufrHeaderCentre")
     result[message.md5()]["_meta"]["data_category"] = \

@@ -28,8 +28,6 @@ import click
 
 from csv2bufr import __version__
 from csv2bufr import transform as transform_csv
-#from csv2bufr import bufr2geojson
-
 
 THISDIR = os.path.dirname(os.path.realpath(__file__))
 MAPPINGS = f"{THISDIR}{os.sep}resources{os.sep}mappings"

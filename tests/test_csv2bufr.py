@@ -29,7 +29,7 @@ from eccodes import (codes_bufr_new_from_samples, codes_release)
 import pytest
 
 from csv2bufr import (validate_mapping_dict, apply_scaling, validate_value,
-                      encode, transform, SUCCESS, bufr2geojson)
+                      BUFRMessage, transform, SUCCESS)
 
 LOGGER = logging.getLogger(__name__)
 LOGGER.setLevel("DEBUG")
@@ -40,13 +40,13 @@ LOGGER.setLevel("DEBUG")
 def mapping_dict():
     return {
         "inputDelayedDescriptorReplicationFactor": [],
+        "unexpandedDescriptors":[301021, 301011, 301012, 10051, 12101],
         "header": [
             {"eccodes_key": "edition", "value": 4},  # noqa
             {"eccodes_key": "masterTableNumber", "value": 0},  # noqa
             {"eccodes_key": "bufrHeaderCentre", "value": 0},  # noqa
             {"eccodes_key": "bufrHeaderSubCentre", "value": 0},  # noqa
             {"eccodes_key": "updateSequenceNumber", "value": 0},  # noqa
-            {"eccodes_key": "section1Flags", "value": 0},  # noqa
             {"eccodes_key": "dataCategory", "value": 0},  # noqa
             {"eccodes_key": "internationalDataSubCategory", "value": 6},  # noqa
             {"eccodes_key": "masterTablesVersionNumber", "value": 36},  # noqa
@@ -150,7 +150,7 @@ def json_template():
 @pytest.fixture
 def json_result():
     return {
-        "id": None,
+        "id": "981938dbd97be3e5adc8e7b1c6eb642c",
         "type": "Feature",
         "geometry": {
             "type": "Point",
@@ -315,32 +315,22 @@ def test_validate_value_nullify():
     assert value is None
 
 
-# check that test encode works
-def test_encode(data_to_encode):
-    delayed_replications = list()
-    msg = encode(data_to_encode, delayed_replications)
-    key = hashlib.md5(msg.read()).hexdigest()
-    assert key == "981938dbd97be3e5adc8e7b1c6eb642c"
-
-
 # check that test transform works
-def test_transform(data_dict, mapping_dict, station_dict):
-
+def test_transform(data_dict, station_dict, mapping_dict):
+    # create CSV
     output = StringIO()
-
     writer = csv.DictWriter(output, quoting=csv.QUOTE_NONNUMERIC,
                             fieldnames=data_dict.keys())
     writer.writeheader()
     writer.writerow(data_dict)
     data = output.getvalue()
-
-    result = transform(data, mapping_dict, station_dict)
+    result = transform(data, station_dict, mapping_dict)
     assert isinstance(result, dict)
     assert list(result.keys())[0] == '981938dbd97be3e5adc8e7b1c6eb642c'
     assert len(list(result.keys())) == 1
 
 
-def test_json(data_dict, mapping_dict, station_dict, json_template,
+def test_json(data_dict, station_dict, mapping_dict, json_template,
               json_result):
     # create CSV
     output = StringIO()
@@ -350,17 +340,11 @@ def test_json(data_dict, mapping_dict, station_dict, json_template,
     writer.writerow(data_dict)
     data = output.getvalue()
     # transform CSV to BUFR
-    result = transform(data, mapping_dict, station_dict)
-
-    for key, value in result.items():
-        # transform BUFR to GeoJSON
-        json_dict = bufr2geojson(key, value, json_template)
-
-        # copy id and resulttime to expected result, these are generated at the
-        # time of testing.
-        json_result['id'] = json_dict['id']
-        json_result['properties']['resultTime'] = \
-            json_dict['properties']['resultTime']
-
+    result = transform(data, station_dict, mapping_dict, json_template)
+    for item in result:
+        geojson = json.loads(result[item]["geojson"])
+        # we need to copy result time to our expected json result
+        json_result["properties"]["resultTime"] = \
+            geojson["properties"]["resultTime"]
         # now compare
-        assert json.dumps(json_result) == json.dumps(json_dict)
+        assert json.dumps(geojson) == json.dumps(json_result)
