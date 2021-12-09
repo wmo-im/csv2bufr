@@ -28,7 +28,6 @@ import click
 
 from csv2bufr import __version__
 from csv2bufr import transform as transform_csv
-from csv2bufr import bufr2geojson
 
 THISDIR = os.path.dirname(os.path.realpath(__file__))
 MAPPINGS = f"{THISDIR}{os.sep}resources{os.sep}mappings"
@@ -101,6 +100,7 @@ def transform(ctx, csv_file, mapping, output_dir, station_metadata,
     result = None
     click.echo(f"Transforming {csv_file.name} to BUFR")
 
+    # identify mapping to use
     if not os.path.isfile(mapping):
         mappings_file = f"{MAPPINGS}{os.sep}{mapping}.json"
         if not os.path.isfile(mappings_file):
@@ -108,24 +108,19 @@ def transform(ctx, csv_file, mapping, output_dir, station_metadata,
                 f"Invalid stored mapping ({mappings_file})")
     else:
         mappings_file = mapping
-
-    with open(mappings_file) as fh2, open(station_metadata) as fh3:  # noqa
-        try:
-            result = transform_csv(csv_file.read(),
-                                   mappings=json.load(fh2),
-                                   station_metadata=json.load(fh3))
-        except Exception as err:
-            raise click.ClickException(err)
-
-    # load GeoJSON json_template
+    # now identify geojson template to use
     if geojson_template is not None:
         if not os.path.isfile(geojson_template):
             json_template_file = f"{MAPPINGS}{os.sep}{geojson_template}.geojson"  # noqa
         else:
             json_template_file = geojson_template
+
+    with open(mappings_file) as fh2, open(station_metadata) as fh3, open(json_template_file) as fh4:  # noqa
         try:
-            with open(json_template_file) as fh:
-                geojson_template = json.load(fh)
+            result = transform_csv(csv_file.read(),
+                                   metadata=json.load(fh3),
+                                   mappings=json.load(fh2),
+                                   template=json.load(fh4))
         except Exception as err:
             raise click.ClickException(err)
 
@@ -133,16 +128,12 @@ def transform(ctx, csv_file, mapping, output_dir, station_metadata,
     for key, value in result.items():
         bufr_filename = f"{output_dir}{os.sep}{key}.bufr4"
         with open(bufr_filename, "wb") as fh:
-            fh.write(value.read())
-        value.seek(0)
-
-        # convert to GeoJSON if template specified
-        if geojson_template is not None:
+            fh.write(value["bufr4"])
+        if "geojson" in value:
             click.echo("Writing GeoJSON data to file")
-            json_filename = f"{output_dir}{os.sep}{key}.json"
-            json_dict = bufr2geojson(key, value, geojson_template)
+            json_filename = f"{output_dir}{os.sep}{key}.geojson"
             with open(json_filename, "w") as fh:
-                fh.write(json.dumps(json_dict, indent=4))
+                fh.write(value["geojson"])
 
     click.echo("Done")
 
