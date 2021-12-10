@@ -183,6 +183,7 @@ class BUFRMessage:
                                      if not set ECCODES sets the delayed
                                      replicators to 1. Omit if unsure of value
         :param table_version: version of Master Table 0 to use, default 36
+
         """
         # ===============================
         # first create empty bufr message
@@ -240,7 +241,7 @@ class BUFRMessage:
         :param key: the key of the element to set (using ECCODES keys)
         :param value: the value of the element
 
-        :return:
+        :returns: `None`
         """
 
         # TODO move value validation here
@@ -269,7 +270,8 @@ class BUFRMessage:
         Function to retrieve value from BUFR message
 
         :param key: the key of the element to set (using ECCODES keys)
-        :return: value of the element
+
+        :returns: value of the element
         """
 
         # check if we want value or an attribute (indicated by ->)
@@ -280,14 +282,16 @@ class BUFRMessage:
             result = self.dict[key]["value"]
         return result
 
-    def as_bufr(self, use_cached=True) -> bytes:
+    def as_bufr(self, use_cached: bool = True) -> bytes:
         """
         Function to get BUFR message encoded into bytes. Once called the bytes
         are cached and the cached value returned unless specified otherwise.
 
         :param use_cached: Boolean indicating whether to use cached value
-        :return: bytes containing BUFR data
+
+        :returns: bytes containing BUFR data
         """
+
         if use_cached and (self.bufr is not None):
             return self.bufr
         # ===========================
@@ -352,8 +356,9 @@ class BUFRMessage:
         """
         Calculates and returns md5 of BUFR message
 
-        :return: md5 of BUFR message
+        :returns: md5 of BUFR message
         """
+
         return hashlib.md5(self.as_bufr()).hexdigest()
 
     def as_geojson(self, identifier: str, template: dict) -> str:
@@ -363,13 +368,13 @@ class BUFRMessage:
 
         :param identifier: unique ID used to identify the message
         :param template: dictionary containing mapping from BUFR to geoJSON
-        :return: string containing geoJSON data (from json.dumps)
+        :returns: string containing geoJSON data (from json.dumps)
         """
 
         result = self._extract(template)
         result["id"] = identifier
         result["properties"]["resultTime"] = datetime.now(timezone.utc).isoformat(timespec="seconds") # noqa
-        return json.dumps(result, indent=2)
+        return json.dumps(result, indent=4)
 
     def _extract(self, object_: Union[dict, list]) -> Union[dict, list]:
         """
@@ -378,7 +383,8 @@ class BUFRMessage:
         Used by as_geojson
 
         :param object_: the element in the geoJSON message to extract
-        :return: the element with the value set from the BUFR message
+
+        :returns: the element with the value set from the BUFR message
         """
 
         if isinstance(object_, dict):
@@ -404,6 +410,7 @@ class BUFRMessage:
             result = object_
         else:
             result = object_
+
         return result
 
     def parse(self, data: str, metadata: dict, mappings: dict) -> None:
@@ -418,7 +425,7 @@ class BUFRMessage:
         :param mappings: dictionary containing list of BUFR elements to
                         encode (specified using ECCODES key) and whether
                         to get the value from (fixed, csv or metadata)
-        :return:
+        :returns: `None`
         """
 
         # =====================
@@ -518,19 +525,24 @@ class BUFRMessage:
                         LOGGER.debug(f"value {value} updated for element {element['eccodes_key']}")  # noqa
             rows_read += 1
 
+            num_messages = rows_read - 1
+            LOGGER.info(f"{num_messages} row{'s'[:num_messages^1]} read")
+
     def get_datetime(self) -> str:
         """
         Function to extract characteristic date and time from the BUFR message
-        :return: String (ISO8601) representation of the characteristic
+
+        :returns: `str`of ISO8601 representation of the characteristic
                 date/time
         """
 
-        "{:04d}-{:02d}-{:02d}T{:02d}:{:02d}:00+00:00".format(
-                                                             self.get_element("typicalYear"), # noqa
-                                                             self.get_element("typicalMonth"), # noqa
-                                                             self.get_element("typicalDay"), # noqa
-                                                             self.get_element("typicalHour"), # noqa
-                                                             self.get_element("typicalMinute")) # noqa
+        return "{:04d}-{:02d}-{:02d}T{:02d}:{:02d}:00+00:00".format(
+                self.get_element("typicalYear"),
+                self.get_element("typicalMonth"),
+                self.get_element("typicalDay"),
+                self.get_element("typicalHour"),
+                self.get_element("typicalMinute")
+        )
 
 
 def transform(data: str, metadata: dict, mappings: dict,
@@ -546,33 +558,40 @@ def transform(data: str, metadata: dict, mappings: dict,
                     encode (specified using ECCODES key) and whether
                     to get the value from (fixed, csv or metadata)
     :param template: dictionary containing mapping from BUFR to geoJSON
-    :return:
+
+    :returns: `dict` of output messages
     """
 
     # we've not validated at this stage, do we want to make that the first
     # thing we do?
     unexpanded_descriptors = mappings["unexpandedDescriptors"]
     delayed_replications = mappings["inputDelayedDescriptorReplicationFactor"]
-    # initialise new BUFR message
+
+    LOGGER.debug("Initializing new BUFR message")
     message = BUFRMessage(unexpanded_descriptors, delayed_replications)
-    # parse the data into an internal dict
+
+    LOGGER.debug("Parsing data")
     message.parse(data, metadata, mappings)
     # now create a dict to store the return value
     result = dict()
     # now md5 as the key for this obs.
-    result[message.md5()] = dict()
+    rmk = message.md5()
+
+    result[rmk] = {
+        "bufr4": message.as_bufr()
+    }
+
     # encode to bufr
-    result[message.md5()]["bufr4"] = message.as_bufr()
     if template is not None:
+        LOGGER.debug("Adding GeoJSON representation")
         # if template specified get geojson as well
-        result[message.md5()]["geojson"] = \
-            message.as_geojson(message.md5(), template) # noqa
-    # now add metadata elements
-    result[message.md5()]["_meta"] = dict()
-    result[message.md5()]["_meta"]["data_date"] = message.get_datetime()
-    result[message.md5()]["_meta"]["originating_centre"] =\
-        message.get_element("bufrHeaderCentre")
-    result[message.md5()]["_meta"]["data_category"] = \
-        message.get_element("dataCategory")
+        result[rmk]["geojson"] = message.as_geojson(rmk, template)
+
+    LOGGER.debug("Adding metadata elements")
+    result[rmk]["_meta"] = {
+        "data_date": message.get_datetime(),
+        "originating_centre": message.get_element("bufrHeaderCentre"),
+        "data_category": message.get_element("dataCategory")
+    }
 
     return result
