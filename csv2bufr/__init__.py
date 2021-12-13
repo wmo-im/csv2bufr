@@ -413,13 +413,13 @@ class BUFRMessage:
 
         return result
 
-    def parse(self, data: str, metadata: dict, mappings: dict) -> None:
+    def parse(self, data: dict, metadata: dict, mappings: dict) -> None:
         """
         Function to parse observation data and station metadata, mapping to the
         specified BUFR sequence.
 
-        :param data: string containing csv separated data. First line should
-                    contain the column headers, second line the data
+        :param data: dictionary of key value pairs containing the
+                    data to be encoded.
         :param metadata: dictionary containing the metadata for the station
                         from OSCAR surface
         :param mappings: dictionary containing list of BUFR elements to
@@ -428,105 +428,80 @@ class BUFRMessage:
         :returns: `None`
         """
 
-        # =====================
-        # validate mapping dict
-        # =====================
-        e = validate_mapping_dict(mappings)
-        if e is not SUCCESS:
-            raise ValueError("Invalid mappings")
         # ==================================================
-        # TODO validate metadata here
-        # ==================================================
-        # now extract wigos ID from metadata
+        # extract wigos ID from metadata
+        # Is this the right place for this?
         # ==================================================
         wigosID = metadata["wigosIds"][0]["wid"]
         tokens = parse_wigos_id(wigosID)
         for token in tokens:
             metadata["wigosIds"][0][token] = tokens[token]
         # ==================================================
-        # now read data and parse data.
+        # now parse the data.
         # ==================================================
-        # first convert data to StringIO object
-        fh = StringIO(data)
-        # now read csv data and iterate over rows
-        reader = csv.reader(fh, delimiter=',', quoting=csv.QUOTE_NONNUMERIC)
-        rows_read = 0
-        for row in reader:
-            assert rows_read < 2
-            if rows_read == 0:
-                col_names = row
-            else:
-                data = row
-                # make dictionary from header row and data row
-                data_dict = dict(zip(col_names, data))
-                # Iterate over items to map, perform unit conversions and validate # noqa
-                for section in ("header", "data"):
-                    for element in mappings[section]:
-                        eccodes_key = element["eccodes_key"]
-                        # first identify source of data
-                        value = None
-                        column = None
-                        jsonpath = None
-                        if "value" in element:
-                            value = element["value"]
-                        if "csv_column" in element:
-                            column = element["csv_column"]
-                        if "jsonpath" in element:
-                            jsonpath = element["jsonpath"]
-                        # now get value from indicated source
-                        if value is not None:
-                            value = element["value"]
-                        elif column is not None:
-                            # get column name
-                            # make sure column is in data_dict
-                            if (column not in data_dict):
-                                message = f"column '{column}' not found in data dictionary"  # noqa
-                                raise ValueError(message)
-                            value = data_dict[column]
-                        elif jsonpath is not None:
-                            query = parser.parse(jsonpath).find(metadata)
-                            assert len(query) == 1
-                            value = query[0].value
-                        else:
-                            LOGGER.debug(f"value and column both None for element {element['eccodes_key']}")  # noqa
-                        # ===============================
-                        # apply specified scaling to data
-                        # ===============================
-                        if value in MISSING:
-                            value = None
-                        else:
-                            scale = None
-                            offset = None
-                            if "scale" in element:
-                                scale = element["scale"]
-                            if "offset" in element:
-                                offset = element["offset"]
-                            value = apply_scaling(value, scale, offset)
-                        # ==================
-                        # now validate value
-                        # ==================
-                        valid_min = None
-                        valid_max = None
-                        if "valid_min" in element:
-                            valid_min = element["valid_min"]
-                        if "valid_max" in element:
-                            valid_max = element["valid_min"]
-                        LOGGER.debug(f"validating value {value} for element {element['eccodes_key']}")  # noqa
-                        value = validate_value(element["eccodes_key"], value,
-                                               valid_min, valid_max,
-                                               NULLIFY_INVALID)
+        for section in ("header", "data"):
+            for element in mappings[section]:
+                eccodes_key = element["eccodes_key"]
+                # first identify source of data
+                value = None
+                column = None
+                jsonpath = None
+                if "value" in element:
+                    value = element["value"]
+                if "csv_column" in element:
+                    column = element["csv_column"]
+                if "jsonpath" in element:
+                    jsonpath = element["jsonpath"]
+                # now get value from indicated source
+                if value is not None:
+                    value = element["value"]
+                elif column is not None:
+                    # get column name
+                    # make sure column is in data
+                    if (column not in data):
+                        message = f"column '{column}' not found in data dictionary"  # noqa
+                        raise ValueError(message)
+                    value = data[column]
+                elif jsonpath is not None:
+                    query = parser.parse(jsonpath).find(metadata)
+                    assert len(query) == 1
+                    value = query[0].value
+                else:
+                    LOGGER.debug(f"value and column both None for element {element['eccodes_key']}")  # noqa
+                # ===============================
+                # apply specified scaling to data
+                # ===============================
+                if value in MISSING:
+                    value = None
+                else:
+                    scale = None
+                    offset = None
+                    if "scale" in element:
+                        scale = element["scale"]
+                    if "offset" in element:
+                        offset = element["offset"]
+                    value = apply_scaling(value, scale, offset)
+                # ==================
+                # now validate value
+                # ==================
+                valid_min = None
+                valid_max = None
+                if "valid_min" in element:
+                    valid_min = element["valid_min"]
+                if "valid_max" in element:
+                    valid_max = element["valid_min"]
+                LOGGER.debug(f"validating value {value} for element {element['eccodes_key']}")  # noqa
+                value = validate_value(element["eccodes_key"], value,
+                                       valid_min, valid_max,
+                                       NULLIFY_INVALID)
 
-                        LOGGER.debug(f"value {value} validated for element {element['eccodes_key']}")  # noqa
-                        # ==================================================
-                        # at this point we should have the eccodes key and a
-                        # validated value to use, add to dict
-                        # ==================================================
-                        self.set_element(eccodes_key, value)
-                        LOGGER.debug(f"value {value} updated for element {element['eccodes_key']}")  # noqa
-            rows_read += 1
-
-            num_messages = rows_read - 1
-            LOGGER.info(f"{num_messages} row{'s'[:num_messages^1]} read")
+                LOGGER.debug(f"value {value} validated for element {element['eccodes_key']}")  # noqa
+                # ==================================================
+                # at this point we should have the eccodes key and a
+                # validated value to use, add to dict
+                # ==================================================
+                self.set_element(eccodes_key, value)
+                LOGGER.debug(f"value {value} updated for element {element['eccodes_key']}")  # noqa
 
     def get_datetime(self) -> str:
         """
@@ -562,36 +537,65 @@ def transform(data: str, metadata: dict, mappings: dict,
     :returns: `dict` of output messages
     """
 
-    # we've not validated at this stage, do we want to make that the first
-    # thing we do?
+    # ======================
+    # validate mapping files
+    # ======================
+    e = validate_mapping_dict(mappings)
+    if e is not SUCCESS:
+        raise ValueError("Invalid mappings")
+    # ==========================================================
+    # Now extract descriptors and replications from mapping file
+    # ==========================================================
     unexpanded_descriptors = mappings["unexpandedDescriptors"]
     delayed_replications = mappings["inputDelayedDescriptorReplicationFactor"]
 
-    LOGGER.debug("Initializing new BUFR message")
-    message = BUFRMessage(unexpanded_descriptors, delayed_replications)
-
-    LOGGER.debug("Parsing data")
-    message.parse(data, metadata, mappings)
-    # now create a dict to store the return value
+    # =========================================
+    # Now we need to convert string back to CSV
+    # and iterate over rows
+    # =========================================
+    fh = StringIO(data)
+    reader = csv.reader(fh, delimiter=',', quoting=csv.QUOTE_NONNUMERIC)
+    # counter to keep track
+    rows_read = 0
+    # dictionary to store output
     result = dict()
-    # now md5 as the key for this obs.
-    rmk = message.md5()
+    # now iterate
+    for row in reader:
+        if rows_read == 0:  # header row
+            col_names = row
+            rows_read += 1
+            continue
+        else:  # data row, make dictionary
+            data = row
+            data_dict = dict(zip(col_names, data))
+            rows_read += 1
+        # initialise new BUFRMessage
+        LOGGER.debug("Initializing new BUFR message")
+        message = BUFRMessage(unexpanded_descriptors, delayed_replications)
 
-    result[rmk] = {
-        "bufr4": message.as_bufr()
-    }
+        # parse to BUFR sequence
+        LOGGER.debug("Parsing data")
+        message.parse(data_dict, metadata, mappings)
 
-    # encode to bufr
-    if template is not None:
-        LOGGER.debug("Adding GeoJSON representation")
-        # if template specified get geojson as well
-        result[rmk]["geojson"] = message.as_geojson(rmk, template)
+        # now md5 as the key for this obs.
+        rmk = message.md5()
 
-    LOGGER.debug("Adding metadata elements")
-    result[rmk]["_meta"] = {
-        "data_date": message.get_datetime(),
-        "originating_centre": message.get_element("bufrHeaderCentre"),
-        "data_category": message.get_element("dataCategory")
-    }
+        result[rmk] = {
+            "bufr4": message.as_bufr()
+        }
 
+        # encode to bufr
+        if template is not None:
+            LOGGER.debug("Adding GeoJSON representation")
+            # if template specified get geojson as well
+            result[rmk]["geojson"] = message.as_geojson(rmk, template)
+
+        LOGGER.debug("Adding metadata elements")
+        result[rmk]["_meta"] = {
+            "data_date": message.get_datetime(),
+            "originating_centre": message.get_element("bufrHeaderCentre"),
+            "data_category": message.get_element("dataCategory")
+        }
+
+    LOGGER.info("{} rows read and converted to BUFR".format(rows_read-1))
     return result
