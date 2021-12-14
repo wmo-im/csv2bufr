@@ -75,7 +75,7 @@ if (os.path.exists('MANIFEST')):
 
 
 setup(
-    name='wis2node',
+    name='csv2bufr',
     version=get_package_version(),
     description=DESCRIPTION,
     long_description=read('README.md'),
