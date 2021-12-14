@@ -503,20 +503,20 @@ class BUFRMessage:
                 self.set_element(eccodes_key, value)
                 LOGGER.debug(f"value {value} updated for element {element['eccodes_key']}")  # noqa
 
-    def get_datetime(self) -> str:
+    def get_datetime(self) -> datetime:
         """
         Function to extract characteristic date and time from the BUFR message
 
-        :returns: `str`of ISO8601 representation of the characteristic
-                date/time
+        :returns: `datetime.datetime` of ISO8601 representation of the
+                  characteristic date/time
         """
 
-        return "{:04d}-{:02d}-{:02d}T{:02d}:{:02d}:00+00:00".format(
-                self.get_element("typicalYear"),
-                self.get_element("typicalMonth"),
-                self.get_element("typicalDay"),
-                self.get_element("typicalHour"),
-                self.get_element("typicalMinute")
+        return datetime(
+            self.get_element("typicalYear"),
+            self.get_element("typicalMonth"),
+            self.get_element("typicalDay"),
+            self.get_element("typicalHour"),
+            self.get_element("typicalMinute")
         )
 
 
