@@ -548,7 +548,7 @@ def transform(data: str, metadata: dict, mappings: dict,
     # ==========================================================
     unexpanded_descriptors = mappings["unexpandedDescriptors"]
     delayed_replications = mappings["inputDelayedDescriptorReplicationFactor"]
-
+    table_version = mappings["masterTableVersionNumber"]
     # =========================================
     # Now we need to convert string back to CSV
     # and iterate over rows
@@ -571,7 +571,8 @@ def transform(data: str, metadata: dict, mappings: dict,
             rows_read += 1
         # initialise new BUFRMessage
         LOGGER.debug("Initializing new BUFR message")
-        message = BUFRMessage(unexpanded_descriptors, delayed_replications)
+        message = BUFRMessage(unexpanded_descriptors, delayed_replications,
+                              table_version)
 
         # parse to BUFR sequence
         LOGGER.debug("Parsing data")

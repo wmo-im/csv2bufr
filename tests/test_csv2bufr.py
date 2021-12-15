@@ -40,6 +40,7 @@ def mapping_dict():
     return {
         "inputDelayedDescriptorReplicationFactor": [],
         "unexpandedDescriptors": [301021, 301011, 301012, 10051, 12101],
+        "masterTableVersionNumber": 36,
         "header": [
             {"eccodes_key": "edition", "value": 4},  # noqa
             {"eccodes_key": "masterTableNumber", "value": 0},  # noqa
