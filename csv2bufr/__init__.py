@@ -546,9 +546,11 @@ def transform(data: str, metadata: dict, mappings: dict,
     # ==========================================================
     # Now extract descriptors and replications from mapping file
     # ==========================================================
-    unexpanded_descriptors = mappings["unexpandedDescriptors"]
     delayed_replications = mappings["inputDelayedDescriptorReplicationFactor"]
-    table_version = mappings["masterTableVersionNumber"]
+    path = "$.header[?(@.eccodes_key=='unexpandedDescriptors')]"
+    unexpanded_descriptors = parser.parse(path).find(mappings)[0].value["value"]
+    path = "$.header[?(@.eccodes_key=='masterTablesVersionNumber')]"
+    table_version = parser.parse(path).find(mappings)[0].value["value"]
     # =========================================
     # Now we need to convert string back to CSV
     # and iterate over rows

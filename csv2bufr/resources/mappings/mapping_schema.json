@@ -7,13 +7,6 @@
             "type": "array",
             "items": {"type": "integer"}
         },
-        "unexpandedDescriptors": {
-            "type": "array",
-            "items": {"type": "integer"}
-        },
-        "masterTableVersionNumber": {
-            "type": "integer"
-        },
         "header":{
             "type": "array",
             "items": {"$ref": "#/$defs/bufr_element"},
@@ -25,7 +18,7 @@
             "description": "mapping from CSV file (or metadata json file) to BUFR"
         }
     },
-    "required" : ["inputDelayedDescriptorReplicationFactor","header","data","masterTableVersionNumber"],
+    "required" : ["inputDelayedDescriptorReplicationFactor","header","data"],
     "$defs":{
         "bufr_element": {
             "type": "object",
