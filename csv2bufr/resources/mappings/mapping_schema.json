@@ -7,10 +7,6 @@
             "type": "array",
             "items": {"type": "integer"}
         },
-        "unexpandedDescriptors": {
-            "type": "array",
-            "items": {"type": "integer"}
-        },
         "header":{
             "type": "array",
             "items": {"$ref": "#/$defs/bufr_element"},

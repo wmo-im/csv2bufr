@@ -546,9 +546,12 @@ def transform(data: str, metadata: dict, mappings: dict,
     # ==========================================================
     # Now extract descriptors and replications from mapping file
     # ==========================================================
-    unexpanded_descriptors = mappings["unexpandedDescriptors"]
     delayed_replications = mappings["inputDelayedDescriptorReplicationFactor"]
-
+    path = "$.header[?(@.eccodes_key=='unexpandedDescriptors')]"
+    unexpanded_descriptors = \
+        parser.parse(path).find(mappings)[0].value["value"]
+    path = "$.header[?(@.eccodes_key=='masterTablesVersionNumber')]"
+    table_version = parser.parse(path).find(mappings)[0].value["value"]
     # =========================================
     # Now we need to convert string back to CSV
     # and iterate over rows
@@ -571,7 +574,8 @@ def transform(data: str, metadata: dict, mappings: dict,
             rows_read += 1
         # initialise new BUFRMessage
         LOGGER.debug("Initializing new BUFR message")
-        message = BUFRMessage(unexpanded_descriptors, delayed_replications)
+        message = BUFRMessage(unexpanded_descriptors, delayed_replications,
+                              table_version)
 
         # parse to BUFR sequence
         LOGGER.debug("Parsing data")
