@@ -548,7 +548,8 @@ def transform(data: str, metadata: dict, mappings: dict,
     # ==========================================================
     delayed_replications = mappings["inputDelayedDescriptorReplicationFactor"]
     path = "$.header[?(@.eccodes_key=='unexpandedDescriptors')]"
-    unexpanded_descriptors = parser.parse(path).find(mappings)[0].value["value"]
+    unexpanded_descriptors = \
+        parser.parse(path).find(mappings)[0].value["value"]
     path = "$.header[?(@.eccodes_key=='masterTablesVersionNumber')]"
     table_version = parser.parse(path).find(mappings)[0].value["value"]
     # =========================================
