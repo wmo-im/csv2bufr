@@ -28,7 +28,7 @@ import hashlib
 from io import StringIO, BytesIO
 import logging
 import os.path
-from typing import Union, Any
+from typing import Any, Iterator, Union
 from jsonpath_ng.ext import parser
 
 from eccodes import (codes_bufr_new_from_samples,
@@ -521,7 +521,7 @@ class BUFRMessage:
 
 
 def transform(data: str, metadata: dict, mappings: dict,
-              template: dict = None) -> dict:
+              template: dict = {}) -> Iterator[dict]:
     """
     Function to drive conversion to BUFR and if specified to geojson
 
@@ -560,8 +560,7 @@ def transform(data: str, metadata: dict, mappings: dict,
     reader = csv.reader(fh, delimiter=',', quoting=csv.QUOTE_NONNUMERIC)
     # counter to keep track
     rows_read = 0
-    # dictionary to store output
-    result = dict()
+
     # now iterate
     for row in reader:
         if rows_read == 0:  # header row
@@ -584,22 +583,23 @@ def transform(data: str, metadata: dict, mappings: dict,
         # now md5 as the key for this obs.
         rmk = message.md5()
 
-        result[rmk] = {
+        result = {
             "bufr4": message.as_bufr()
         }
 
-        # encode to bufr
-        if template is not None:
+        # encode to BUFR
+        if template:
             LOGGER.debug("Adding GeoJSON representation")
             # if template specified get geojson as well
-            result[rmk]["geojson"] = message.as_geojson(rmk, template)
+            result["geojson"] = message.as_geojson(rmk, template)
 
         LOGGER.debug("Adding metadata elements")
-        result[rmk]["_meta"] = {
+        result["_meta"] = {
+            "identifier": rmk,
             "data_date": message.get_datetime(),
             "originating_centre": message.get_element("bufrHeaderCentre"),
             "data_category": message.get_element("dataCategory")
         }
 
-    LOGGER.info("{} rows read and converted to BUFR".format(rows_read-1))
-    return result
+        LOGGER.debug(f"Message: {result}")
+        yield result

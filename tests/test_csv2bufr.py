@@ -23,6 +23,7 @@ import csv
 from io import StringIO
 import logging
 import json
+from types import GeneratorType
 
 from eccodes import (codes_bufr_new_from_samples, codes_release)
 import pytest
@@ -323,9 +324,11 @@ def test_transform(data_dict, station_dict, mapping_dict):
     writer.writerow(data_dict)
     data = output.getvalue()
     result = transform(data, station_dict, mapping_dict)
-    assert isinstance(result, dict)
-    assert list(result.keys())[0] == '981938dbd97be3e5adc8e7b1c6eb642c'
-    assert len(list(result.keys())) == 1
+    assert isinstance(result, GeneratorType)
+    first = next(result)
+    assert first['_meta']['identifier'] == '981938dbd97be3e5adc8e7b1c6eb642c'
+    result = transform(data, station_dict, mapping_dict)
+    assert len(list(result))
 
 
 def test_json(data_dict, station_dict, mapping_dict, json_template,
@@ -340,7 +343,7 @@ def test_json(data_dict, station_dict, mapping_dict, json_template,
     # transform CSV to BUFR
     result = transform(data, station_dict, mapping_dict, json_template)
     for item in result:
-        geojson = json.loads(result[item]["geojson"])
+        geojson = json.loads(item["geojson"])
         # we need to copy result time to our expected json result
         json_result["properties"]["resultTime"] = \
             geojson["properties"]["resultTime"]
