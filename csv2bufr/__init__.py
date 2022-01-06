@@ -28,7 +28,7 @@ import hashlib
 from io import StringIO, BytesIO
 import logging
 import os.path
-from typing import Union, Any
+from typing import Any, Iterator, Union
 from jsonpath_ng.ext import parser
 
 from eccodes import (codes_bufr_new_from_samples,
@@ -558,7 +558,7 @@ class BUFRMessage:
 
 
 def transform(data: str, metadata: dict, mappings: dict,
-              template: dict = None) -> dict:
+              template: dict = {}) -> Iterator[dict]:
     """
     Function to drive conversion to BUFR and if specified to geojson
 
@@ -591,6 +591,7 @@ def transform(data: str, metadata: dict, mappings: dict,
     table_version = parser.parse(path).find(mappings)[0].value["value"]
     nheaders = mappings["number_header_rows"]
     names = mappings["names_on_row"]
+
     # =========================================
     # Now we need to convert string back to CSV
     # and iterate over rows
@@ -611,6 +612,7 @@ def transform(data: str, metadata: dict, mappings: dict,
     LOGGER.debug("Initializing new BUFR message")
     message = BUFRMessage(unexpanded_descriptors, delayed_replications,
                           table_version)
+
 
     # now iterate over remaining rows
     for row in reader:
@@ -644,6 +646,7 @@ def transform(data: str, metadata: dict, mappings: dict,
         # now create GeoJSON if specified
         if template is not None:
             LOGGER.debug("Adding GeoJSON representation")
+
             result["geojson"] = message.as_geojson(rmk, template)
 
         # now additional metadata elements
@@ -660,4 +663,5 @@ def transform(data: str, metadata: dict, mappings: dict,
         rows_read += 1
 
         # now yield result back to caller
+
         yield result

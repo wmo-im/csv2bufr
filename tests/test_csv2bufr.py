@@ -23,6 +23,7 @@ import csv
 from io import StringIO
 import logging
 import json
+from types import GeneratorType
 
 from eccodes import (codes_bufr_new_from_samples, codes_release)
 import pytest
@@ -330,6 +331,7 @@ def test_transform(data_dict, station_dict, mapping_dict):
         assert "md5" in item
         assert "_meta" in item
         assert item["md5"] == '981938dbd97be3e5adc8e7b1c6eb642c'
+
 
 
 def test_json(data_dict, station_dict, mapping_dict, json_template,
