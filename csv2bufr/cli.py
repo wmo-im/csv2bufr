@@ -147,7 +147,6 @@ def transform(ctx, csv_file, mapping, output_dir, station_metadata,
 
     click.echo("Done")
 
-
 data.add_command(transform)
 mappings.add_command(list_mappings)
 

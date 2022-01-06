@@ -613,7 +613,6 @@ def transform(data: str, metadata: dict, mappings: dict,
     message = BUFRMessage(unexpanded_descriptors, delayed_replications,
                           table_version)
 
-
     # now iterate over remaining rows
     for row in reader:
         result = dict()
