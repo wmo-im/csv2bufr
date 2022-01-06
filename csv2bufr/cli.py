@@ -144,8 +144,8 @@ def transform(ctx, csv_file, mapping, output_dir, station_metadata,
             with open(json_filename, "w") as fh:
                 fh.write(item["geojson"])
 
-
     click.echo("Done")
+
 
 data.add_command(transform)
 mappings.add_command(list_mappings)
