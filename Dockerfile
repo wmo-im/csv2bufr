@@ -19,21 +19,32 @@
 #
 ###############################################################################
 
-FROM ubuntu:20.04
+FROM ubuntu:focal
 
-ENV ECCODES_VER=2.23.0
-ENV ECCODES_DIR=/opt/eccodes
+ARG BUILD_PACKAGES="build-essential curl cmake gfortran" \
+    ECCODES_VER=2.23.0
 
-RUN echo "Acquire::Check-Valid-Until \"false\";\nAcquire::Check-Date \"false\";" | cat > /etc/apt/apt.conf.d/10no--check-valid-until
-
-RUN apt-get update -y
-RUN DEBIAN_FRONTEND="noninteractive" TZ="Europe/Bern" apt-get install -y build-essential curl cmake python3 gfortran python3-pip libffi-dev python3-dev
+ENV DEBIAN_FRONTEND="noninteractive" \
+    TZ="Etc/UTC" \
+    ECCODES_DIR=/opt/eccodes \
+    PATH="$PATH;/opt/eccodes/bin"
 
 WORKDIR /tmp/eccodes
-RUN curl https://confluence.ecmwf.int/download/attachments/45757960/eccodes-${ECCODES_VER}-Source.tar.gz --output eccodes-${ECCODES_VER}-Source.tar.gz
-RUN tar xzf eccodes-${ECCODES_VER}-Source.tar.gz
-RUN mkdir build && cd build && cmake -DCMAKE_INSTALL_PREFIX=${ECCODES_DIR} ../eccodes-${ECCODES_VER}-Source && make && ctest && make install
-RUN pip3 install eccodes
-RUN export PATH="$PATH;/opt/eccodes/bin"
-RUN cd / && rm -rf /tmp/eccodes
+
+COPY . /tmp/csv2bufr
+
+RUN echo "Acquire::Check-Valid-Until \"false\";\nAcquire::Check-Date \"false\";" | cat > /etc/apt/apt.conf.d/10no--check-valid-until \
+    && apt-get update -y \
+    && apt-get install -y ${BUILD_PACKAGES} python3 python3-pip libffi-dev python3-dev \
+    && curl https://confluence.ecmwf.int/download/attachments/45757960/eccodes-${ECCODES_VER}-Source.tar.gz --output eccodes-${ECCODES_VER}-Source.tar.gz \
+    && tar xzf eccodes-${ECCODES_VER}-Source.tar.gz \
+    && mkdir build && cd build && cmake -DCMAKE_INSTALL_PREFIX=${ECCODES_DIR} ../eccodes-${ECCODES_VER}-Source && make && ctest && make install \
+    && cd /tmp/csv2bufr \
+    && python3 setup.py install \
+    && cd / && rm -rf /tmp/eccodes /tmp/csv2bufr \
+    && apt-get remove --purge -y ${BUILD_PACKAGES} \
+    && apt autoremove -y  \
+    && apt-get -q clean \
+    && rm -rf /var/lib/apt/lists/*
+
 WORKDIR /

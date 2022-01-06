@@ -7,6 +7,14 @@
             "type": "array",
             "items": {"type": "integer"}
         },
+        "number_header_rows": {
+            "type": "integer",
+            "description": "Number of header rows in the file"
+        },
+        "names_on_row": {
+            "type": "integer",
+            "description": "Which row the column names appear on"
+        },
         "header":{
             "type": "array",
             "items": {"$ref": "#/$defs/bufr_element"},

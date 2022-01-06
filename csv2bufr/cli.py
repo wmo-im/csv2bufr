@@ -82,7 +82,7 @@ def list_mappings(ctx):
 
 @click.command()
 @click.pass_context
-@click.argument("csv_file", type=click.File())
+@click.argument("csv_file", type=click.File(errors="ignore"))
 @click.option("--mapping", required=True,
               help="Name of file or mapping template to " +
                    "use to map from CSV to BUFR")
@@ -134,15 +134,15 @@ def transform(ctx, csv_file, mapping, output_dir, station_metadata,
         raise click.ClickException(err)
 
     click.echo("Writing data to file")
-    for key, value in result.items():
+    for item in result:
+        key = item["md5"]
         bufr_filename = f"{output_dir}{os.sep}{key}.bufr4"
         with open(bufr_filename, "wb") as fh:
-            fh.write(value["bufr4"])
-        if "geojson" in value:
-            click.echo("Writing GeoJSON data to file")
+            fh.write(item["bufr4"])
+        if "geojson" in item:
             json_filename = f"{output_dir}{os.sep}{key}.geojson"
             with open(json_filename, "w") as fh:
-                fh.write(value["geojson"])
+                fh.write(item["geojson"])
 
     click.echo("Done")
 
