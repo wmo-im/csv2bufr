@@ -37,7 +37,7 @@ from eccodes import (codes_bufr_new_from_samples,
                      CODES_MISSING_LONG, CODES_MISSING_DOUBLE,
                      codes_bufr_keys_iterator_new,
                      codes_bufr_keys_iterator_next,
-                     codes_bufr_keys_iterator_get_name)
+                     codes_bufr_keys_iterator_get_name, CodesInternalError)
 from jsonschema import validate
 
 # some 'constants'
@@ -62,6 +62,11 @@ HEADERS = ["edition", "masterTableNumber", "bufrHeaderCentre",
            "typicalMinute", "typicalSecond", "typicalDate", "typicalTime",
            "numberOfSubsets", "observedData", "compressedData",
            "unexpandedDescriptors", "subsetNumber"]
+
+# jsonpath_ng appears to consume memory for each parser created, leading to
+# memory leak. For each call it appears to run yacc compiler as well. Create
+# dict of parsers so each is only created / compiled once
+jsonpath_parsers = dict()
 
 
 def parse_wigos_id(wigos_id: str) -> dict:
@@ -162,7 +167,7 @@ def validate_value(key: str, value: Union[NUMBERS],
             e = ValueError(f"{key}: Value ({value}) out of valid range ({valid_min} - {valid_max}).")  # noqa
             if nullify_on_fail:
                 message = f"{e} Element set to missing"
-                LOGGER.warning(message)
+                LOGGER.debug(message)
                 return None
             else:
                 LOGGER.error(str(e))
@@ -205,7 +210,7 @@ class BUFRMessage:
         # ================================================
         # now iterator over and add to internal dictionary
         # ================================================
-        self.dict = dict()  # need a more descriptive / imaginative name :-)
+        self.dict = dict()  # need a more descriptive name
         iterator = codes_bufr_keys_iterator_new(bufr_msg)
         while codes_bufr_keys_iterator_next(iterator):
             key = codes_bufr_keys_iterator_get_name(iterator)
@@ -234,6 +239,16 @@ class BUFRMessage:
         self.bufr = None  # placeholder for BUFR bytes
         # ============================================
 
+    def reset(self) -> None:
+        """
+        Function resets BUFRMessage
+
+        :returns: `None`
+        """
+        for key in self.dict:
+            self.dict[key]["value"] = None
+        self.bufr = None
+
     def set_element(self, key: str, value: object) -> None:
         """
         Function to set element in BUFR message
@@ -249,18 +264,23 @@ class BUFRMessage:
         if value is not None and not isinstance(value, list):
             expected_type = self.dict[key]["type"]
             if expected_type == "int" and not isinstance(value, int):
-                LOGGER.warning(
-                    f"int expected for {key} but received {type(value)} ({value})")  # noqa
+                LOGGER.debug(f"int expected for {key} but received {type(value)} ({value})")  # noqa
                 if isinstance(value, float):
                     value = int(round(value))
                 else:
-                    value = int(value)
-                LOGGER.warning(f"value converted to int ({value})")
+                    try:
+                        value = int(value)
+                    except Exception as e:
+                        if NULLIFY_INVALID:
+                            value = None
+                            LOGGER.debug(f"{e}: Unable to convert value to int, set to None")  # noqa
+                        else:
+                            raise e
+                LOGGER.debug(f"value converted to int ({value})")
             elif expected_type == "float" and not isinstance(value, float):
-                LOGGER.warning(
-                    f"float expected for {key} but received {type(value)} ({value})")  # noqa
+                LOGGER.debug(f"float expected for {key} but received {type(value)} ({value})")  # noqa
                 value = float(value)
-                LOGGER.warning(f"value converted to float ({value})")
+                LOGGER.debug(f"value converted to float ({value})")
             else:
                 value = value
         self.dict[key]["value"] = value
@@ -282,7 +302,7 @@ class BUFRMessage:
             result = self.dict[key]["value"]
         return result
 
-    def as_bufr(self, use_cached: bool = True) -> bytes:
+    def as_bufr(self, use_cached: bool = False) -> bytes:
         """
         Function to get BUFR message encoded into bytes. Once called the bytes
         are cached and the cached value returned unless specified otherwise.
@@ -310,28 +330,31 @@ class BUFRMessage:
         for eccodes_key in self.dict:
             value = self.dict[eccodes_key]["value"]
             if value is not None:
-                LOGGER.debug(
-                    f"setting value {value} for element {eccodes_key}.")
+                LOGGER.debug(f"setting value {value} for element {eccodes_key}.")  # noqa
                 if isinstance(value, list):
                     try:
                         LOGGER.debug("calling codes_set_array")
                         codes_set_array(bufr_msg, eccodes_key, value)
                     except Exception as e:
-                        LOGGER.error(
-                            f"error calling codes_set_array({bufr_msg}, {eccodes_key}, {value}): {e}")  # noqa
+                        LOGGER.error(f"error calling codes_set_array({bufr_msg}, {eccodes_key}, {value}): {e}")  # noqa
                         raise e
                 else:
                     try:
                         codes_set(bufr_msg, eccodes_key, value)
                     except Exception as e:
-                        LOGGER.error(
-                            f"error calling codes_set({bufr_msg}, {eccodes_key}, {value}): {e}")  # noqa
+                        LOGGER.error(f"error calling codes_set({bufr_msg}, {eccodes_key}, {value}): {e}")  # noqa
                         raise e
         # ==============================
         # Message now ready to be packed
         # ==============================
         try:
             codes_set(bufr_msg, "pack", True)
+        except CodesInternalError as e:
+            LOGGER.debug(f"error calling codes_set({bufr_msg}, 'pack', True): {e}")  # noqa
+            LOGGER.debug(json.dumps(self.dict, indent=4))
+            LOGGER.debug("null message returned")
+            codes_release(bufr_msg)
+            return self.bufr
         except Exception as e:
             LOGGER.error(f"error calling codes_set({bufr_msg}, 'pack', True): {e}") # noqa
             raise e
@@ -358,8 +381,12 @@ class BUFRMessage:
 
         :returns: md5 of BUFR message
         """
+        bufr = self.as_bufr(use_cached=True)
 
-        return hashlib.md5(self.as_bufr()).hexdigest()
+        if bufr is not None:
+            return hashlib.md5(bufr).hexdigest()
+        else:
+            return None
 
     def as_geojson(self, identifier: str, template: dict) -> str:
         """
@@ -463,7 +490,10 @@ class BUFRMessage:
                         raise ValueError(message)
                     value = data[column]
                 elif jsonpath is not None:
-                    query = parser.parse(jsonpath).find(metadata)
+                    if jsonpath not in jsonpath_parsers:
+                        jsonpath_parsers[jsonpath] = parser.parse(jsonpath)
+                    p = jsonpath_parsers[jsonpath]
+                    query = p.find(metadata)
                     assert len(query) == 1
                     value = query[0].value
                 else:
@@ -490,12 +520,19 @@ class BUFRMessage:
                     valid_min = element["valid_min"]
                 if "valid_max" in element:
                     valid_max = element["valid_min"]
-                LOGGER.debug(f"validating value {value} for element {element['eccodes_key']}")  # noqa
-                value = validate_value(element["eccodes_key"], value,
-                                       valid_min, valid_max,
-                                       NULLIFY_INVALID)
+                LOGGER.debug(f"validating value {value} for element {element['eccodes_key']} against range")  # noqa
+                try:
+                    value = validate_value(element["eccodes_key"], value,
+                                           valid_min, valid_max,
+                                           NULLIFY_INVALID)
+                    LOGGER.debug(f"value {value} validated for element {element['eccodes_key']}")  # noqa
+                except Exception as e:
+                    if NULLIFY_INVALID:
+                        LOGGER.debug(f"Error raised whilst validating {element['eccodes_key']}, value set to None")  # noqa
+                        value = None
+                    else:
+                        raise e
 
-                LOGGER.debug(f"value {value} validated for element {element['eccodes_key']}")  # noqa
                 # ==================================================
                 # at this point we should have the eccodes key and a
                 # validated value to use, add to dict
@@ -552,6 +589,9 @@ def transform(data: str, metadata: dict, mappings: dict,
         parser.parse(path).find(mappings)[0].value["value"]
     path = "$.header[?(@.eccodes_key=='masterTablesVersionNumber')]"
     table_version = parser.parse(path).find(mappings)[0].value["value"]
+    nheaders = mappings["number_header_rows"]
+    names = mappings["names_on_row"]
+
     # =========================================
     # Now we need to convert string back to CSV
     # and iterate over rows
@@ -560,39 +600,54 @@ def transform(data: str, metadata: dict, mappings: dict,
     reader = csv.reader(fh, delimiter=',', quoting=csv.QUOTE_NONNUMERIC)
     # counter to keep track
     rows_read = 0
-
-    # now iterate
-    for row in reader:
-        if rows_read == 0:  # header row
+    # first read in and process header rows
+    while rows_read < nheaders:
+        row = next(reader)
+        if rows_read == names - 1:
             col_names = row
-            rows_read += 1
-            continue
-        else:  # data row, make dictionary
-            data = row
-            data_dict = dict(zip(col_names, data))
-            rows_read += 1
-        # initialise new BUFRMessage
-        LOGGER.debug("Initializing new BUFR message")
-        message = BUFRMessage(unexpanded_descriptors, delayed_replications,
-                              table_version)
+        rows_read += 1
+        continue
 
+    # initialise new BUFRMessage (and reuse later)
+    LOGGER.debug("Initializing new BUFR message")
+    message = BUFRMessage(unexpanded_descriptors, delayed_replications,
+                          table_version)
+
+    # now iterate over remaining rows
+    for row in reader:
+        result = dict()
+        LOGGER.debug(f"Processing row {rows_read}")
+        # check and make sure we have ascii data
+        for val in row:
+            if isinstance(val, str):
+                if not val.isascii():
+                    if NULLIFY_INVALID:
+                        LOGGER.debug(f"csv read error, non ASCII data detected ({val}), skipping row")  # noqa
+                        LOGGER.debug(row)
+                        continue
+                    else:
+                        raise ValueError
+        # valid data row, make dictionary
+        data_dict = dict(zip(col_names, row))
+        # reset BUFR message to clear data
+        message.reset()
         # parse to BUFR sequence
         LOGGER.debug("Parsing data")
         message.parse(data_dict, metadata, mappings)
+        # encode to BUFR
+        LOGGER.debug("Parsing data")
+        result["bufr4"] = message.as_bufr()
 
         # now md5 as the key for this obs.
         rmk = message.md5()
+        result["md5"] = rmk
 
-        result = {
-            "bufr4": message.as_bufr()
-        }
-
-        # encode to BUFR
+        # now create GeoJSON if specified
         if template:
             LOGGER.debug("Adding GeoJSON representation")
-            # if template specified get geojson as well
             result["geojson"] = message.as_geojson(rmk, template)
 
+        # now additional metadata elements
         LOGGER.debug("Adding metadata elements")
         result["_meta"] = {
             "identifier": rmk,
@@ -600,6 +655,11 @@ def transform(data: str, metadata: dict, mappings: dict,
             "originating_centre": message.get_element("bufrHeaderCentre"),
             "data_category": message.get_element("dataCategory")
         }
+        time = datetime.now(timezone.utc).isoformat()
+        LOGGER.info(f"|{time}|{metadata['wigosIds'][0]['wid']}|{result['_meta']['data_date']}|{rmk}")  # noqa
+        # increment ticker
+        rows_read += 1
 
-        LOGGER.debug(f"Message: {result}")
+        # now yield result back to caller
+
         yield result

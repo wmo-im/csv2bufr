@@ -23,7 +23,6 @@ import csv
 from io import StringIO
 import logging
 import json
-from types import GeneratorType
 
 from eccodes import (codes_bufr_new_from_samples, codes_release)
 import pytest
@@ -40,6 +39,8 @@ LOGGER.setLevel("DEBUG")
 def mapping_dict():
     return {
         "inputDelayedDescriptorReplicationFactor": [],
+        "number_header_rows": 1,
+        "names_on_row": 1,
         "header": [
             {"eccodes_key": "edition", "value": 4},  # noqa
             {"eccodes_key": "masterTableNumber", "value": 0},  # noqa
@@ -324,11 +325,11 @@ def test_transform(data_dict, station_dict, mapping_dict):
     writer.writerow(data_dict)
     data = output.getvalue()
     result = transform(data, station_dict, mapping_dict)
-    assert isinstance(result, GeneratorType)
-    first = next(result)
-    assert first['_meta']['identifier'] == '981938dbd97be3e5adc8e7b1c6eb642c'
-    result = transform(data, station_dict, mapping_dict)
-    assert len(list(result))
+    for item in result:
+        assert isinstance(item, dict)
+        assert "md5" in item
+        assert "_meta" in item
+        assert item["md5"] == '981938dbd97be3e5adc8e7b1c6eb642c'
 
 
 def test_json(data_dict, station_dict, mapping_dict, json_template,
