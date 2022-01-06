@@ -649,6 +649,7 @@ def transform(data: str, metadata: dict, mappings: dict,
         # now additional metadata elements
         LOGGER.debug("Adding metadata elements")
         result["_meta"] = {
+            "identifier": rmk,
             "data_date": message.get_datetime(),
             "originating_centre": message.get_element("bufrHeaderCentre"),
             "data_category": message.get_element("dataCategory")
