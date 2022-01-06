@@ -644,9 +644,8 @@ def transform(data: str, metadata: dict, mappings: dict,
         result["md5"] = rmk
 
         # now create GeoJSON if specified
-        if template is not None:
+        if template:
             LOGGER.debug("Adding GeoJSON representation")
-
             result["geojson"] = message.as_geojson(rmk, template)
 
         # now additional metadata elements
