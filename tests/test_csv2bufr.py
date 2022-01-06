@@ -23,6 +23,7 @@ import csv
 from io import StringIO
 import logging
 import json
+from types import GeneratorType
 
 from eccodes import (codes_bufr_new_from_samples, codes_release)
 import pytest

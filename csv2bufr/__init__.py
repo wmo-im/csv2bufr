@@ -28,7 +28,7 @@ import hashlib
 from io import StringIO, BytesIO
 import logging
 import os.path
-from typing import Union, Any
+from typing import Any, Iterator, Union
 from jsonpath_ng.ext import parser
 
 from eccodes import (codes_bufr_new_from_samples,
@@ -558,7 +558,7 @@ class BUFRMessage:
 
 
 def transform(data: str, metadata: dict, mappings: dict,
-              template: dict = None) -> dict:
+              template: dict = {}) -> Iterator[dict]:
     """
     Function to drive conversion to BUFR and if specified to geojson
 
@@ -589,8 +589,10 @@ def transform(data: str, metadata: dict, mappings: dict,
         parser.parse(path).find(mappings)[0].value["value"]
     path = "$.header[?(@.eccodes_key=='masterTablesVersionNumber')]"
     table_version = parser.parse(path).find(mappings)[0].value["value"]
+
     nheaders = mappings["number_header_rows"]
     names = mappings["names_on_row"]
+
     # =========================================
     # Now we need to convert string back to CSV
     # and iterate over rows
@@ -599,6 +601,7 @@ def transform(data: str, metadata: dict, mappings: dict,
     reader = csv.reader(fh, delimiter=',', quoting=csv.QUOTE_NONNUMERIC)
     # counter to keep track
     rows_read = 0
+    
     # first read in and process header rows
     while rows_read < nheaders:
         row = next(reader)
@@ -649,6 +652,7 @@ def transform(data: str, metadata: dict, mappings: dict,
         # now additional metadata elements
         LOGGER.debug("Adding metadata elements")
         result["_meta"] = {
+            "identifier": rmk,
             "data_date": message.get_datetime(),
             "originating_centre": message.get_element("bufrHeaderCentre"),
             "data_category": message.get_element("dataCategory")

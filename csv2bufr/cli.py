@@ -134,8 +134,9 @@ def transform(ctx, csv_file, mapping, output_dir, station_metadata,
         raise click.ClickException(err)
 
     click.echo("Writing data to file")
+
     for item in result:
-        key = item["md5"]
+        key = message['_meta']['identifier']
         bufr_filename = f"{output_dir}{os.sep}{key}.bufr4"
         with open(bufr_filename, "wb") as fh:
             fh.write(item["bufr4"])
@@ -143,6 +144,7 @@ def transform(ctx, csv_file, mapping, output_dir, station_metadata,
             json_filename = f"{output_dir}{os.sep}{key}.geojson"
             with open(json_filename, "w") as fh:
                 fh.write(item["geojson"])
+
 
     click.echo("Done")
 
