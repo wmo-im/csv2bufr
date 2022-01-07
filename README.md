@@ -33,6 +33,9 @@ csv2bufr data transform \
 
 # list stored mappings
 csv2bufr mappings list
+
+# create a new mapping
+csv2bufr mappings create 301150 307091
 ```
 
 ### Configuration

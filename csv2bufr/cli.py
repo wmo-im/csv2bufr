@@ -85,9 +85,6 @@ def list_mappings(ctx):
 @click.pass_context
 @click.argument("sequence", nargs=-1, type=int)
 def create_mappings(ctx, sequence):
-    # split sequence
-    for descriptor in sequence:
-        click.echo( descriptor )
     msg = BUFRMessage(sequence)
     msg.create_template()
 
