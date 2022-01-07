@@ -28,6 +28,7 @@ import click
 
 from csv2bufr import __version__
 from csv2bufr import transform as transform_csv
+from csv2bufr import BUFRMessage
 
 THISDIR = os.path.dirname(os.path.realpath(__file__))
 MAPPINGS = f"{THISDIR}{os.sep}resources{os.sep}mappings"
@@ -80,20 +81,30 @@ def list_mappings(ctx):
         click.echo(msg)
 
 
+@click.command('create')
+@click.pass_context
+@click.argument("sequence", nargs=-1, type=int)
+def create_mappings(ctx, sequence):
+    # split sequence
+    for descriptor in sequence:
+        click.echo( descriptor )
+    msg = BUFRMessage(sequence)
+    msg.create_template()
+
+
+
 @click.command()
 @click.pass_context
 @click.argument("csv_file", type=click.File(errors="ignore"))
-@click.option("--mapping", required=True,
-              help="Name of file or mapping template to " +
-                   "use to map from CSV to BUFR")
+@click.option("--bufr-template", "mapping", required=True,
+              help="Name of file or mapping template to use to map from CSV to BUFR")  # noqa
 @click.option("--output-dir", "output_dir", required=True,
               help="Name of output file")
 @click.option("--station-metadata", "station_metadata", required=True,
               help="WIGOS station identifier JSON file")
 @click.option("--geojson-template", "geojson_template", required=False,
               default=None,
-              help="Name of file or template for GeoJSON containing " +
-                   "mapping from BUFR to GeoJSON")
+              help="Name of file or template for GeoJSON containing mapping from BUFR to GeoJSON")  # noqa
 @cli_option_verbosity
 def transform(ctx, csv_file, mapping, output_dir, station_metadata,
               geojson_template, verbosity):
@@ -149,6 +160,7 @@ def transform(ctx, csv_file, mapping, output_dir, station_metadata,
 
 data.add_command(transform)
 mappings.add_command(list_mappings)
+mappings.add_command(create_mappings)
 
 cli.add_command(data)
 cli.add_command(mappings)

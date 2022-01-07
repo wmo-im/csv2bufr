@@ -235,9 +235,50 @@ class BUFRMessage:
         # ============================================
         # finally add last few items to class
         # ============================================
+        self.descriptors = descriptors
         self.delayed_replications = delayed_replications  # used when encoding
         self.bufr = None  # placeholder for BUFR bytes
         # ============================================
+
+    def create_template(self) -> None:
+        template = {}
+        template["inputDelayedDescriptorReplicationFactor"] = \
+            self.delayed_replications
+        template["number_header_rows"] = 1
+        template["names_on_row"] = 1
+        template["header"] = []
+        # create header section
+        for element in HEADERS:
+            value = None
+            if element == "unexpandedDescriptors":
+                value = self.descriptors
+            entry = {
+                "eccodes_key": element,
+                "value": value,
+                "csv_column": None,
+                "jsonpath": None,
+                "valid_min": None,
+                "valid_max": None,
+                "scale": None,
+                "offset": None
+            }
+            template["header"].append(entry)
+        # now create data section
+        template["data"] = []
+        for element in self.dict:
+            if element not in HEADERS:
+                entry = {
+                    "eccodes_key": element,
+                    "value": None,
+                    "csv_column": None,
+                    "jsonpath": None,
+                    "valid_min": None,
+                    "valid_max": None,
+                    "scale": None,
+                    "offset": None
+                }
+                template["data"].append(entry)
+        print( json.dumps(template, indent=4) )
 
     def reset(self) -> None:
         """

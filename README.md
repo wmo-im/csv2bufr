@@ -25,7 +25,7 @@ pip install .
 
 # run the converter
 csv2bufr data transform \
-   ./data/input/Namitambo.SYNOP.csv \
+   ./data/input/Namitambo_SYNOP.csv \
    --mapping malawi_synop_bufr \
    --geojson-template malawi_synop_json \
    --output-dir ./data/output \
