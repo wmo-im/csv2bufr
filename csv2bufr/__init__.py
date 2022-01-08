@@ -640,7 +640,6 @@ def transform(data: str, metadata: dict, mappings: dict,
 
         # now md5 as the key for this obs.
         rmk = message.md5()
-        result["md5"] = rmk
 
         # now create GeoJSON if specified
         if template:
@@ -651,6 +650,7 @@ def transform(data: str, metadata: dict, mappings: dict,
         LOGGER.debug("Adding metadata elements")
         result["_meta"] = {
             "identifier": rmk,
+            "md5": rmk,
             "data_date": message.get_datetime(),
             "originating_centre": message.get_element("bufrHeaderCentre"),
             "data_category": message.get_element("dataCategory")
