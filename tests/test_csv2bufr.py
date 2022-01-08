@@ -327,9 +327,9 @@ def test_transform(data_dict, station_dict, mapping_dict):
     result = transform(data, station_dict, mapping_dict)
     for item in result:
         assert isinstance(item, dict)
-        assert "md5" in item
+        assert "md5" in item["_meta"]
         assert "_meta" in item
-        assert item["md5"] == '981938dbd97be3e5adc8e7b1c6eb642c'
+        assert item["_meta"]["md5"] == "981938dbd97be3e5adc8e7b1c6eb642c"
 
 
 def test_json(data_dict, station_dict, mapping_dict, json_template,
