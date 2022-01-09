@@ -327,8 +327,14 @@ def test_transform(data_dict, station_dict, mapping_dict):
     result = transform(data, station_dict, mapping_dict)
     for item in result:
         assert isinstance(item, dict)
-        assert "md5" in item["_meta"]
+
         assert "_meta" in item
+
+        item_meta_keys = ['data_category', 'data_date', 'identifier',
+                          'md5', 'originating_centre', 'wigos_id']
+
+        assert sorted(item["_meta"].keys()) == item_meta_keys
+
         assert item["_meta"]["md5"] == "981938dbd97be3e5adc8e7b1c6eb642c"
 
 
