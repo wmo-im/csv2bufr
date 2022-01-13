@@ -30,7 +30,7 @@ import logging
 import os.path
 from typing import Any, Iterator, Union
 from jsonpath_ng.ext import parser
-
+from copy import deepcopy
 from eccodes import (codes_bufr_new_from_samples,
                      codes_set_array, codes_set, codes_get_native_type,
                      codes_write, codes_release, codes_get,
@@ -227,7 +227,7 @@ class BUFRMessage:
                         self.dict[key][attr] = \
                             codes_get(bufr_msg, f"{key}->{attr}")
                     except Exception as e:
-                        raise(e)
+                        raise e
         # ============================================
         # now release the BUFR message back to eccodes
         # ============================================
@@ -439,7 +439,8 @@ class BUFRMessage:
         :returns: string containing geoJSON data (from json.dumps)
         """
 
-        result = self._extract(template)
+        _template = deepcopy(template)
+        result = self._extract(_template)
         result["id"] = identifier
         result["properties"]["resultTime"] = datetime.now(timezone.utc).isoformat(timespec="seconds") # noqa
         return json.dumps(result, indent=4)
@@ -526,7 +527,7 @@ class BUFRMessage:
                 elif column is not None:
                     # get column name
                     # make sure column is in data
-                    if (column not in data):
+                    if column not in data:
                         message = f"column '{column}' not found in data dictionary"  # noqa
                         raise ValueError(message)
                     value = data[column]
