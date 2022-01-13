@@ -100,6 +100,7 @@ def json_template():
                             {"eccodes_key": "#1#latitude"}]
         },
         "properties": {
+            "identifier": None,
             "phenomenonTime": {
                 "format": "{:04d}-{:02d}-{:02d}T{:02d}:{:02d}:00+00:00",
                 "args": [
@@ -157,6 +158,7 @@ def json_result():
             "coordinates": [0.0, 55.154]
         },
         "properties": {
+            "identifier": "981938dbd97be3e5adc8e7b1c6eb642c",
             "phenomenonTime": "2021-11-18T18:00:00+00:00",
             "resultTime": None,
             "observations": {

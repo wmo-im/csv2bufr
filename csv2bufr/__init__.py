@@ -399,7 +399,7 @@ class BUFRMessage:
         """
 
         result = self._extract(template)
-        result["id"] = identifier
+        result["properties"]["identifier"] = result["id"] = identifier
         result["properties"]["resultTime"] = datetime.now(timezone.utc).isoformat(timespec="seconds") # noqa
         return json.dumps(result, indent=4)
 
