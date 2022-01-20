@@ -89,7 +89,6 @@ def create_mappings(ctx, sequence):
     msg.create_template()
 
 
-
 @click.command()
 @click.pass_context
 @click.argument("csv_file", type=click.File(errors="ignore"))

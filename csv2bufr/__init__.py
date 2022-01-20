@@ -278,7 +278,7 @@ class BUFRMessage:
                     "offset": None
                 }
                 template["data"].append(entry)
-        print( json.dumps(template, indent=4) )
+        print(json.dumps(template, indent=4))
 
     def reset(self) -> None:
         """
