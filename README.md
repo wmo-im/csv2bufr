@@ -199,12 +199,12 @@ def transform(data: str, metadata: dict, mappings: dict,
 ````
 
 As noted above, the metadata and GeoJSON arguments will be removed in a future version. 
-The return dictionary contains the following elements:
-- ``result["md5"]`` the md5 checksum of the encoded BUFR data
-- ``result["bufr4"]`` binary BUFR data
-- ``result["geojson"]`` geojson string representation (to be removed)
-- ``result["_meta"]`` dictionary containing elements used by wis2node.
-- ``result["_meta"]["identifier"]`` unique identifier for result
-- ``result["_meta"]["data_date"]`` characteristic date of data contained in result (from BUFR)
-- ``result["_meta"]["originating_centre"]`` originating centre for data  (from BUFR)
-- ``result["_meta"]["data_category"]`` data category (from BUFR)
+The returned dictionary (``item`` from the above example) contains the following elements:
+- ``item["md5"]`` the md5 checksum of the encoded BUFR data
+- ``item["bufr4"]`` binary BUFR data
+- ``item["geojson"]`` geojson string representation (to be removed)
+- ``item["_meta"]`` dictionary containing elements used by wis2node.
+- ``item["_meta"]["identifier"]`` unique identifier for result
+- ``item["_meta"]["data_date"]`` characteristic date of data contained in result (from BUFR)
+- ``item["_meta"]["originating_centre"]`` originating centre for data  (from BUFR)
+- ``item["_meta"]["data_category"]`` data category (from BUFR)
