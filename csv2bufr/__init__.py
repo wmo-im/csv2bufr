@@ -459,10 +459,13 @@ class BUFRMessage:
         # extract wigos ID from metadata
         # Is this the right place for this?
         # ==================================================
-        wigosID = metadata["wigosIds"][0]["wid"]
-        tokens = parse_wigos_id(wigosID)
-        for token in tokens:
-            metadata["wigosIds"][0][token] = tokens[token]
+        try:
+            wigosID = metadata["wigosIds"][0]["wid"]
+            tokens = parse_wigos_id(wigosID)
+            for token in tokens:
+                metadata["wigosIds"][0][token] = tokens[token]
+        except (Exception, AssertionError):
+            LOGGER.warning("WigosID not parsed automatically. wigosID element not in metadata?")
         # ==================================================
         # now parse the data.
         # ==================================================
