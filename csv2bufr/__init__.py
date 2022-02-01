@@ -21,16 +21,16 @@
 
 __version__ = "0.1.0"
 
+from copy import deepcopy
 import csv
-import json
 from datetime import timezone, datetime
 import hashlib
 from io import StringIO, BytesIO
+import json
 import logging
 import os.path
 from typing import Any, Iterator, Union
-from jsonpath_ng.ext import parser
-from copy import deepcopy
+
 from eccodes import (codes_bufr_new_from_samples,
                      codes_set_array, codes_set, codes_get_native_type,
                      codes_write, codes_release, codes_get,
@@ -38,6 +38,7 @@ from eccodes import (codes_bufr_new_from_samples,
                      codes_bufr_keys_iterator_new,
                      codes_bufr_keys_iterator_next,
                      codes_bufr_keys_iterator_get_name, CodesInternalError)
+from jsonpath_ng.ext import parser
 from jsonschema import validate
 
 # some 'constants'

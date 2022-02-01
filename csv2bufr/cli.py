@@ -26,9 +26,7 @@ import sys
 
 import click
 
-from csv2bufr import __version__
-from csv2bufr import transform as transform_csv
-from csv2bufr import BUFRMessage
+from csv2bufr import __version__, BUFRMessage, transform as transform_csv
 
 THISDIR = os.path.dirname(os.path.realpath(__file__))
 MAPPINGS = f"{THISDIR}{os.sep}resources{os.sep}mappings"

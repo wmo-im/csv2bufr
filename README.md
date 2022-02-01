@@ -3,11 +3,11 @@
 [![Tests](https://github.com/wmo-im/csv2bufr/workflows/tests%20%E2%9A%99%EF%B8%8F/badge.svg)](https://github.com/wmo-im/csv2bufr/actions/workflows/tests.yml)
 
 csv2bufr is a Python package to transform CSV data into WMO BUFR.  Currently, csv2bufr converts each row in a 
-CSV to a BUFR message. Both a python module and CLI to the module are provided.
+CSV to a BUFR message. Both a Python module and CLI to the module are provided.
 
 ### Installation
-The csv2bufr module relies on the ECCODES software library from ECMWF. 
-Prior to installing the module ECCODES needs to be installed. 
+The csv2bufr module relies on the [ecCodes](https://confluence.ecmwf.int/display/ECC) software library from ECMWF. 
+Prior to installing the module ecCodes needs to be installed. 
 As part of the repository this is done via a Docker image, this is currently built as part of the install process but future versions will rely on a pre-built image. 
 
 Clone the repository and enter the csv2bufr directory, working from the dev branch.  
@@ -29,7 +29,7 @@ The software should now be installed and ready to run.
 Two configurations files are required, the first specifying how to map from the input CSV file to BUFR.
 The second contains the station level metadata from the WMO OSCAR/Surface catalogue. 
 Both files take the JSON format and a description of the mapping file is given below under usage.
-The second can be downloaded by the pyoscar tool (installed as part of the image build).
+The second can be downloaded by the [pyoscar](https://github.com/wmo-cop/pyoscar) tool (installed as part of the image build).
 To download the metadata for e.g. the weather station on Bird Island, South Georgia, the following would be used:
 
 ```
@@ -224,7 +224,7 @@ def transform(data: str, metadata: dict, mappings: dict,
     :param metadata: dictionary containing the metadata for the station
                     from OSCAR surface downloaded by wis2node.
     :param mappings: dictionary containing list of BUFR elements to
-                    encode (specified using ECCODES key) and whether
+                    encode (specified using ecCodes key) and whether
                     to get the value from (fixed, csv or metadata).
     :param template: dictionary containing mapping from BUFR to geoJSON.
 
