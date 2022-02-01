@@ -75,6 +75,7 @@
             ]
         }
     ],
+    "wigos_identifier": {"jsonpath": "$.wigosIds[0].wid"},
     "data": [
         {
             "eccodes_key": "#1#wigosIdentifierSeries",

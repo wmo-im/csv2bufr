@@ -278,6 +278,12 @@ class BUFRMessage:
                     "offset": None
                 }
                 template["data"].append(entry)
+        # add WIGOS identifier
+        template["wigos_identifier"] = {
+            "value": None,
+            "jsonpath": None,
+            "csv_column": None
+        }
         print(json.dumps(template, indent=4))
 
     def reset(self) -> None:

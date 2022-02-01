@@ -24,6 +24,20 @@ docker run -it -v ${pwd}:/app csv2bufr
 
 The software should now be installed and ready to run.
 
+### Configuration
+
+Two configurations files are required, the first specifying how to map from the input CSV file to BUFR.
+The second contains the station level metadata from the WMO OSCAR/Surface catalogue. 
+Both files take the JSON format and a description of the mapping file is given below under usage.
+The second can be downloaded by the pyoscar tool (installed as part of the image build).
+To download the metadata for e.g. the weather station on Bird Island, South Georgia, the following would be used:
+
+```
+pyoscar station --identifier 0-20000-0-88900 > 0-20000-0-88900.json
+```
+
+noting the redirect of the data to the json file.
+
 ### Usage (CLI)
 
 As part of the module a command line interface is included, this takes a number of arguments:
@@ -31,10 +45,13 @@ As part of the module a command line interface is included, this takes a number 
 - The name of the csv file to process.
 - The template used to map from the CSV to BUFR.
 - The output directory to write the BUFR data to.
-- The name / path of the file containing the metadata (*NOTE: this will be removed before the first version and the module will rely only on data int he CSV*).
+- The name / path of the file containing the metadata.
 
 An example using the CLI is show below:
 ```bash
+# download the metadata (if not already done)
+pyoscar station --identifier 0-454-2-AWSNAMITAMBO.json > ./metadata/0-454-2-AWSNAMITAMBO.json
+
 # run the converter
 csv2bufr data transform \
    ./data/input/Namitambo_SYNOP.csv \
@@ -42,7 +59,7 @@ csv2bufr data transform \
    --output-dir ./data/output \
    --station-metadata ./metadata/0-454-2-AWSNAMITAMBO.json
 ```
-Any number of header rows canbe included in the CSV file but the number needs to be specified in the template file using the *number_header_rows* field. 
+Any number of header rows can be included in the CSV file but the number needs to be specified in the template file using the *number_header_rows* field. 
 The row number for the column names also needs to be specified using the *names_on_row* field. All other header rows are ignored.
 
 Pre-configured templates mapping to BUFR will be included with the module, those available can be listed using:
@@ -55,7 +72,7 @@ Alternatively, a new BUFR template can be providing by specifying the file name,
 # run the converter
 csv2bufr data transform \
    ./data/input/Namitambo_SYNOP.csv \
-   --bufr-template ./csv2bufr/resources/malawi_synop_bufr.json \  
+   --bufr-template ./csv2bufr/resources/mappings/malawi_synop_bufr.json \  
    --output-dir ./data/output \
    --station-metadata ./metadata/0-454-2-AWSNAMITAMBO.json
 ```
@@ -91,6 +108,20 @@ For convenience this is copied below:
             "type": "array",
             "items": {"$ref": "#/$defs/bufr_element"},
             "description": "mapping from CSV file (or metadata json file) to BUFR"
+        },
+        "wigos_identifier": {
+            "type": "object",
+            "description": "Field to contain WIGOS identifier (currently unused)",
+            "properties": {
+                "csv_column": {"type": "string"},
+                "jsonpath": {"type": "string"},
+                "value": {"type": "string"}
+            },
+            "oneOf": [
+                        {"required": ["value"]},
+                        {"required": ["csv_column"]},
+                        {"required": ["jsonpath"]}
+                    ]
         }
     },
     "required" : ["inputDelayedDescriptorReplicationFactor","header","data"],
@@ -154,14 +185,17 @@ For convenience this is copied below:
 }
 ```
 
-A command is also included in the CLI to generate a blank template, in the example below a new mapping template containing the sequences 301150 () and 307091 () is generated:
+A command is also included in the CLI to generate a blank template, 
+in the example below a new mapping template containing
+the sequences 301150 (WIGOS Identifier) and 307091 (BUFR template for surface observations from 
+one-hour period with national and WMO station identification) is generated:
 ```bash
 # create a new mapping
 csv2bufr mappings create 301150 307091 > new-mapping.json
 ```
 Currently, this is output to stdout and redirected to the file *new-mapping.json* in the example above. 
 Elements that are null or missing can be deleted, other elements can be mapped to either the CSV file by specifying the column names (``csv_column``) or to a fixed value (``value``).
-The ``jsonpath`` option maps to the metadata file be is planned to be removed but currently maps to an element in the metadata path using jsonpath expressions.
+The ``jsonpath`` option maps to the metadata file using jsonpath syntax to access elements in the json file..
 To help quality control the data before conversion to BUFR valid minimum and maximum values can be specified using the ``valid_min`` and ``valid_max`` fields.
 All data should be in S.I. units or the units expected by BUFR but a simple scaling and offset is supported.
 
@@ -198,13 +232,31 @@ def transform(data: str, metadata: dict, mappings: dict,
     """
 ````
 
-As noted above, the metadata and GeoJSON arguments will be removed in a future version. 
 The returned dictionary (``item`` from the above example) contains the following elements:
 - ``item["md5"]`` the md5 checksum of the encoded BUFR data
 - ``item["bufr4"]`` binary BUFR data
-- ``item["geojson"]`` geojson string representation (to be removed)
+- ``item["geojson"]`` geojson string representation
 - ``item["_meta"]`` dictionary containing elements used by wis2node.
 - ``item["_meta"]["identifier"]`` unique identifier for result
 - ``item["_meta"]["data_date"]`` characteristic date of data contained in result (from BUFR)
 - ``item["_meta"]["originating_centre"]`` originating centre for data  (from BUFR)
 - ``item["_meta"]["data_category"]`` data category (from BUFR)
+
+### Examples
+
+Generate template for basic BUFR sequence containing
+
+- Station name (001015)
+- Observation Date & Time (004001 004002 004003 004004 004005)
+- Latitude (high accuracy) (005001)
+- Longitude (high accuracy) (006001)
+- Wind Direction (011001)
+- Wind Gust (011041)
+- Wind Speed (011002)
+- Water Temperature (022043)
+- Water Level (Tidal elevation with respect to local chart datum) (022035)
+
+````bash
+csv2bufr mappings create 001015 004001 004002 004003 004004 004005 \
+    005001 006001 011001 011041 011002 022043 022038
+````

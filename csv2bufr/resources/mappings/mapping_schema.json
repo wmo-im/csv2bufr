@@ -24,6 +24,20 @@
             "type": "array",
             "items": {"$ref": "#/$defs/bufr_element"},
             "description": "mapping from CSV file (or metadata json file) to BUFR"
+        },
+        "wigos_identifier": {
+            "type": "object",
+            "description": "Field to contain WIGOS identifier (currently unused)",
+            "properties": {
+                "csv_column": {"type": "string"},
+                "jsonpath": {"type": "string"},
+                "value": {"type": "string"}
+            },
+            "oneOf": [
+                        {"required": ["value"]},
+                        {"required": ["csv_column"]},
+                        {"required": ["jsonpath"]}
+                    ]
         }
     },
     "required" : ["inputDelayedDescriptorReplicationFactor","header","data"],
