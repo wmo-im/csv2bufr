@@ -31,21 +31,22 @@ ENV DEBIAN_FRONTEND="noninteractive" \
 
 WORKDIR /tmp/eccodes
 
-COPY . /tmp/csv2bufr
-
 RUN echo "Acquire::Check-Valid-Until \"false\";\nAcquire::Check-Date \"false\";" | cat > /etc/apt/apt.conf.d/10no--check-valid-until \
     && apt-get update -y \
     && apt-get install -y ${BUILD_PACKAGES} python3 python3-pip libffi-dev python3-dev \
     && curl https://confluence.ecmwf.int/download/attachments/45757960/eccodes-${ECCODES_VER}-Source.tar.gz --output eccodes-${ECCODES_VER}-Source.tar.gz \
     && tar xzf eccodes-${ECCODES_VER}-Source.tar.gz \
     && mkdir build && cd build && cmake -DCMAKE_INSTALL_PREFIX=${ECCODES_DIR} ../eccodes-${ECCODES_VER}-Source && make && ctest && make install \
-    && cd /tmp/csv2bufr \
-    && python3 setup.py install \
     && cd / && rm -rf /tmp/eccodes /tmp/csv2bufr \
     && apt-get remove --purge -y ${BUILD_PACKAGES} \
     && apt autoremove -y  \
     && apt-get -q clean \
     && rm -rf /var/lib/apt/lists/*
+
+COPY . /tmp/csv2bufr
+
+RUN cd /tmp/csv2bufr && python3 setup.py install
+    
 
 WORKDIR /
 

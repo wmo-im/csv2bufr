@@ -459,10 +459,13 @@ class BUFRMessage:
         # extract wigos ID from metadata
         # Is this the right place for this?
         # ==================================================
-        wigosID = metadata["wigosIds"][0]["wid"]
-        tokens = parse_wigos_id(wigosID)
-        for token in tokens:
-            metadata["wigosIds"][0][token] = tokens[token]
+        try:
+            wigosID = metadata["wigosIds"][0]["wid"]
+            tokens = parse_wigos_id(wigosID)
+            for token in tokens:
+                metadata["wigosIds"][0][token] = tokens[token]
+        except (Exception, AssertionError):
+            LOGGER.warning("WigosID not parsed automatically. wigosID element not in metadata?")
         # ==================================================
         # now parse the data.
         # ==================================================
@@ -651,7 +654,7 @@ def transform(data: str, metadata: dict, mappings: dict,
         result["_meta"] = {
             "identifier": rmk,
             "md5": rmk,
-            "wigos_id": metadata['wigosIds'][0]['wid'],
+            "wigos_id": metadata['wigosIds'][0]['wid'] if 'wigosIds' in metadata else "N/A" ,
             "data_date": message.get_datetime(),
             "originating_centre": message.get_element("bufrHeaderCentre"),
             "data_category": message.get_element("dataCategory")
