@@ -447,7 +447,7 @@ class BUFRMessage:
 
         _template = deepcopy(template)
         result = self._extract(_template)
-        result["id"] = identifier
+        result["properties"]["identifier"] = result["id"] = identifier
 
         result["properties"]["resultTime"] = datetime.now(timezone.utc).isoformat(timespec="seconds") # noqa
         return json.dumps(result, indent=4)

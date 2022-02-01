@@ -124,7 +124,7 @@ def json_template():
                     "sensor_height_above_mean_sea_level": None,
                     "valid_min": None,
                     "valid_max": None,
-
+                    "scale": None,
                     "offset": None
                 },
                 "#1#pressureReducedToMeanSeaLevel": {
@@ -140,7 +140,7 @@ def json_template():
                     "sensor_height_above_mean_sea_level": None,
                     "valid_min": None,
                     "valid_max": None,
-
+                    "scale": None,
                     "offset": None
                 }
             }
@@ -170,7 +170,7 @@ def json_result():
                     "sensor_height_above_mean_sea_level": None,
                     "valid_min": None,
                     "valid_max": None,
-
+                    "scale": None,
                     "offset": None
                 },
                 "#1#pressureReducedToMeanSeaLevel": {
@@ -181,7 +181,7 @@ def json_result():
                     "sensor_height_above_mean_sea_level": None,
                     "valid_min": None,
                     "valid_max": None,
-
+                    "scale": None,
                     "offset": None
                 }
             }
