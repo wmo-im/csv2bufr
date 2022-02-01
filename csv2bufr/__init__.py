@@ -514,7 +514,7 @@ class BUFRMessage:
             for token in tokens:
                 metadata["wigosIds"][0][token] = tokens[token]
         except (Exception, AssertionError):
-            LOGGER.warning("WigosID not parsed automatically. wigosID element not in metadata?")
+            LOGGER.warning("WigosID not parsed automatically. wigosID element not in metadata?")  # noqa
         # ==================================================
         # now parse the data.
         # ==================================================
@@ -704,7 +704,7 @@ def transform(data: str, metadata: dict, mappings: dict,
         result["_meta"] = {
             "identifier": rmk,
             "md5": rmk,
-            "wigos_id": metadata['wigosIds'][0]['wid'] if 'wigosIds' in metadata else "N/A" ,
+            "wigos_id": metadata['wigosIds'][0]['wid'] if 'wigosIds' in metadata else "N/A",  # noqa
             "data_date": message.get_datetime(),
             "originating_centre": message.get_element("bufrHeaderCentre"),
             "data_category": message.get_element("dataCategory")
