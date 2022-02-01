@@ -654,7 +654,6 @@ def transform(data: str, metadata: dict, mappings: dict,
         result["_meta"] = {
             "identifier": rmk,
             "md5": rmk,
-            "wigos_id": metadata['wigosIds'][0]['wid'],
             "data_date": message.get_datetime(),
             "originating_centre": message.get_element("bufrHeaderCentre"),
             "data_category": message.get_element("dataCategory")
