@@ -448,6 +448,7 @@ class BUFRMessage:
         _template = deepcopy(template)
         result = self._extract(_template)
         result["id"] = identifier
+
         result["properties"]["resultTime"] = datetime.now(timezone.utc).isoformat(timespec="seconds") # noqa
         return json.dumps(result, indent=4)
 
@@ -507,10 +508,13 @@ class BUFRMessage:
         # extract wigos ID from metadata
         # Is this the right place for this?
         # ==================================================
-        wigosID = metadata["wigosIds"][0]["wid"]
-        tokens = parse_wigos_id(wigosID)
-        for token in tokens:
-            metadata["wigosIds"][0][token] = tokens[token]
+        try:
+            wigosID = metadata["wigosIds"][0]["wid"]
+            tokens = parse_wigos_id(wigosID)
+            for token in tokens:
+                metadata["wigosIds"][0][token] = tokens[token]
+        except (Exception, AssertionError):
+            LOGGER.warning("WigosID not parsed automatically. wigosID element not in metadata?")
         # ==================================================
         # now parse the data.
         # ==================================================
@@ -699,12 +703,16 @@ def transform(data: str, metadata: dict, mappings: dict,
         LOGGER.debug("Adding metadata elements")
         result["_meta"] = {
             "identifier": rmk,
+            "md5": rmk,
+            "wigos_id": metadata['wigosIds'][0]['wid'] if 'wigosIds' in metadata else "N/A" ,
             "data_date": message.get_datetime(),
             "originating_centre": message.get_element("bufrHeaderCentre"),
             "data_category": message.get_element("dataCategory")
         }
-        time = datetime.now(timezone.utc).isoformat()
-        LOGGER.info(f"|{time}|{metadata['wigosIds'][0]['wid']}|{result['_meta']['data_date']}|{rmk}")  # noqa
+
+        time_ = datetime.now(timezone.utc).isoformat()
+        LOGGER.info(f"{time_}|{result['_meta']}")
+
         # increment ticker
         rows_read += 1
 

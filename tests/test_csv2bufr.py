@@ -100,6 +100,7 @@ def json_template():
                             {"eccodes_key": "#1#latitude"}]
         },
         "properties": {
+            "identifier": None,
             "phenomenonTime": {
                 "format": "{:04d}-{:02d}-{:02d}T{:02d}:{:02d}:00+00:00",
                 "args": [
@@ -157,6 +158,7 @@ def json_result():
             "coordinates": [0.0, 55.154]
         },
         "properties": {
+            "identifier": "981938dbd97be3e5adc8e7b1c6eb642c",
             "phenomenonTime": "2021-11-18T18:00:00+00:00",
             "resultTime": None,
             "observations": {
@@ -327,9 +329,14 @@ def test_transform(data_dict, station_dict, mapping_dict):
     result = transform(data, station_dict, mapping_dict)
     for item in result:
         assert isinstance(item, dict)
-        assert "md5" in item
         assert "_meta" in item
-        assert item["md5"] == '981938dbd97be3e5adc8e7b1c6eb642c'
+
+        item_meta_keys = ['data_category', 'data_date', 'identifier',
+                          'md5', 'originating_centre', 'wigos_id']
+
+        assert sorted(item["_meta"].keys()) == item_meta_keys
+
+        assert item["_meta"]["md5"] == "981938dbd97be3e5adc8e7b1c6eb642c"
 
 
 def test_json(data_dict, station_dict, mapping_dict, json_template,

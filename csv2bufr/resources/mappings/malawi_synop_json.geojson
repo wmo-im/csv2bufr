@@ -9,6 +9,7 @@
         {"eccodes_key":"#1#heightOfStationGroundAboveMeanSeaLevel"}]
   },
   "properties": {
+    "identifier": null,
     "phenomenonTime": {"format":"{:04d}-{:02d}-{:02d}T{:02d}:{:02d}:00+00:00", "args": [
       {"eccodes_key":"#1#year"},
       {"eccodes_key":"#1#month"},
