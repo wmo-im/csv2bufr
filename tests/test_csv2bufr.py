@@ -124,7 +124,7 @@ def json_template():
                     "sensor_height_above_mean_sea_level": None,
                     "valid_min": None,
                     "valid_max": None,
-
+                    "scale": None,
                     "offset": None
                 },
                 "#1#pressureReducedToMeanSeaLevel": {
@@ -140,7 +140,7 @@ def json_template():
                     "sensor_height_above_mean_sea_level": None,
                     "valid_min": None,
                     "valid_max": None,
-
+                    "scale": None,
                     "offset": None
                 }
             }
@@ -170,7 +170,7 @@ def json_result():
                     "sensor_height_above_mean_sea_level": None,
                     "valid_min": None,
                     "valid_max": None,
-
+                    "scale": None,
                     "offset": None
                 },
                 "#1#pressureReducedToMeanSeaLevel": {
@@ -181,7 +181,7 @@ def json_result():
                     "sensor_height_above_mean_sea_level": None,
                     "valid_min": None,
                     "valid_max": None,
-
+                    "scale": None,
                     "offset": None
                 }
             }
@@ -329,7 +329,6 @@ def test_transform(data_dict, station_dict, mapping_dict):
     result = transform(data, station_dict, mapping_dict)
     for item in result:
         assert isinstance(item, dict)
-
         assert "_meta" in item
 
         item_meta_keys = ['data_category', 'data_date', 'identifier',

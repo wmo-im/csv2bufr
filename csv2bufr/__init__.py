@@ -21,15 +21,15 @@
 
 __version__ = "0.1.0"
 
+from copy import deepcopy
 import csv
-import json
 from datetime import timezone, datetime
 import hashlib
 from io import StringIO, BytesIO
+import json
 import logging
 import os.path
 from typing import Any, Iterator, Union
-from jsonpath_ng.ext import parser
 
 from eccodes import (codes_bufr_new_from_samples,
                      codes_set_array, codes_set, codes_get_native_type,
@@ -38,6 +38,7 @@ from eccodes import (codes_bufr_new_from_samples,
                      codes_bufr_keys_iterator_new,
                      codes_bufr_keys_iterator_next,
                      codes_bufr_keys_iterator_get_name, CodesInternalError)
+from jsonpath_ng.ext import parser
 from jsonschema import validate
 
 # some 'constants'
@@ -227,7 +228,7 @@ class BUFRMessage:
                         self.dict[key][attr] = \
                             codes_get(bufr_msg, f"{key}->{attr}")
                     except Exception as e:
-                        raise(e)
+                        raise e
         # ============================================
         # now release the BUFR message back to eccodes
         # ============================================
@@ -235,9 +236,56 @@ class BUFRMessage:
         # ============================================
         # finally add last few items to class
         # ============================================
+        self.descriptors = descriptors
         self.delayed_replications = delayed_replications  # used when encoding
         self.bufr = None  # placeholder for BUFR bytes
         # ============================================
+
+    def create_template(self) -> None:
+        template = {}
+        template["inputDelayedDescriptorReplicationFactor"] = \
+            self.delayed_replications
+        template["number_header_rows"] = 1
+        template["names_on_row"] = 1
+        template["header"] = []
+        # create header section
+        for element in HEADERS:
+            value = None
+            if element == "unexpandedDescriptors":
+                value = self.descriptors
+            entry = {
+                "eccodes_key": element,
+                "value": value,
+                "csv_column": None,
+                "jsonpath": None,
+                "valid_min": None,
+                "valid_max": None,
+                "scale": None,
+                "offset": None
+            }
+            template["header"].append(entry)
+        # now create data section
+        template["data"] = []
+        for element in self.dict:
+            if element not in HEADERS:
+                entry = {
+                    "eccodes_key": element,
+                    "value": None,
+                    "csv_column": None,
+                    "jsonpath": None,
+                    "valid_min": None,
+                    "valid_max": None,
+                    "scale": None,
+                    "offset": None
+                }
+                template["data"].append(entry)
+        # add WIGOS identifier
+        template["wigos_identifier"] = {
+            "value": None,
+            "jsonpath": None,
+            "csv_column": None
+        }
+        print(json.dumps(template, indent=4))
 
     def reset(self) -> None:
         """
@@ -398,8 +446,10 @@ class BUFRMessage:
         :returns: string containing geoJSON data (from json.dumps)
         """
 
-        result = self._extract(template)
+        _template = deepcopy(template)
+        result = self._extract(_template)
         result["properties"]["identifier"] = result["id"] = identifier
+
         result["properties"]["resultTime"] = datetime.now(timezone.utc).isoformat(timespec="seconds") # noqa
         return json.dumps(result, indent=4)
 
@@ -465,7 +515,7 @@ class BUFRMessage:
             for token in tokens:
                 metadata["wigosIds"][0][token] = tokens[token]
         except (Exception, AssertionError):
-            LOGGER.warning("WigosID not parsed automatically. wigosID element not in metadata?")
+            LOGGER.warning("WigosID not parsed automatically. wigosID element not in metadata?")  # noqa
         # ==================================================
         # now parse the data.
         # ==================================================
@@ -488,7 +538,7 @@ class BUFRMessage:
                 elif column is not None:
                     # get column name
                     # make sure column is in data
-                    if (column not in data):
+                    if column not in data:
                         message = f"column '{column}' not found in data dictionary"  # noqa
                         raise ValueError(message)
                     value = data[column]
@@ -643,6 +693,7 @@ def transform(data: str, metadata: dict, mappings: dict,
 
         # now md5 as the key for this obs.
         rmk = message.md5()
+        result["md5"] = rmk
 
         # now create GeoJSON if specified
         if template:
@@ -654,13 +705,15 @@ def transform(data: str, metadata: dict, mappings: dict,
         result["_meta"] = {
             "identifier": rmk,
             "md5": rmk,
-            "wigos_id": metadata['wigosIds'][0]['wid'] if 'wigosIds' in metadata else "N/A" ,
+            "wigos_id": metadata['wigosIds'][0]['wid'] if 'wigosIds' in metadata else "N/A",  # noqa
             "data_date": message.get_datetime(),
             "originating_centre": message.get_element("bufrHeaderCentre"),
             "data_category": message.get_element("dataCategory")
         }
+
         time_ = datetime.now(timezone.utc).isoformat()
         LOGGER.info(f"{time_}|{result['_meta']}")
+
         # increment ticker
         rows_read += 1
 
