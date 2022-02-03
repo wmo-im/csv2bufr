@@ -693,7 +693,6 @@ def transform(data: str, metadata: dict, mappings: dict,
 
         # now md5 as the key for this obs.
         rmk = message.md5()
-        result["md5"] = rmk
 
         # now create GeoJSON if specified
         if template:
