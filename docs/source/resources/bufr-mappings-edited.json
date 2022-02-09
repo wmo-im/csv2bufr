@@ -118,13 +118,13 @@
         },
         {
             "eccodes_key": "#1#3HourPressureChange",
-            "csv_column": "a"
-        },
-        {
-            "eccodes_key": "#1#characteristicOfPressureTendency",
             "csv_column": "ppp",
             "scale": 2,
             "offset": 0
+        },
+        {
+            "eccodes_key": "#1#characteristicOfPressureTendency",
+            "csv_column": "a"
         }
     ],
     "wigos_identifier": {

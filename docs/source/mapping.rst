@@ -26,7 +26,7 @@ In both cases the field eccodes_key is used to indicate the BUFR element being m
 For example, the code block below shows how the pressure reduced to mean sea level would be mapped from the column "mslp" in the csv file
 to the BUFR element indicated by the eccodes key "pressureReducedToMeanSeaLevel" (FXXYYY = 010051).
 
-.. code-block::
+.. code-block:: json
 
 	{
 		"data":[
@@ -37,7 +37,7 @@ to the BUFR element indicated by the eccodes key "pressureReducedToMeanSeaLevel"
 In addition to mapping to the csv columns, constant values and values from the JSON metadata file can be mapped using the "value" and "josnpath" fields.
 Building on the prior example:
 
-.. code-block::
+.. code-block:: json
 
 	{
 		"header":[
@@ -96,7 +96,7 @@ The scaled values are calculated as:
 
 The scaled value is then used to set the indicated BUFR element. For example:
 
-.. code-block::
+.. code-block:: json
 
 	{
 		"data":[
@@ -119,7 +119,7 @@ It should be noted that the units of the data to be encoded into BUFR should mat
 Kelvin for temperatures, Pascals for pressure etc. Simple conversions between units are possible as specified above using
 the ``scale`` and ``offset`` fields. Some additional examples are given below.
 
-.. code-block::
+.. code-block:: json
 
 	{
 		"data":[

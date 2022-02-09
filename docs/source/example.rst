@@ -13,9 +13,9 @@ Creating a new mapping file
 A command line tool to create an empty BUFR mapping template has been included as part of the csv2bufr module.
 This can be invoked using the ``csv2bufr mappings create <BUFR descriptors>`` command. E.g.:
 
-.. code-block::
+.. code-block:: bash
 
-	csv2bufr mappings create 301150 302001 > bufr-mappings.json
+	csv2bufr mappings create 301150 301011 301012 301021 302001 > bufr-mappings.json
 
 
 :redtext:`we need to add location+date to the above`
