@@ -7,24 +7,24 @@ BUFR4 Descriptors
 Introduction
 ------------
 
-The data contained within the data section of a BUFR message (Section 4, byte 5 onwards - see previous page)
-are specified within the :redtext:`unexpanded descriptors` from Section 3 of the BUFR message.
+As part of the BUFR format, a list of the included parameters is embedded within the file using the
+:redtext:`unexpandedDescriptors` element of Section 3.
 This element takes a list of the parameters to be included and the order of those parameters.
 For example, the unexpanded descriptor list (in text, see format of descriptors below):
 
 .. code::
 
 	["unexpandedDescriptors"] = ["wigosID", "year", "month", "day", "hour", "minute", \
-                                 "latitude", "longitude", "mean sea level pressure"]
+                                 "latitude", "longitude", "pressure reduced to mean sea level"]
 
-would specify that the station identifier (wigosID) followed by the date, time, location and then mean sea level
-pressure would be included in the data section. For conciseness, aliases (or sequences in BUFR terminology) exist to group commonly
-reported parameters together, for example grouping the year, month and day together.
+would specify that the station identifier (wigosID) followed by the date, time, location and then the pressure reduced to mean sea level would be included in the data section.
+For conciseness, aliases (or sequences in BUFR terminology) exist to group commonly
+reported parameters together, for example grouping the year, month and day together in the group date.
 Using sequences, the above example becomes:
 
 .. code::
 
-	["unexpandedDescriptors"] = ["wigosID", "date", "time", "location", "mean sea level pressure"]
+	["unexpandedDescriptors"] = ["wigosID", "date", "time", "location", "pressure reduced to mean sea level"]
 
 where
 
@@ -68,17 +68,18 @@ where:
              = ["hour", "minute"]
     [301023] = [    005002,      006002] # (location)
              = ["latitude", "longitude"]
-    [010051] = ["mean sea level pressure"]
+    [010051] = ["pressure reduced to mean sea level"]
 
 
 Replication / repetition
 ------------------------
 
-Within BUFR elements can be repeated using the replication descriptors (F=1 in FXXYYY).
+Within the BUFR format elements can be repeated using the replication descriptors (F=1 in FXXYYY).
 For example, we may want to repeat temperature and humidity measurements as part of an atmospheric
 profile or, alternatively, the daily minimum and maximum temperatures within a month.
 In some cases we may know the number of repetitions before encoding and all data of the same type
-may have the same number of repetitions. In this case th number of replications can be set before hand.
+may have the same number of repetitions.
+In this case the number of replications can be set before hand and included in the sequence.
 In other cases, there may be a variable number of repetitions and so the number is set at the time of encoding.
 
 When using the replication descriptor (1XXYYY), the XX component indicates the number of following descriptors to repeat

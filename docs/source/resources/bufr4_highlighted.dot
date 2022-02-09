@@ -29,7 +29,7 @@ section1  [label=<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="
 			<TR><TD><FONT COLOR="red">bufrHeaderSubCentre</FONT></TD><TD>2</TD><TD>Identification of originating/generating sub-centre (allocated by <BR/> originating/generating centre – see Common Code Table C–12)</TD></TR>
 			<TR><TD><FONT COLOR="red">updateSequenceNumber</FONT></TD><TD>1</TD><TD>Update sequence number (zero for original messages and for messages containing only <BR/>delayed reports; incremented for the other updates)</TD></TR>
 			<TR><TD>section1Flags</TD><TD>1</TD><TD>Flag indicating presence of optional section (section 2)</TD></TR>
-			<TR><TD><FONT COLOR="red">dataCategory</FONT></TD><TD>1</TD><TD>DData category (Table A)</TD></TR>
+			<TR><TD><FONT COLOR="red">dataCategory</FONT></TD><TD>1</TD><TD>Data category (Table A)</TD></TR>
 			<TR><TD><FONT COLOR="red">internationalDataSubCategory</FONT></TD><TD>1</TD><TD>International data sub-category (see Common Code Table C–13 and Note 3)</TD></TR>
 			<TR><TD>dataSubCategory</TD><TD>1</TD><TD>Local data sub-category (defined locally by automatic <BR/>data-processing (ADP) centres – see Note 3)</TD></TR>
 			<TR><TD><FONT COLOR="red">masterTablesVersionNumber</FONT></TD><TD>1</TD><TD>BUFR master table version number (see Common Code Table C–0 and Note 2)</TD></TR>

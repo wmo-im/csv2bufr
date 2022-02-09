@@ -70,7 +70,7 @@ html_theme = "nature"
 html_static_path = ['_static']
 
 html_css_files = [
-        '_static/theme_overrides.css',  # overrides for wide tables in RTD theme
+        'theme_overrides.css',  # overrides for wide tables in RTD theme
         ]
 
 # options for maths

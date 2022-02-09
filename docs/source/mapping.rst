@@ -1,7 +1,7 @@
 .. _mapping:
 
-BUFR template mapping
-=====================
+BUFR template
+=============
 
 Schema
 ------
@@ -25,14 +25,14 @@ The JSON schema contains 6 primary properties:
 Out of these, only the ``inputDelayedDescriptorReplicationFactor``, ``header`` and ``data`` are mandatory.
 The ``number_header_rows`` and ``names_on_row`` default to one if not specified.
 
-bufr_element
-************
+Both the ``header`` and ``data`` properties make use of the ``bufr_element`` object
 
 header
 ******
 
 data
 ****
+
 
 - json schema
 - mapping, csv_column vs jsonpath
