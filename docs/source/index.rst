@@ -19,6 +19,7 @@ csv2bufr |release| documentation
    bufr4
    bufr4_descriptors
    mapping
+   example
    development
    support
    license
