@@ -45,7 +45,7 @@ with the WIGOS station identifier "0-20008-0-SGI" the following would be used:
 
 	pyoscar station --identifier 0-20008-0-SGI > 0-20008-0-SGI.json
 
-This writes the output to the file 0-20008-0-SGI.json.
+This writes the output to the file 0-20008-0-SGI.json as specified by the redirect (>).
 
 The following example transforms the data in file ``my-csv-file.csv`` to BUFR using template ``csv-to-bufr-mapping.json``
 and writes the output to directory ``output-directory-path``:

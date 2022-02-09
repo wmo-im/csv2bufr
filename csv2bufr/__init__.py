@@ -19,7 +19,7 @@
 #
 ###############################################################################
 
-__version__ = "0.1.0"
+__version__ = "0.0.1"
 
 from copy import deepcopy
 import csv
@@ -140,8 +140,7 @@ def apply_scaling(value: Union[NUMBERS], scale: Union[NUMBERS],
 
     .. math::
         \\mbox{scaled\\_value} =
-            \\left(\\mbox{value} + \\mbox{offset}\\right)
-            \\times 10^{\\mbox{scale}}
+            \\mbox{value} \\times 10^{\\mbox{scale}} + \\mbox{offset}
 
     :param value: The input value to have scaling and offset applied to
     :param scale: The scale factor to use
