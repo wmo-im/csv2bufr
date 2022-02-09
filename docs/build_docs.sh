@@ -15,7 +15,8 @@ make -C ./docs html # now build the docs
 
 # setup environment
 # =================
-git config --global user.name "${GITHUB_ACTOR}"
+git config --local user.email "action@github.com"
+git config --local user.name "GitHub Action"
 
 # create temporary directory to work in
 working_directory=`mktemp -d`
