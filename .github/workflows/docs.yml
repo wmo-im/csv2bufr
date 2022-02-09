@@ -17,7 +17,7 @@ jobs:
         run: |
           apt-get update
           apt-get install -y git
-          git clone --depth 1 "https://token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" .
+          git clone -b docs --depth 1 "https://token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" .
         shell: bash
 
       - name: build
