@@ -1,0 +1,135 @@
+{
+    "inputDelayedDescriptorReplicationFactor": [],
+    "number_header_rows": 1,
+    "names_on_row": 1,
+    "header": [
+        {
+            "eccodes_key": "edition",
+            "value": 4
+        },
+        {
+            "eccodes_key": "masterTableNumber",
+            "value": 0
+        },
+        {
+            "eccodes_key": "bufrHeaderCentre",
+            "value": null
+        },
+        {
+            "eccodes_key": "bufrHeaderSubCentre",
+            "value": null
+        },
+        {
+            "eccodes_key": "updateSequenceNumber",
+            "value": 0
+        },
+        {
+            "eccodes_key": "dataCategory",
+            "value": 0
+        },
+        {
+            "eccodes_key": "internationalDataSubCategory",
+            "value": 6
+        },
+        {
+            "eccodes_key": "dataSubCategory",
+            "value": null
+        },
+        {
+            "eccodes_key": "masterTablesVersionNumber",
+            "value": 37
+        },
+        {
+            "eccodes_key": "localTablesVersionNumber",
+            "value": null
+        },
+        {
+            "eccodes_key": "typicalYear",
+            "csv_column": "year"
+        },
+        {
+            "eccodes_key": "typicalMonth",
+            "csv_column": "month"
+        },
+        {
+            "eccodes_key": "typicalDay",
+            "csv_column": "day"
+        },
+        {
+            "eccodes_key": "typicalHour",
+            "csv_column": "hour"
+        },
+        {
+            "eccodes_key": "typicalMinute",
+            "csv_column": "minute"
+        },
+        {
+            "eccodes_key": "numberOfSubsets",
+            "value": 1
+        },
+        {
+            "eccodes_key": "observedData",
+            "value": 1
+        },
+        {
+            "eccodes_key": "compressedData",
+            "value": 0
+        },
+        {
+            "eccodes_key": "unexpandedDescriptors",
+            "value": [
+                301150,
+                302001
+            ]
+        },
+        {
+            "eccodes_key": "subsetNumber",
+            "value": 1
+        }
+    ],
+    "data": [
+        {
+            "eccodes_key": "#1#wigosIdentifierSeries",
+            "jsonpath": "$.wigosIds[0].wid_series"
+        },
+        {
+            "eccodes_key": "#1#wigosIssuerOfIdentifier",
+            "jsonpath": "$.wigosIds[0].wid_issuer"
+        },
+        {
+            "eccodes_key": "#1#wigosIssueNumber",
+            "jsonpath": "$.wigosIds[0].wid_issue_number"
+        },
+        {
+            "eccodes_key": "#1#wigosLocalIdentifierCharacter",
+            "jsonpath": "$.wigosIds[0].wid_local"
+        },
+        {
+            "eccodes_key": "#1#nonCoordinatePressure",
+            "csv_column": "slp",
+            "scale": 2,
+            "offset": 0
+        },
+        {
+            "eccodes_key": "#1#pressureReducedToMeanSeaLevel",
+            "csv_column": "mslp",
+            "scale": 2,
+            "offset": 0
+        },
+        {
+            "eccodes_key": "#1#3HourPressureChange",
+            "csv_column": "a"
+        },
+        {
+            "eccodes_key": "#1#characteristicOfPressureTendency",
+            "csv_column": "ppp",
+            "scale": 2,
+            "offset": 0
+        }
+    ],
+    "wigos_identifier": {
+        "value": null,
+        "jsonpath": null,
+        "csv_column": null
+    }
+}

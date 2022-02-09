@@ -1,0 +1,327 @@
+{
+    "inputDelayedDescriptorReplicationFactor": [],
+    "number_header_rows": 1,
+    "names_on_row": 1,
+    "header": [
+        {
+            "eccodes_key": "edition",
+            "value": null,
+            "csv_column": null,
+            "jsonpath": null,
+            "valid_min": null,
+            "valid_max": null,
+            "scale": null,
+            "offset": null
+        },
+        {
+            "eccodes_key": "masterTableNumber",
+            "value": null,
+            "csv_column": null,
+            "jsonpath": null,
+            "valid_min": null,
+            "valid_max": null,
+            "scale": null,
+            "offset": null
+        },
+        {
+            "eccodes_key": "bufrHeaderCentre",
+            "value": null,
+            "csv_column": null,
+            "jsonpath": null,
+            "valid_min": null,
+            "valid_max": null,
+            "scale": null,
+            "offset": null
+        },
+        {
+            "eccodes_key": "bufrHeaderSubCentre",
+            "value": null,
+            "csv_column": null,
+            "jsonpath": null,
+            "valid_min": null,
+            "valid_max": null,
+            "scale": null,
+            "offset": null
+        },
+        {
+            "eccodes_key": "updateSequenceNumber",
+            "value": null,
+            "csv_column": null,
+            "jsonpath": null,
+            "valid_min": null,
+            "valid_max": null,
+            "scale": null,
+            "offset": null
+        },
+        {
+            "eccodes_key": "dataCategory",
+            "value": null,
+            "csv_column": null,
+            "jsonpath": null,
+            "valid_min": null,
+            "valid_max": null,
+            "scale": null,
+            "offset": null
+        },
+        {
+            "eccodes_key": "internationalDataSubCategory",
+            "value": null,
+            "csv_column": null,
+            "jsonpath": null,
+            "valid_min": null,
+            "valid_max": null,
+            "scale": null,
+            "offset": null
+        },
+        {
+            "eccodes_key": "dataSubCategory",
+            "value": null,
+            "csv_column": null,
+            "jsonpath": null,
+            "valid_min": null,
+            "valid_max": null,
+            "scale": null,
+            "offset": null
+        },
+        {
+            "eccodes_key": "masterTablesVersionNumber",
+            "value": null,
+            "csv_column": null,
+            "jsonpath": null,
+            "valid_min": null,
+            "valid_max": null,
+            "scale": null,
+            "offset": null
+        },
+        {
+            "eccodes_key": "localTablesVersionNumber",
+            "value": null,
+            "csv_column": null,
+            "jsonpath": null,
+            "valid_min": null,
+            "valid_max": null,
+            "scale": null,
+            "offset": null
+        },
+        {
+            "eccodes_key": "typicalYear",
+            "value": null,
+            "csv_column": null,
+            "jsonpath": null,
+            "valid_min": null,
+            "valid_max": null,
+            "scale": null,
+            "offset": null
+        },
+        {
+            "eccodes_key": "typicalMonth",
+            "value": null,
+            "csv_column": null,
+            "jsonpath": null,
+            "valid_min": null,
+            "valid_max": null,
+            "scale": null,
+            "offset": null
+        },
+        {
+            "eccodes_key": "typicalDay",
+            "value": null,
+            "csv_column": null,
+            "jsonpath": null,
+            "valid_min": null,
+            "valid_max": null,
+            "scale": null,
+            "offset": null
+        },
+        {
+            "eccodes_key": "typicalHour",
+            "value": null,
+            "csv_column": null,
+            "jsonpath": null,
+            "valid_min": null,
+            "valid_max": null,
+            "scale": null,
+            "offset": null
+        },
+        {
+            "eccodes_key": "typicalMinute",
+            "value": null,
+            "csv_column": null,
+            "jsonpath": null,
+            "valid_min": null,
+            "valid_max": null,
+            "scale": null,
+            "offset": null
+        },
+        {
+            "eccodes_key": "typicalSecond",
+            "value": null,
+            "csv_column": null,
+            "jsonpath": null,
+            "valid_min": null,
+            "valid_max": null,
+            "scale": null,
+            "offset": null
+        },
+        {
+            "eccodes_key": "typicalDate",
+            "value": null,
+            "csv_column": null,
+            "jsonpath": null,
+            "valid_min": null,
+            "valid_max": null,
+            "scale": null,
+            "offset": null
+        },
+        {
+            "eccodes_key": "typicalTime",
+            "value": null,
+            "csv_column": null,
+            "jsonpath": null,
+            "valid_min": null,
+            "valid_max": null,
+            "scale": null,
+            "offset": null
+        },
+        {
+            "eccodes_key": "numberOfSubsets",
+            "value": null,
+            "csv_column": null,
+            "jsonpath": null,
+            "valid_min": null,
+            "valid_max": null,
+            "scale": null,
+            "offset": null
+        },
+        {
+            "eccodes_key": "observedData",
+            "value": null,
+            "csv_column": null,
+            "jsonpath": null,
+            "valid_min": null,
+            "valid_max": null,
+            "scale": null,
+            "offset": null
+        },
+        {
+            "eccodes_key": "compressedData",
+            "value": null,
+            "csv_column": null,
+            "jsonpath": null,
+            "valid_min": null,
+            "valid_max": null,
+            "scale": null,
+            "offset": null
+        },
+        {
+            "eccodes_key": "unexpandedDescriptors",
+            "value": [
+                301150,
+                302001
+            ],
+            "csv_column": null,
+            "jsonpath": null,
+            "valid_min": null,
+            "valid_max": null,
+            "scale": null,
+            "offset": null
+        },
+        {
+            "eccodes_key": "subsetNumber",
+            "value": null,
+            "csv_column": null,
+            "jsonpath": null,
+            "valid_min": null,
+            "valid_max": null,
+            "scale": null,
+            "offset": null
+        }
+    ],
+    "data": [
+        {
+            "eccodes_key": "#1#wigosIdentifierSeries",
+            "value": null,
+            "csv_column": null,
+            "jsonpath": null,
+            "valid_min": null,
+            "valid_max": null,
+            "scale": null,
+            "offset": null
+        },
+        {
+            "eccodes_key": "#1#wigosIssuerOfIdentifier",
+            "value": null,
+            "csv_column": null,
+            "jsonpath": null,
+            "valid_min": null,
+            "valid_max": null,
+            "scale": null,
+            "offset": null
+        },
+        {
+            "eccodes_key": "#1#wigosIssueNumber",
+            "value": null,
+            "csv_column": null,
+            "jsonpath": null,
+            "valid_min": null,
+            "valid_max": null,
+            "scale": null,
+            "offset": null
+        },
+        {
+            "eccodes_key": "#1#wigosLocalIdentifierCharacter",
+            "value": null,
+            "csv_column": null,
+            "jsonpath": null,
+            "valid_min": null,
+            "valid_max": null,
+            "scale": null,
+            "offset": null
+        },
+        {
+            "eccodes_key": "#1#nonCoordinatePressure",
+            "value": null,
+            "csv_column": null,
+            "jsonpath": null,
+            "valid_min": null,
+            "valid_max": null,
+            "scale": null,
+            "offset": null
+        },
+        {
+            "eccodes_key": "#1#pressureReducedToMeanSeaLevel",
+            "value": null,
+            "csv_column": null,
+            "jsonpath": null,
+            "valid_min": null,
+            "valid_max": null,
+            "scale": null,
+            "offset": null
+        },
+        {
+            "eccodes_key": "#1#3HourPressureChange",
+            "value": null,
+            "csv_column": null,
+            "jsonpath": null,
+            "valid_min": null,
+            "valid_max": null,
+            "scale": null,
+            "offset": null
+        },
+        {
+            "eccodes_key": "#1#characteristicOfPressureTendency",
+            "value": null,
+            "csv_column": null,
+            "jsonpath": null,
+            "valid_min": null,
+            "valid_max": null,
+            "scale": null,
+            "offset": null
+        }
+    ],
+    "wigos_identifier": {
+        "value": null,
+        "jsonpath": null,
+        "csv_column": null
+    }
+}
