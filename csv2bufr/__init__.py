@@ -572,7 +572,7 @@ class BUFRMessage:
                 if "valid_min" in element:
                     valid_min = element["valid_min"]
                 if "valid_max" in element:
-                    valid_max = element["valid_min"]
+                    valid_max = element["valid_max"]
                 LOGGER.debug(f"validating value {value} for element {element['eccodes_key']} against range")  # noqa
                 try:
                     value = validate_value(element["eccodes_key"], value,
