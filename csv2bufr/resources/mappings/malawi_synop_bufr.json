@@ -23,7 +23,7 @@
     ],
     "wigos_identifier": {"jsonpath": "$.wigosIds[0].wid"},
     "data": [
-        {"eccodes_key": "#1#wigosIdentifierSeries", "jsonpath": "$.wigosIds[0].wid_series"},
+        {"eccodes_key": "#1#wigosIdentifierSeries", "jsonpath": "$.wigosIds[0].wid_series", "csv_column": "aaa"},
         {"eccodes_key": "#1#wigosIssuerOfIdentifier", "jsonpath": "$.wigosIds[0].wid_issuer"},
         {"eccodes_key": "#1#wigosIssueNumber", "jsonpath": "$.wigosIds[0].wid_issue_number"},
         {"eccodes_key": "#1#wigosLocalIdentifierCharacter", "jsonpath": "$.wigosIds[0].wid_local"},

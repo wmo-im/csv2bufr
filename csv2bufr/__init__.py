@@ -53,8 +53,10 @@ LOGGER = logging.getLogger(__name__)
 THISDIR = os.path.dirname(os.path.realpath(__file__))
 MAPPINGS = f"{THISDIR}{os.sep}resources{os.sep}mappings"
 
-BUFR_TABLE_VERSION = 36
+BUFR_TABLE_VERSION = 36  # default BUFR table version
+# list of BUFR attributes
 ATTRIBUTES = ['code', 'units', 'scale', 'reference', 'width']
+# list of ecCodes keys for BUFR headers
 HEADERS = ["edition", "masterTableNumber", "bufrHeaderCentre",
            "bufrHeaderSubCentre", "updateSequenceNumber", "dataCategory",
            "internationalDataSubCategory", "dataSubCategory",
@@ -64,19 +66,32 @@ HEADERS = ["edition", "masterTableNumber", "bufrHeaderCentre",
            "numberOfSubsets", "observedData", "compressedData",
            "unexpandedDescriptors", "subsetNumber"]
 
-# jsonpath_ng appears to consume memory for each parser created, leading to
-# memory leak. For each call it appears to run yacc compiler as well. Create
-# dict of parsers so each is only created / compiled once
+# dictionary to store jsonpath parsers, these are compiled the first time that
+# they are used.
 jsonpath_parsers = dict()
+
+# custom error handlers
+class mapping_exception(Exception):
+    pass
 
 
 def parse_wigos_id(wigos_id: str) -> dict:
     """
-    Split a WSI into a mapping dictionary for use in subsequent processing
+    Returns the WIGOS Identifier (wigos_id) in string representation
+    as the individual components in a dictionary. The WIGOS Identifier takes
+    the following form:
 
-    :param wigos_id: WIGOS Station Identifier (WSI)
+        <WIGOS identifier series>-<issuer>-<issue number>-<local identifier>
 
-    :returns: `dict` of WIGOS series/issuer/issuer number/local id
+    See https://community.wmo.int/wigos-station-identifier for more
+    information.
+
+    :param wigos_id: WIGOS Station Identifier (WSI) as a string, e.g.
+        "0-20000-0-ABCD123"
+
+    :returns: `dict` containing components of the WIGOS identifier:
+        "wid_series", "wid_issuer", "wid_issue_number" and "local_identifier"
+
     """
 
     tokens = wigos_id.split("-")
@@ -90,12 +105,13 @@ def parse_wigos_id(wigos_id: str) -> dict:
     return result
 
 
-def validate_mapping_dict(mapping_dict: dict) -> bool:
+def validate_mapping(mapping: dict) -> bool:
     """
-    Validate mapping dictionary
+    Validates dictionary containing mapping to BUFR against internal schema.
+    Returns True if the dictionary passes and raises an error otherwise.
 
-    :param mapping_dict: dictionary containing mappings to specified BUFR
-                        sequence using ECCODES key.
+    :param mapping: dictionary containing mappings to specified BUFR
+                        sequence using ecCodes key.
 
     :returns: `bool` of validation result
     """
@@ -107,9 +123,9 @@ def validate_mapping_dict(mapping_dict: dict) -> bool:
 
     # now validate
     try:
-        validate(mapping_dict, schema)
-    except Exception as e:
-        message = "invalid mapping dictionary"
+        validate(mapping, schema)
+    except mapping_exception as e:
+        message = "Invalid mapping dictionary"
         LOGGER.error(message)
         raise e
 
@@ -119,11 +135,17 @@ def validate_mapping_dict(mapping_dict: dict) -> bool:
 def apply_scaling(value: Union[NUMBERS], scale: Union[NUMBERS],
                   offset: Union[NUMBERS]) -> Union[NUMBERS]:
     """
-    Apply simple scaling and offsets
+    Applies a simple scaling and offset to the input data value.
+    Scaling follows the BUFR conventions, e.g.
 
-    :param value: TODO describe
-    :param scale: TODO describe
-    :param offset: TODO describe
+    .. math::
+        \\mbox{scaled\\_value} =
+            \\left(\\mbox{value} + \\mbox{offset}\\right)
+            \\times 10^{\\mbox{scale}}
+
+    :param value: The input value to have scaling and offset applied to
+    :param scale: The scale factor to use
+    :param offset: The offset factor to use
 
     :returns: scaled value
     """
@@ -613,24 +635,45 @@ class BUFRMessage:
 def transform(data: str, metadata: dict, mappings: dict,
               template: dict = {}) -> Iterator[dict]:
     """
-    Function to drive conversion to BUFR and if specified to geojson
+    This function returns an iterator to process each line in the input CSV
+    string. On each iteration a dictionary is returned containing the BUFR
+    encoded data and, if specified, a geojson representation. The mapping to
+    BUFR is specified by the "mappings" dictionary using the ecCodes keys. For
+    more information and a list of the keys see the tables at:
+
+        https://confluence.ecmwf.int/display/ECC/WMO%3D37+element+table
+
+    The dictionary returned by the iterator contains the following keys:
+
+        - ["bufr4"] = data encoded into BUFR;
+        - ["geojson"] = data encoded into geojson (only present if template specified);
+        - ["_meta"] = metadata on the data.
+
+    The ["_meta"] element includes the following:
+
+        - ["identifier"] = unique identifier for report;
+        - ["md5"] = md5 checksum of BUFR encoded data;
+        - ["wigos_id"] = WIGOS identifier;
+        - ["data_date"] = characteristic date of data;
+        - ["originating_centre"] = Originating centre (see Common code table C11);
+        - ["data_category"] = Category of data, see BUFR Table A.
 
     :param data: string containing csv separated data. First line should
                 contain the column headers, second line the data
     :param metadata: dictionary containing the metadata for the station
                     from OSCAR surface
     :param mappings: dictionary containing list of BUFR elements to
-                    encode (specified using ECCODES key) and whether
+                    encode (specified using ecCodes key) and whether
                     to get the value from (fixed, csv or metadata)
     :param template: dictionary containing mapping from BUFR to geoJSON
 
-    :returns: `dict` of output messages
+    :returns: iterator
     """
 
     # ======================
     # validate mapping files
     # ======================
-    e = validate_mapping_dict(mappings)
+    e = validate_mapping(mappings)
     if e is not SUCCESS:
         raise ValueError("Invalid mappings")
     # ==========================================================

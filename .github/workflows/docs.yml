@@ -1,0 +1,27 @@
+name: docs
+
+on:
+  push:
+    branches: [ docs ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container: debian:buster-slim
+
+    steps:
+
+      - name: setup
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          apt-get update
+          apt-get install -y git
+          git clone --depth 1 "https://token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" .
+        shell: bash
+
+      - name: build
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: "docs/build_docs.sh"
+        shell: bash

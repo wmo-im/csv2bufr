@@ -246,17 +246,19 @@ The returned dictionary (``item`` from the above example) contains the following
 
 Generate template for basic BUFR sequence containing
 
-- Station name (001015)
-- Observation Date & Time (004001 004002 004003 004004 004005)
+- Tide station identification (001075)
+- Year, month, day (301011)
+- Hour, minute (301012)
 - Latitude (high accuracy) (005001)
 - Longitude (high accuracy) (006001)
 - Wind Direction (011001)
 - Wind Gust (011041)
 - Wind Speed (011002)
 - Water Temperature (022043)
-- Water Level (Tidal elevation with respect to local chart datum) (022035)
+- Water Level (Tidal elevation with respect to local chart datum) (022038)
+- Meteorological residual tidal elevation (surge or offset) (022039)
 
 ````bash
-csv2bufr mappings create 001015 004001 004002 004003 004004 004005 \
-    005001 006001 011001 011041 011002 022043 022038
+csv2bufr mappings create 001075 301011 301012 301021 011001 011002 \
+                         011041 022043 022038 022039 
 ````
