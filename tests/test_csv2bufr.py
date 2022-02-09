@@ -27,7 +27,7 @@ import json
 from eccodes import (codes_bufr_new_from_samples, codes_release)
 import pytest
 
-from csv2bufr import (validate_mapping_dict, apply_scaling, validate_value,
+from csv2bufr import (validate_mapping, apply_scaling, validate_value,
                       transform, SUCCESS)
 
 LOGGER = logging.getLogger(__name__)
@@ -252,14 +252,14 @@ def test_eccodes():
     assert True
 
 
-# test to check validate_mapping_dict is not broken
-def test_validate_mapping_dict_pass(mapping_dict):
-    success = validate_mapping_dict(mapping_dict)
+# test to check validate_mapping is not broken
+def test_validate_mapping_pass(mapping_dict):
+    success = validate_mapping(mapping_dict)
     assert success == SUCCESS
 
 
-# test to check validate_mapping_dict fails when we expect it to
-def test_validate_mapping_dict_fail():
+# test to check validate_mapping fails when we expect it to
+def test_validate_mapping_fail():
     # not sure on this one, do we need this test and if so have many
     # different exceptions do we want to test?
     test_data = {
@@ -273,7 +273,7 @@ def test_validate_mapping_dict_fail():
         ]
     }
     try:
-        success = validate_mapping_dict(test_data)
+        success = validate_mapping(test_data)
     except Exception:
         success = False
     assert success != SUCCESS
