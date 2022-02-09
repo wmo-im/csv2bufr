@@ -17,7 +17,8 @@ This can be invoked using the ``csv2bufr mappings create <BUFR descriptors>`` co
 
 	csv2bufr mappings create 301150 302001 > bufr-mappings.json
 
-:redtext:`we need to add locaition+date to the above`
+
+:redtext:`we need to add location+date to the above`
 
 generates the following file:
 
