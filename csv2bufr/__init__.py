@@ -683,10 +683,19 @@ def transform(data: str, metadata: dict, mappings: dict,
     path = "$.header[?(@.eccodes_key=='unexpandedDescriptors')]"
     unexpanded_descriptors = \
         parser.parse(path).find(mappings)[0].value["value"]
+
     path = "$.header[?(@.eccodes_key=='masterTablesVersionNumber')]"
     table_version = parser.parse(path).find(mappings)[0].value["value"]
-    nheaders = mappings["number_header_rows"]
-    names = mappings["names_on_row"]
+
+    if "number_header_rows" in mappings:
+        nheaders = mappings["number_header_rows"]
+    else:
+        nheaders = 1
+
+    if "names_on_row" in mappings:
+        names = mappings["names_on_row"]
+    else:
+        names = 1
 
     # =========================================
     # Now we need to convert string back to CSV
@@ -736,7 +745,6 @@ def transform(data: str, metadata: dict, mappings: dict,
 
         # now md5 as the key for this obs.
         rmk = message.md5()
-        result["md5"] = rmk
 
         # now create GeoJSON if specified
         if template:
