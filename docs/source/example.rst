@@ -48,6 +48,8 @@ Editing the bufr mappings file to map to the above example csv data we have:
 
 .. literalinclude:: resources/bufr-mappings-edited.json
 
+Note that the sequence includes no delayed replications and so the :redtext:`inputDelayedDescriptorReplicationFactor` can be left as an empty array.
+
 Transformation
 --------------
 

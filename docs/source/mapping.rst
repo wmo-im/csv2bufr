@@ -42,7 +42,7 @@ Building on the prior example:
 	{
 		"header":[
 			{"eccodes_key": "dataCategory", "value": 0}
-		]
+		],
 		"data":[
 			{"eccodes_key": "latitude", "jsonpath": "$.locations[0].latitude"},
 			{"eccodes_key": "longitude", "jsonpath": "$.locations[0].latitude"},
@@ -63,6 +63,9 @@ Similarly the keys for the different data elements can be found at:
 
 - `<https://confluence.ecmwf.int/display/ECC/WMO%3D37+element+table>`_
 
+inputDelayedDescriptorReplicationFactor
+---------------------------------------
+Due to the way that eccodes works the
 
 bufr_element
 ------------
@@ -82,7 +85,7 @@ The ``jsonpath`` source maps from the value found by resolving the JSON path in 
 
 The ``valid_min`` and ``valid_max`` are optional and can be used to perform a basic quality control of numeric fields.
 If these fields are specified the csv2bufr module checks the value indicated extracted from the source to the indicated
-valid minimum and maximum values. If outside of the range the value is set to missing (:redtext:`this needs checking`).
+valid minimum and maximum values. If outside of the range the value is set to missing.
 
 The ``scale`` and ``offset`` fields are conditionally optional, either both can be omitted or both can included.
 Including only one will result in a failed validation of the mapping file. These allow simple unit conversions to be performed,
@@ -109,7 +112,9 @@ The scaled value is then used to set the indicated BUFR element. For example:
 		]
 	}
 
-Would convert the value contained in the "mslp" column of the CSV file from hPa to Pa by multiplying by 100 (:math:`10^2`) and adding 0.
+Would convert the value contained in the "mslp" column of the CSV file from hPa to Pa by multiplying by 100 and adding 0.
+
+For each of the above elements (``value, csv_column, jsonpath, valid_min, valid_max, scale, offset``) null values must be excluded from the mapping file.
 
 Units
 -----

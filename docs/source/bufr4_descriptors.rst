@@ -122,7 +122,7 @@ Often, within sequences, delayed descriptors are used to specify optional elemen
 descriptor replication factor (031000) that takes a value of either 0 or 1.
 
 Within the csv2bufr module the number of delayed replications needs to be set within the mapping file using the
-`inputDelayedDescriptorReplicationFactor` key. More information is provided on the mappings page.
+:redtext:`inputDelayedDescriptorReplicationFactor` key. More information is provided on the mappings page.
 
 Commonly used sequences
 -----------------------
