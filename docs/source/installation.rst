@@ -42,8 +42,10 @@ libraries and Python modules:
 This installs a Docker image based on Ubuntu and includes the ecCodes software library, dependencies noted above
 and the csv2bufr module (including the command line interface).
 
-Alternatively, on existing systems the module and command line interface can be installed using:
+Alternatively, csv2bufr can be installed from source:
 
-.. code-block:: shell
+.. code-block:: bash
 
-	pip install csv2bufr
+	git clone https://github.com/wmo-im/csv2bufr.git
+	cd csv2bufr
+	pip install .

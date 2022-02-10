@@ -128,6 +128,24 @@ Would convert the value contained in the "mslp" column of the CSV file from hPa 
 
 For each of the above elements (``value, csv_column, jsonpath, valid_min, valid_max, scale, offset``) null values must be excluded from the mapping file.
 
+An individual BUFR descriptor can occur multiple times within a single BUFR message.
+To allow the indexing of the descriptors within a particular message, and the inclusions of multiple descriptors or keys with  the same name, eccodes prepends an index number to the eccodes_key.
+For the first occurrence the index number can be omitted but for all other cases it should be included.
+The index is indicated within the eccodes_key using ``#index#eccodes_key``, an example is given below.
+
+.. code-block:: json
+
+	{
+		"data":[
+			{
+				"#1#eccodes_key": "pressureReducedToMeanSeaLevel",
+				"csv_column": "mslp",
+				"scale": 2,
+				"offset": 0
+			}
+		]
+	}
+
 Units
 -----
 

@@ -44,9 +44,15 @@ and explanation.
 Within the BUFR format these are specified by 6 digit codes of the form FXXYYY, with each of F, XX and YYY having
 specific meaning.
 
-* F: Type of BUFR descriptor (0: element descriptor (BUFR Table B); 1: replication (or repetition) descriptor; 2: operator (BUFR Table C); 3: sequence (or alias) descriptor (BUFR Table D))
-* XX: Sub-table within class of descriptor
-* YYY: Line in sub-table.
+* F: Type of BUFR descriptor
+
+   - 0: element descriptor (BUFR Table B);
+   - 1: replication (or repetition) descriptor;
+   - 2: operator (BUFR Table C);
+   - 3: sequence descriptor (BUFR Table D)
+
+* XX: Sub-table (class) within type of descriptor
+* YYY: Index within in sub-table.
 
 As an example, the table below shows the first few entries from BUFR Table B 01.
 
@@ -124,6 +130,28 @@ descriptor replication factor (031000) that takes a value of either 0 or 1.
 Within the csv2bufr module the number of delayed replications needs to be set within the mapping file using the
 :redtext:`inputDelayedDescriptorReplicationFactor` key. More information is provided on the mappings page.
 
+Scope of descriptors
+--------------------
+
+BUFR Table B descriptors within classes 0 - 8 contain metadata about the observations.
+For example, the location of an observations, the instrumentation used to make an observation
+or the time period over which an observation was made or averaged.
+These descriptors remain in force and apply to all subsequent elements until they are either reused or set to missing.
+For example the sequence ``[007032, 012001, 007032, 012001, 007032]`` could be used to record air temperature measurements at
+two different heights, e.g.:
+
+.. code-block:: python
+
+	# set height of sensor for following observations
+	[007032] = ["heightOfSensorAboveLocalGroundOrDeckOfMarinePlatform"] = 2.0
+	[012001] = ["airTemperature"] = 280.15 # air temperature at 2 m height
+	 # redefine height of sensor to 10 m
+	[007032] = ["heightOfSensorAboveLocalGroundOrDeckOfMarinePlatform"] = 10.0
+	[012001] = ["airTemperature"] = 280.07 # air temperature at 10 m height
+	# cancel height of sensor, following observations will have an undefined height
+	[007032] = ["heightOfSensorAboveLocalGroundOrDeckOfMarinePlatform"] = None
+
+
 Commonly used sequences
 -----------------------
 Listed below are some commonly used sequences:
@@ -131,7 +159,7 @@ Listed below are some commonly used sequences:
 - 307080: Sequence for representation of synoptic reports from a fixed land station suitable for SYNOP data.
 - 315008: Sequence for the representation of data from moored buoys.
 - 315009: Sequence for the representation of data from drifting buoys.
-- :redtext:`more to follow`
+- :redtext:`As this documentation is developed further additional examples will be added.`
 
 
 Further information
@@ -139,5 +167,6 @@ Further information
 The description of the BUFR operators (F = 2 in the FXXYYY notation) is beyond the scope of this documentation.
 For users wanting to define new sequences, including the use of the operators, it is recommended to
 refer to Volume I.2 of the WMO Manual on Codes. However, before defining a new sequence it is recommended
-to check if any of the existing sequence meet the user requirements. :redtext:`Add where to get further advice from`.
+to check if any of the existing sequence meet the user requirements.
+See the :ref:`support page <support>` for information on how to get further information and support..
 

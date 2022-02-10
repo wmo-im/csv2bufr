@@ -9,7 +9,15 @@ stored in a CSV file to the WMO BUFR data format.
 Command line interface
 **********************
 
-The command line interface reads in data from a CSV file, converts it to BUFR and writes out the data to the specified directory.
+The command line interface reads in data from a CSV file, converts it to BUFR and writes out the data to the specified directory. e.g.:
+
+.. code-block:: shell
+
+	csv2bufr data transform <my-csv-file.csv> \
+			--bufr-template <csv-to-bufr-mapping.json> \
+			--station-metadata <oscar-metadata-file.json> \
+			--output <output-directory-path>
+
 Currently, a single station per file is supported with each row treated as a separate record and one BUFR file per record created.
 The format of the input CSV file has a few requirements:
 
