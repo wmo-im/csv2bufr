@@ -43,6 +43,8 @@ At a minimum this file must contain the `WIGOS station identifier <https://commu
 	}
 
 Where the parameters in brackets (<>) are replaced with their respective values.
+More information on the WIGOS identifiers can also be found in the
+`Guide to the WMO Integrated Observing System <https://library.wmo.int/doc_num.php?explnum_id=10962>`_, section 2 (WMO-No. 1165).
 
 If the station has been registered within the WMO OSCAR/Surface database the metadata
 file can be downloaded using the `pyoscar <https://pypi.org/project/pyoscar/>`_ Python module.
