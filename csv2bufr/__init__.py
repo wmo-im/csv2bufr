@@ -70,6 +70,7 @@ HEADERS = ["edition", "masterTableNumber", "bufrHeaderCentre",
 # they are used.
 jsonpath_parsers = dict()
 
+
 # custom error handlers
 class mapping_exception(Exception):
     pass
@@ -645,7 +646,7 @@ def transform(data: str, metadata: dict, mappings: dict,
     The dictionary returned by the iterator contains the following keys:
 
         - ["bufr4"] = data encoded into BUFR;
-        - ["geojson"] = data encoded into geojson (only present if template specified);
+        - ["geojson"] = data encoded into geojson (only present if template specified);  # noqa
         - ["_meta"] = metadata on the data.
 
     The ["_meta"] element includes the following:
@@ -654,7 +655,7 @@ def transform(data: str, metadata: dict, mappings: dict,
         - ["md5"] = md5 checksum of BUFR encoded data;
         - ["wigos_id"] = WIGOS identifier;
         - ["data_date"] = characteristic date of data;
-        - ["originating_centre"] = Originating centre (see Common code table C11);
+        - ["originating_centre"] = Originating centre (see Common code table C11);  # noqa
         - ["data_category"] = Category of data, see BUFR Table A.
 
     :param data: string containing csv separated data. First line should
