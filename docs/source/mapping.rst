@@ -65,7 +65,19 @@ Similarly the keys for the different data elements can be found at:
 
 inputDelayedDescriptorReplicationFactor
 ---------------------------------------
-Due to the way that eccodes works the
+Due to the way that eccodes works any delayed replication factors need to be specified before encoding and included in the mapping file.
+This currently limits the use of the delayed replication factors to static values for a given mapping. For example
+every data file that uses a given mapping file has the same optional elements present or the same number of levels in an
+atmospheric profile present.
+
+For sequences that do not include delayed replications the :redtext:`inputDelayedDescriptorReplicationFactor`
+must still be included but may be set to an empty array, e.g.
+
+.. code-block:: json
+
+	{
+		"inputDelayedDescriptorReplicationFactor": []
+	}
 
 bufr_element
 ------------
