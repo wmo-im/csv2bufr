@@ -12,14 +12,6 @@
             "value": 0
         },
         {
-            "eccodes_key": "bufrHeaderCentre",
-            "value": null
-        },
-        {
-            "eccodes_key": "bufrHeaderSubCentre",
-            "value": null
-        },
-        {
             "eccodes_key": "updateSequenceNumber",
             "value": 0
         },
@@ -32,16 +24,8 @@
             "value": 6
         },
         {
-            "eccodes_key": "dataSubCategory",
-            "value": null
-        },
-        {
             "eccodes_key": "masterTablesVersionNumber",
-            "value": 37
-        },
-        {
-            "eccodes_key": "localTablesVersionNumber",
-            "value": null
+            "value": 36
         },
         {
             "eccodes_key": "typicalYear",
@@ -79,12 +63,12 @@
             "eccodes_key": "unexpandedDescriptors",
             "value": [
                 301150,
+                301011,
+                301012,
+                301021,
+                  7031,
                 302001
             ]
-        },
-        {
-            "eccodes_key": "subsetNumber",
-            "value": 1
         }
     ],
     "data": [
@@ -103,6 +87,38 @@
         {
             "eccodes_key": "#1#wigosLocalIdentifierCharacter",
             "jsonpath": "$.wigosIds[0].wid_local"
+        },
+        {
+            "eccodes_key": "#1#year",
+            "csv_column": "year"
+        },
+        {
+            "eccodes_key": "#1#month",
+            "csv_column": "month"
+        },
+        {
+            "eccodes_key": "#1#day",
+            "csv_column": "day"
+        },
+        {
+            "eccodes_key": "#1#hour",
+            "csv_column": "hour"
+        },
+        {
+            "eccodes_key": "#1#minute",
+            "csv_column": "minute"
+        },
+        {
+            "eccodes_key": "#1#latitude",
+            "csv_column": "latitude"
+        },
+        {
+            "eccodes_key": "#1#longitude",
+            "csv_column": "longitude"
+        },
+        {
+            "eccodes_key": "#1#heightOfBarometerAboveMeanSeaLevel",
+            "csv_column": "brmh"
         },
         {
             "eccodes_key": "#1#nonCoordinatePressure",
@@ -126,10 +142,5 @@
             "eccodes_key": "#1#characteristicOfPressureTendency",
             "csv_column": "a"
         }
-    ],
-    "wigos_identifier": {
-        "value": null,
-        "jsonpath": null,
-        "csv_column": null
-    }
+    ]
 }
