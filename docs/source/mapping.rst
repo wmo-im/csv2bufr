@@ -6,7 +6,7 @@ BUFR template mapping
 =====================
 
 The mapping between the input csv data and the output BUFR data is specified in a JSON file.
-The csv2bufr module validates the mapping file schema shown at the bottom of this page prior to attempted the transformation to BUFR.
+The csv2bufr module validates the mapping file against the schema shown at the bottom of this page prior to attempted the transformation to BUFR.
 This schema specifies 6 primary properties:
 
 - ``inputDelayedDescriptorReplicationFactor`` - array of integers, values for the delayed descriptor replication factors to use
@@ -55,7 +55,7 @@ the ``latitude`` and ``longitude`` to the elements specified by resolving the js
 and the ``pressureReducedToMeanSeaLevel`` to the data from the "mslp" column in the CSV file.
 
 The keys used for the header elements are listed on the :ref:`bufr4` page, with the mandatory keys highlighted in red.
-The list of keys can also be at:
+The list of keys can also be found at:
 
 - `<https://confluence.ecmwf.int/display/ECC/BUFR+headers>`_
 
