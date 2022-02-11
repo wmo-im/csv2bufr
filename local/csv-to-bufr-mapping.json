@@ -1,0 +1,29 @@
+{
+    "inputDelayedDescriptorReplicationFactor": [],
+    "header": [
+        {"eccodes_key": "edition", "value": 4},
+        {"eccodes_key": "masterTableNumber", "value": 0},
+        {"eccodes_key": "masterTablesVersionNumber", "value": 36},
+        {"eccodes_key": "unexpandedDescriptors", "value": [1015, 4001, 4002, 4003, 4004, 4005, 5001, 6001, 11001, 11041, 11002, 22043, 22038]},
+        {"eccodes_key": "typicalYear", "csv_column": "YearUTC"},
+        {"eccodes_key": "typicalMonth", "csv_column": "MonthUTC"},
+        {"eccodes_key": "typicalDay", "csv_column": "DayUTC"},
+        {"eccodes_key": "typicalHour", "csv_column": "HourUTC"},
+        {"eccodes_key": "typicalMinute", "csv_column": "MinuteUTC"}
+    ],
+    "data": [
+        {"eccodes_key": "#1#stationOrSiteName", "csv_column": "Station Name"},
+        {"eccodes_key": "#1#year", "csv_column": "YearUTC"},
+        {"eccodes_key": "#1#month", "csv_column": "MonthUTC", "valid_min": 1, "valid_max": 12},
+        {"eccodes_key": "#1#day", "csv_column": "DayUTC", "valid_min": 1, "valid_max": 31},
+        {"eccodes_key": "#1#hour", "csv_column": "HourUTC", "valid_min": 0, "valid_max": 23},
+        {"eccodes_key": "#1#minute", "csv_column": "MinuteUTC", "valid_min": 0, "valid_max": 59},
+        {"eccodes_key": "#1#latitude", "csv_column": "Latitude", "valid_min": -90.0, "valid_max": 90.0},
+        {"eccodes_key": "#1#longitude", "csv_column": "Longitude", "valid_min": -180.0, "valid_max": 180.0},
+        {"eccodes_key": "#1#windDirection", "csv_column": "Wind Direction", "valid_min":  0.0, "valid_max": 360},
+        {"eccodes_key": "#1#maximumWindGustSpeed", "csv_column": "Wind Gust"},
+        {"eccodes_key": "#1#windSpeed", "csv_column": "Wind Speed"},
+        {"eccodes_key": "#1#oceanographicWaterTemperature", "csv_column": "Water Temperature", "scale": 0, "offset": 273.15},
+        {"eccodes_key": "#1#tidalElevationWithRespectToLocalChartDatum", "csv_column": "Water Level"}
+    ]
+}
