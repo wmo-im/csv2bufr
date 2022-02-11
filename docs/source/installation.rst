@@ -37,9 +37,9 @@ libraries and Python modules:
 
 .. code-block:: shell
 
-	docker pull wmoim/csv2bufr:latest
+	docker pull wmoim/csv2bufr
 
-This installs a Docker image based on Ubuntu and includes the ecCodes software library, dependencies noted above
+This installs a `Docker image <https://hub.docker.com/r/wmoim/csv2bufr>`_ based on Ubuntu and includes the ecCodes software library, dependencies noted above
 and the csv2bufr module (including the command line interface).
 
 Alternatively, csv2bufr can be installed from source:
