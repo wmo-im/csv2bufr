@@ -25,19 +25,21 @@ These are all specified in the BUFR template mapping file.
 The :redtext:`edition number` and :redtext:`master table number` should be 4 and 0 respectively.
 BUFR edition 4 is the latest version and whilst it is possible to define new BUFR tables for different application
 areas only Master Table 0 (MT0) has been defined (meteorology).
-The tables in MT0 are updated approximately every 6 months as part of the WMO fast track process.
-The latest version can be found at https://github.com/wmo-im/BUFR4 and it is recommended to use the the most recent
-version for the :redtext:`master table version number`.
+The tables in MT0 are updated approximately every 6 months as part of the WMO fast track process and the authoritative
+source can be found in the `WMO Manual on Codes, Volume I.2 <https://library.wmo.int/doc_num.php?explnum_id=10722>`_.
+Updates to this can be delayed and the latest version, including machine readable tables, can be found at
+https://github.com/wmo-im/BUFR4/releases and it is recommended to use the the most recent release. The ``master`` branch
+contains the current working copy of the tables and is subject to change.
 
 The :redtext:`BUFR header centre` and :redtext:`bufr header sub centre` are specified in Common Code Tables C-11 and
 C-12 respectively.
 The typical time of observation (:redtext:`typicalYear ... typicalSecond`) should be determined based on the data to be
 encoded.
-Within the csv2bufr module and CLI ony a single observation / weather report is encoded per file and so these should
-be set to those columns in the csv specifying the year, month, day etc.
+Within the csv2bufr module and CLI only a single observation / weather report is encoded per file and so these should
+be set to those columns in the CSV specifying the year, month, day etc.
 More information is provided in the page on the BUFR template mapping (:redtext:`link to follow`).
 
-The :redtext:`data category` should be set accoridng to BUFR Table A, i.e. 0 for "Surface data - land" and 1 for "Surface data - sea".
+The :redtext:`data category` should be set according to BUFR Table A, i.e. 0 for "Surface data - land" and 1 for "Surface data - sea".
 The :redtext:`international data sub category` should be set according to Common Code Table C-13.
 The :redtext:`unexpanded descriptors` specifies the data to be encoded in the data section is comprised of a list of
 the BUFR descriptors. These descriptors are detailed further on the next page (BUFR descriptors).

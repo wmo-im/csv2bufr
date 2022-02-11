@@ -44,7 +44,7 @@ generates the following file:
 Customising the mapping file (bufr-mappings-edited.json)
 --------------------------------------------------------
 
-Editing the bufr mappings file to map to the above example csv data we have:
+Editing the bufr mappings file to map to the above example CSV data we have:
 
 .. literalinclude:: resources/bufr-mappings-edited.json
 

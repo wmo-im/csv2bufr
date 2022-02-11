@@ -80,7 +80,7 @@ where:
 Replication / repetition
 ------------------------
 
-Within the BUFR format elements can be repeated using the replication descriptors (F=1 in FXXYYY).
+Within the BUFR format, elements can be repeated using the replication descriptors (F=1 in FXXYYY).
 For example, we may want to repeat temperature and humidity measurements as part of an atmospheric
 profile or, alternatively, the daily minimum and maximum temperatures within a month.
 In some cases we may know the number of repetitions before encoding and all data of the same type

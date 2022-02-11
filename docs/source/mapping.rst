@@ -5,7 +5,7 @@
 BUFR template mapping
 =====================
 
-The mapping between the input csv data and the output BUFR data is specified in a JSON file.
+The mapping between the input CSV data and the output BUFR data is specified in a JSON file.
 The csv2bufr module validates the mapping file against the schema shown at the bottom of this page prior to attempted the transformation to BUFR.
 This schema specifies 6 primary properties:
 
@@ -13,7 +13,7 @@ This schema specifies 6 primary properties:
 - ``number_header_rows`` - integer, the number of header rows in the file before the data rows
 - ``names_on_row`` - integer, which row the column names appear on
 - ``header`` - array of objects (see below), header section containing metadata
-- ``data`` - array of object (see below) section mapping from the csv columns to the BUFR elements
+- ``data`` - array of object (see below) section mapping from the CSV columns to the BUFR elements
 - ``wigos_identifier`` - object (see below), section to contain the WIGOS station identifier
 
 Out of these, only the ``inputDelayedDescriptorReplicationFactor``, ``header`` and ``data`` are mandatory,
@@ -23,7 +23,7 @@ Both the ``number_header_rows`` and ``names_on_row`` default to one if not speci
 The header and data sections contain arrays of ``bufr_element`` objects mapping to either the different fields
 in the header sections of the BUFR message or to the data section respectively. More information is provided below.
 In both cases the field eccodes_key is used to indicate the BUFR element being mapped to rather than the 6 digit FXXYYY code.
-For example, the code block below shows how the pressure reduced to mean sea level would be mapped from the column "mslp" in the csv file
+For example, the code block below shows how the pressure reduced to mean sea level would be mapped from the column "mslp" in the CSV file
 to the BUFR element indicated by the eccodes key "pressureReducedToMeanSeaLevel" (FXXYYY = 010051).
 
 .. code-block:: json
@@ -34,7 +34,7 @@ to the BUFR element indicated by the eccodes key "pressureReducedToMeanSeaLevel"
 		]
 	}
 
-In addition to mapping to the csv columns, constant values and values from the JSON metadata file can be mapped using the "value" and "josnpath" fields.
+In addition to mapping to the CSV columns, constant values and values from the JSON metadata file can be mapped using the "value" and "jsonpath" fields.
 Building on the prior example:
 
 .. code-block:: json

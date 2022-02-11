@@ -33,20 +33,20 @@ The command is built on the `Python Click module <https://click.palletsprojects.
 three components (``csv2bufr data transform``), 1 argument and 3 options (specified by --).
 The argument specifies the file to process and the options various configuration files to use.
 
-#. ``my-csv-file.csv``: argument specifying the csv data file to process
+#. ``my-csv-file.csv``: argument specifying the CSV data file to process
 #. ``--bufr-template csv-to-bufr-mapping.json``: option followed by the bufr mapping template to use
 #. ``--station-metadata oscar-metadata-file.json``: option followed by name of json file containing the station metadata
 #. ``--output-dir output-directory-path``: option followed by output directory to write BUFR file to. The output filename is set using the md5 checksum of the BUFR data to ensure uniqueness, future versions will use the WIGOS ID and timestamp of the data to set the filename.
 
 The output BUFR files can be validated using a tool such as the `ECMWF BUFR validator <https://apps.ecmwf.int/codes/bufr/validator/>`_.
 
-Input csv file
+Input CSV file
 --------------
 
 Currently, a single station per file is supported with each row treated as a separate record and one BUFR file per record created.
 The format of the input CSV file has a few requirements:
 
-- A comma "," must be used as the delimiter.
+- A comma (i.e. ``,``) must be used as the delimiter.
 - Strings must be quoted.
 - Missing values must be encoded as "None".
 - The final row in the file must contain data and not be a new line.
@@ -54,12 +54,12 @@ The format of the input CSV file has a few requirements:
 - The date/time elements should be in Universal Time Coordinated (UTC).
 
 
-BUFR mapping template (--bufr-template)
+BUFR mapping template (``--bufr-template``)
 ---------------------------------------
 
 The mapping from CSV to BUFR is specified in a JSON file (see the :ref:`BUFR template mapping page <mapping>`).
 
-Station metadata (--station-metadata)
+Station metadata (``--station-metadata``)
 -------------------------------------
 
 In addition to the input CSV data file and BUFR template file a json file containing the station metadata is also required.
@@ -75,12 +75,12 @@ At a minimum this file must contain the `WIGOS station identifier <https://commu
 			]
 	}
 
-Where the parameters in brackets (<>) are replaced with their respective values.
+Where the parameters in brackets (``<>``) are replaced with their respective values.
 More information on the WIGOS identifiers can also be found in the
 `Guide to the WMO Integrated Observing System <https://library.wmo.int/doc_num.php?explnum_id=10962>`_, section 2 (WMO-No. 1165).
 
 If the station has been registered within the WMO OSCAR/Surface database the metadata
-file can be downloaded using the `pyoscar <https://pypi.org/project/pyoscar/>`_ Python module.
+file can be downloaded using the `pyoscar <https://pypi.org/project/pyoscar/>`_ Python package.
 For example, to download station metadata for the station on Bird Island, South Georgia,
 with the WIGOS station identifier "0-20008-0-SGI" the following would be used:
 

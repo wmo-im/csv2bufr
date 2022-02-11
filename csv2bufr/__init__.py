@@ -72,7 +72,7 @@ jsonpath_parsers = dict()
 
 
 # custom error handlers
-class mapping_exception(Exception):
+class MappingError(Exception):
     pass
 
 
@@ -125,7 +125,7 @@ def validate_mapping(mapping: dict) -> bool:
     # now validate
     try:
         validate(mapping, schema)
-    except mapping_exception as e:
+    except MappingError as e:
         message = "Invalid mapping dictionary"
         LOGGER.error(message)
         raise e
