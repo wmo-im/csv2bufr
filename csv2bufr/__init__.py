@@ -651,7 +651,7 @@ def transform(data: str, metadata: dict, mappings: dict,
 
     The ["_meta"] element includes the following:
 
-        - ["identifier"] = unique identifier for report;
+        - ["identifier"] = identifier for report (WIGOS_<WSI>_<ISO8601>);
         - ["md5"] = md5 checksum of BUFR encoded data;
         - ["wigos_id"] = WIGOS identifier;
         - ["data_date"] = characteristic date of data;
@@ -743,8 +743,10 @@ def transform(data: str, metadata: dict, mappings: dict,
         LOGGER.debug("Parsing data")
         result["bufr4"] = message.as_bufr()
 
-        # now md5 as the key for this obs.
-        rmk = message.md5()
+        # now identifier based on WSI and observation date as identifier
+        wsi = metadata['wigosIds'][0]['wid'] if 'wigosIds' in metadata else "N/A"  # noqa
+        isodate =  message.get_datetime().strftime('%Y%m%dT%H%M%S')
+        rmk = f"WIGOS_{wsi}_{isodate}"
 
         # now create GeoJSON if specified
         if template:
@@ -755,8 +757,8 @@ def transform(data: str, metadata: dict, mappings: dict,
         LOGGER.debug("Adding metadata elements")
         result["_meta"] = {
             "identifier": rmk,
-            "md5": rmk,
-            "wigos_id": metadata['wigosIds'][0]['wid'] if 'wigosIds' in metadata else "N/A",  # noqa
+            "md5": message.md5(),
+            "wigos_id": wsi,
             "data_date": message.get_datetime(),
             "originating_centre": message.get_element("bufrHeaderCentre"),
             "data_category": message.get_element("dataCategory")

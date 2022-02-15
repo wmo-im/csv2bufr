@@ -134,7 +134,7 @@ Each item returned contains a dictionary with the following elements:
 - ``item["bufr4"]`` binary BUFR data
 - ``item["_meta"]`` dictionary containing metadata elements
 - ``item["_meta"]["md5"]`` the md5 checksum of the encoded BUFR data
-- ``item["_meta"]["identifier"]`` unique identifier for result (set to md5 checksum)
+- ``item["_meta"]["identifier"]`` identifier for result (set combination of ``wigos_id`` and ``data_data``)
 - ``item["_meta"]["wigos_id"]`` WIGOS station identifier
 - ``item["_meta"]["data_date"]`` characteristic date of data contained in result (from BUFR)
 - ``item["_meta"]["originating_centre"]`` originating centre for data  (from BUFR)
