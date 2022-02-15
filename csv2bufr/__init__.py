@@ -745,7 +745,7 @@ def transform(data: str, metadata: dict, mappings: dict,
 
         # now identifier based on WSI and observation date as identifier
         wsi = metadata['wigosIds'][0]['wid'] if 'wigosIds' in metadata else "N/A"  # noqa
-        isodate =  message.get_datetime().strftime('%Y%m%dT%H%M%S')
+        isodate = message.get_datetime().strftime('%Y%m%dT%H%M%S')
         rmk = f"WIGOS_{wsi}_{isodate}"
 
         # now create GeoJSON if specified
