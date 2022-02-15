@@ -1,0 +1,87 @@
+digraph bufr4 {
+  rankdir=LR
+  node [margin="0.01" shape=plaintext nodesep=2]
+  fontname="Arial"
+  bufr4 [label=<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="5" COLOR="BLACK">
+							<TR><TD PORT="head" COLSPAN="1" ALIGN="center" BGCOLOR="lightgray">BUFR4 message</TD></TR>
+							<TR><TD PORT="s0">Section 0</TD></TR>
+							<TR><TD PORT="s1">Section 1</TD></TR>
+							<TR><TD PORT="s2">Section 2</TD></TR>
+							<TR><TD PORT="s3">Section 3</TD></TR>
+							<TR><TD PORT="s4">Section 4</TD></TR>
+							<TR><TD PORT="s5">Section 5</TD></TR>
+						 </TABLE>>]
+
+section0 [label=<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="5" COLOR="BLACK">
+			<TR><TD PORT="head" COLSPAN="3" ALIGN="center" BGCOLOR="lightgray">Section 0 – Indicator section</TD></TR>
+			<TR><TD>ecCodes key</TD><TD>Length (bytes)</TD><TD>Description</TD></TR>
+			<TR><TD></TD><TD>4</TD><TD>The string "BUFR" in CCITT-IA5</TD></TR>
+			<TR><TD>totalLength</TD><TD>3</TD><TD>Total length of the BUFR message in bytes</TD></TR>
+			<TR><TD><FONT COLOR="red">editionNumber</FONT></TD><TD>1</TD><TD>BUFR edition number (4)</TD></TR>
+		</TABLE>>]
+
+section1  [label=<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="5" COLOR="BLACK">
+			<TR><TD PORT="head" COLSPAN="3" ALIGN="center" BGCOLOR="lightgray">Section 1 – Identification section</TD></TR>
+			<TR><TD BGCOLOR="lightgray">ecCodes key</TD><TD BGCOLOR="lightgray">Length (bytes)</TD><TD BGCOLOR="lightgray">Description</TD></TR>
+			<TR><TD>section1Length</TD><TD>3</TD><TD>Length of section 1</TD></TR>
+			<TR><TD><FONT COLOR="red">masterTableNumber</FONT></TD><TD>1</TD><TD>BUFR master table user (MT0)</TD></TR>
+			<TR><TD><FONT COLOR="red">bufrHeaderCentre</FONT></TD><TD>2</TD><TD>Identification of originating/generating centre (see Common Code Table C–11)</TD></TR>
+			<TR><TD><FONT COLOR="red">bufrHeaderSubCentre</FONT></TD><TD>2</TD><TD>Identification of originating/generating sub-centre (allocated by <BR/> originating/generating centre – see Common Code Table C–12)</TD></TR>
+			<TR><TD><FONT COLOR="red">updateSequenceNumber</FONT></TD><TD>1</TD><TD>Update sequence number (zero for original messages and for messages containing only <BR/>delayed reports; incremented for the other updates)</TD></TR>
+			<TR><TD>section1Flags</TD><TD>1</TD><TD>Flag indicating presence of optional section (section 2)</TD></TR>
+			<TR><TD><FONT COLOR="red">dataCategory</FONT></TD><TD>1</TD><TD>Data category (Table A)</TD></TR>
+			<TR><TD><FONT COLOR="red">internationalDataSubCategory</FONT></TD><TD>1</TD><TD>International data sub-category (see Common Code Table C–13 and Note 3)</TD></TR>
+			<TR><TD>dataSubCategory</TD><TD>1</TD><TD>Local data sub-category (defined locally by automatic <BR/>data-processing (ADP) centres – see Note 3)</TD></TR>
+			<TR><TD><FONT COLOR="red">masterTablesVersionNumber</FONT></TD><TD>1</TD><TD>BUFR master table version number (see Common Code Table C–0 and Note 2)</TD></TR>
+			<TR><TD>localTablesVersionNumber</TD><TD>1</TD><TD>Version number of local tables used to augment master table in use – see Note 2</TD></TR>
+			<TR><TD><FONT COLOR="red">typicalYear</FONT></TD><TD>2</TD><TD>Typical year of BUFR message contents</TD></TR>
+			<TR><TD><FONT COLOR="red">typicalMonth</FONT></TD><TD>1</TD><TD>Typical month of BUFR message contents</TD></TR>
+			<TR><TD><FONT COLOR="red">typicalDay</FONT></TD><TD>1</TD><TD>Typical day of BUFR message contents</TD></TR>
+			<TR><TD><FONT COLOR="red">typicalHour</FONT></TD><TD>1</TD><TD>Typical hour of BUFR message contents</TD></TR>
+			<TR><TD><FONT COLOR="red">typicalMinute</FONT></TD><TD>1</TD><TD>Typical minute of BUFR message contents</TD></TR>
+			<TR><TD>typicalSecond</TD><TD>1</TD><TD>Typical second of BUFR message contents</TD></TR>
+			<TR><TD></TD><TD>0+</TD><TD>Optional data – for local use by ADP centres</TD></TR>
+		</TABLE>>]
+
+
+section2  [label=<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="5" COLOR="BLACK">
+			<TR><TD PORT="head" COLSPAN="3" ALIGN="center" BGCOLOR="lightgray">Section 2 – Optional section</TD></TR>
+			<TR><TD BGCOLOR="lightgray">ecCodes key</TD><TD BGCOLOR="lightgray">Length (bytes)</TD><TD BGCOLOR="lightgray">Description</TD></TR>
+			<TR><TD></TD><TD>3</TD><TD>Length of section if present</TD></TR>
+			<TR><TD></TD><TD>1</TD><TD>Set to zero</TD></TR>
+			<TR><TD></TD><TD>0+</TD><TD>Reserved for local use by ADP centres</TD></TR>
+		</TABLE>>]
+
+
+section3  [label=<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="5" COLOR="BLACK">
+			<TR><TD PORT="head" COLSPAN="3" ALIGN="center" BGCOLOR="lightgray">Section 3 – Data description section</TD></TR>
+			<TR><TD BGCOLOR="lightgray">ecCodes key</TD><TD BGCOLOR="lightgray">Length (bytes)</TD><TD BGCOLOR="lightgray">Description</TD></TR>
+			<TR><TD>section3Length</TD><TD>3</TD><TD>length of section</TD></TR>
+			<TR><TD></TD><TD>1</TD><TD>Set to zero</TD></TR>
+			<TR><TD>numberOfSubsets</TD><TD>2</TD><TD>Number of data subsets</TD></TR>
+			<TR><TD>section3Flags</TD><TD>1</TD><TD>Flags used to indicate compressed and observed data</TD></TR>
+			<TR><TD><FONT COLOR="red">unexpandedDescriptors</FONT></TD><TD>2+</TD><TD>List of data descriptors describing data contained in section 4<BR/> e.g. [301150, 307080])</TD></TR>
+		</TABLE>>]
+
+section4  [label=<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="5" COLOR="BLACK">
+			<TR><TD PORT="head" COLSPAN="3" ALIGN="center" BGCOLOR="lightgray">Section 4– Data section</TD></TR>
+			<TR><TD BGCOLOR="lightgray">ecCodes key</TD><TD BGCOLOR="lightgray">Length (bytes)</TD><TD BGCOLOR="lightgray">Description</TD></TR>
+			<TR><TD>ecCodes key</TD><TD>Length (bytes)</TD><TD>Description</TD></TR>
+			<TR><TD></TD><TD>3</TD><TD>Length of section 4</TD></TR>
+			<TR><TD></TD><TD>1</TD><TD>Set to zero</TD></TR>
+			<TR><TD></TD><TD></TD><TD>Binary string of encoded data.</TD></TR>
+		</TABLE>>]
+
+section5  [label=<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="5" COLOR="BLACK">
+			<TR><TD PORT="head" COLSPAN="3" ALIGN="center" BGCOLOR="lightgray">Section 5 – End section</TD></TR>
+			<TR><TD BGCOLOR="lightgray">ecCodes key</TD><TD BGCOLOR="lightgray">Length (bytes)</TD><TD BGCOLOR="lightgray">Description</TD></TR>
+			<TR><TD></TD><TD>4</TD><TD>The string "7777" encode in CCITT IA-5</TD></TR>
+		</TABLE>>]
+
+bufr4:s0 -> section0:head
+bufr4:s1 -> section1:head
+bufr4:s2 -> section2:head
+bufr4:s3 -> section3:head
+bufr4:s4 -> section4:head
+bufr4:s5 -> section5:head
+}

@@ -140,7 +140,7 @@ def transform(ctx, csv_file, mapping, output_dir, station_metadata,
 
     click.echo("Writing data to file")
     for item in result:
-        key = item['_meta']["md5"]
+        key = item['_meta']["identifier"]
         bufr_filename = f"{output_dir}{os.sep}{key}.bufr4"
         with open(bufr_filename, "wb") as fh:
             fh.write(item["bufr4"])
