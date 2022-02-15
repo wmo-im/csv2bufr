@@ -151,14 +151,14 @@ def json_template():
 @pytest.fixture
 def json_result():
     return {
-        "id": "981938dbd97be3e5adc8e7b1c6eb642c",
+        "id": "WIGOS_0-1-2-ABCD_20211118T180000",
         "type": "Feature",
         "geometry": {
             "type": "Point",
             "coordinates": [0.0, 55.154]
         },
         "properties": {
-            "identifier": "981938dbd97be3e5adc8e7b1c6eb642c",
+            "identifier": "WIGOS_0-1-2-ABCD_20211118T180000",
             "phenomenonTime": "2021-11-18T18:00:00+00:00",
             "resultTime": None,
             "observations": {
