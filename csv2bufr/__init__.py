@@ -476,12 +476,14 @@ class BUFRMessage:
             for u in units:
                 for o in result["properties"]["observations"]:
                     if result["properties"]["observations"][o]["units"] == u:
-                        result["properties"]["observations"][o]["value"] = \
-                            Units.conform(
+                        value = result["properties"]["observations"][o]["value"]  # noqa
+                        if value is not None:
+                            value = Units.conform(
                                 result["properties"]["observations"][o]["value"],  # noqa
                                 Units(u),
                                 Units(units[u])
                             )
+                            result["properties"]["observations"][o]["value"] = value  # noqa
                         result["properties"]["observations"][o]["units"] = units[u]  # noqa
 
         result["properties"]["identifier"] = result["id"] = identifier
@@ -765,7 +767,8 @@ def transform(data: str, metadata: dict, mappings: dict,
         # now create GeoJSON if specified
         if template:
             LOGGER.debug("Adding GeoJSON representation")
-            result["geojson"] = message.as_geojson(rmk, template, {"K":"Celsius"})  # noqa
+            result["geojson"] = message.as_geojson(rmk, template,
+                            {"K":"Celsius", "Pa":"hPa"})  # noqa
 
         # now additional metadata elements
         LOGGER.debug("Adding metadata elements")
