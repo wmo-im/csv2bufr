@@ -486,9 +486,9 @@ class BUFRMessage:
                             )
                             result["properties"]["observations"][o]["value"] = value  # noqa
                         result["properties"]["observations"][o]["units"] = units[u]  # noqa
-
+        if "_meta" in result:
+            del result["_meta"]
         result["properties"]["identifier"] = result["id"] = identifier
-
         result["properties"]["resultTime"] = datetime.now(timezone.utc).isoformat(timespec="seconds") # noqa
         return json.dumps(result, indent=4)
 
