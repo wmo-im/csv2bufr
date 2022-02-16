@@ -385,8 +385,7 @@
   },
   "_meta": {
   	"units":{
-  		"K":"Celsius",
-  		"Pa":"hPa"
+  		"K":"Celsius"
   	}
   }
 

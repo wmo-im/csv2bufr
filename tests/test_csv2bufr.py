@@ -144,6 +144,11 @@ def json_template():
                     "offset": None
                 }
             }
+        },
+        "_meta": {
+            "units": {
+                "K": "Celsius"
+            }
         }
     }
 
