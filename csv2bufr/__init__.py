@@ -459,7 +459,7 @@ class BUFRMessage:
         else:
             return None
 
-    def as_geojson(self, identifier: str, template: dict, units: dict = {} ) -> str:  # noqa
+    def as_geojson(self, identifier: str, template: dict ) -> str:  # noqa
         """
         Returns contents of BUFR message as a geoJSON string according to the
         specified template.
@@ -472,7 +472,8 @@ class BUFRMessage:
 
         _template = deepcopy(template)
         result = self._extract(_template)
-        if units:
+        if "units" in template["_meta"]:
+            units = template["_meta"]["units"]
             for u in units:
                 for o in result["properties"]["observations"]:
                     if result["properties"]["observations"][o]["units"] == u:
@@ -767,8 +768,7 @@ def transform(data: str, metadata: dict, mappings: dict,
         # now create GeoJSON if specified
         if template:
             LOGGER.debug("Adding GeoJSON representation")
-            result["geojson"] = message.as_geojson(rmk, template,
-                            {"K":"Celsius", "Pa":"hPa"})  # noqa
+            result["geojson"] = message.as_geojson(rmk, template)  # noqa
 
         # now additional metadata elements
         LOGGER.debug("Adding metadata elements")
