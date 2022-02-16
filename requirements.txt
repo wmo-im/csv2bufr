@@ -3,3 +3,4 @@ eccodes
 jsonschema
 jsonpath_ng
 pyoscar
+cfunits

@@ -31,6 +31,7 @@ import logging
 import os.path
 from typing import Any, Iterator, Union
 
+from cfunits import Units
 from eccodes import (codes_bufr_new_from_samples,
                      codes_set_array, codes_set, codes_get_native_type,
                      codes_write, codes_release, codes_get,
@@ -458,18 +459,31 @@ class BUFRMessage:
         else:
             return None
 
-    def as_geojson(self, identifier: str, template: dict) -> str:
+    def as_geojson(self, identifier: str, template: dict, units: dict = {} ) -> str:  # noqa
         """
         Returns contents of BUFR message as a geoJSON string according to the
         specified template.
 
         :param identifier: unique ID used to identify the message
         :param template: dictionary containing mapping from BUFR to geoJSON
+        :param units: dictionary mapping units, e.g. {"K":"Celsius"}
         :returns: string containing geoJSON data (from json.dumps)
         """
 
         _template = deepcopy(template)
         result = self._extract(_template)
+        if units:
+            for u in units:
+                for o in result["properties"]["observations"]:
+                    if result["properties"]["observations"][o]["units"] == u:
+                        result["properties"]["observations"][o]["value"] = \
+                            Units.conform(
+                                result["properties"]["observations"][o]["value"],  # noqa
+                                Units(u),
+                                Units(units[u])
+                            )
+                        result["properties"]["observations"][o]["units"] = units[u]  # noqa
+
         result["properties"]["identifier"] = result["id"] = identifier
 
         result["properties"]["resultTime"] = datetime.now(timezone.utc).isoformat(timespec="seconds") # noqa
@@ -751,7 +765,7 @@ def transform(data: str, metadata: dict, mappings: dict,
         # now create GeoJSON if specified
         if template:
             LOGGER.debug("Adding GeoJSON representation")
-            result["geojson"] = message.as_geojson(rmk, template)
+            result["geojson"] = message.as_geojson(rmk, template, {"K":"Celsius"})  # noqa
 
         # now additional metadata elements
         LOGGER.debug("Adding metadata elements")
