@@ -23,6 +23,9 @@ jobs:
         python-version: ${{ matrix.python-version }}
         conda-channels: anaconda, conda-forge
 
+    - name: Install udunits
+      run: sudo apt-get install -y libudunits2-0
+
     - name: Install requirements 📦
       run: |
         conda install eccodes

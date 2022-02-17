@@ -144,6 +144,11 @@ def json_template():
                     "offset": None
                 }
             }
+        },
+        "_meta": {
+            "units": {
+                "K": "Celsius"
+            }
         }
     }
 
@@ -163,9 +168,9 @@ def json_result():
             "resultTime": None,
             "observations": {
                 "#1#airTemperature": {
-                    "value": 290.31,
+                    "value": 17.160000000000025,
                     "cf_standard_name": "air_temperature",
-                    "units": "K",
+                    "units": "Celsius",
                     "sensor_height_above_local_ground": None,
                     "sensor_height_above_mean_sea_level": None,
                     "valid_min": None,
