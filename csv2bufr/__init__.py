@@ -475,7 +475,7 @@ class BUFRMessage:
         if "units" in template["_meta"]:
             units = template["_meta"]["units"]
             for u in units:
-                for o in range( len(result["properties"]["observations"]) ):
+                for o in range(len(result["properties"]["observations"])):
                     if result["properties"]["observations"][o]["units"] == u:
                         value = result["properties"]["observations"][o]["value"]  # noqa
                         if value is not None:

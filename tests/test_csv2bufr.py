@@ -113,7 +113,7 @@ def json_template():
             "resultTime": None,
             "observations": [
                 {
-                    "name":"#1#airTemperature",
+                    "name": "#1#airTemperature",
                     "value": {
                         "eccodes_key": "#1#airTemperature"
                     },
@@ -129,7 +129,7 @@ def json_template():
                     "offset": None
                 },
                 {
-                    "name":"#1#pressureReducedToMeanSeaLevel",
+                    "name": "#1#pressureReducedToMeanSeaLevel",
                     "value": {
                         "eccodes_key": "#1#pressureReducedToMeanSeaLevel"
                     },
@@ -170,7 +170,7 @@ def json_result():
             "resultTime": None,
             "observations": [
                 {
-                    "name":"#1#airTemperature",
+                    "name": "#1#airTemperature",
                     "value": 17.160000000000025,
                     "cf_standard_name": "air_temperature",
                     "units": "Celsius",
@@ -182,7 +182,7 @@ def json_result():
                     "offset": None
                 },
                 {
-                    "name":"#1#pressureReducedToMeanSeaLevel",
+                    "name": "#1#pressureReducedToMeanSeaLevel",
                     "value": 100130.0,
                     "cf_standard_name": "pressure_at_mean_sea_level",
                     "units": "Pa",
