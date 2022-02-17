@@ -37,68 +37,73 @@
 		  "units": {"eccodes_key": "#1#heightOfStationGroundAboveMeanSeaLevel->units"}
 		}
     ],
-    "observations": {
-      "air_pressure": {
-        "value": {
-          "eccodes_key": "#1#nonCoordinatePressure"
-        },
-        "units": {
-          "eccodes_key": "#1#nonCoordinatePressure->units"
-        },
-        "metadata":[
-			{
-			  "key": "sensor_height_above_mean_sea_level",
-			  "value": {"eccodes_key": "#1#heightOfBarometerAboveMeanSeaLevel"},
-			  "units": {"eccodes_key": "#1#heightOfBarometerAboveMeanSeaLevel->units"}
-			}
-        ]
-      },
-      "pressure_at_mean_sea_level": {
-        "value": {
-          "eccodes_key": "#1#pressureReducedToMeanSeaLevel"
-        },
-        "units": {
-          "eccodes_key": "#1#pressureReducedToMeanSeaLevel->units"
-        },
-        "metadata":[
-			{
-			  "key": "sensor_height_above_mean_sea_level",
-			  "value": {"eccodes_key": "#1#heightOfBarometerAboveMeanSeaLevel"},
-			  "units": {"eccodes_key": "#1#heightOfBarometerAboveMeanSeaLevel->units"}
-			}
-        ]
-      },
-      "change_of_air_pressure_over_past_3_hours": {
-        "value": {
-          "eccodes_key": "#1#3HourPressureChange"
-        },
-        "units": {
-          "eccodes_key": "#1#3HourPressureChange->units"
-        },
-        "metadata":[
-			{
-			  "key": "sensor_height_above_mean_sea_level",
-			  "value": {"eccodes_key": "#1#heightOfBarometerAboveMeanSeaLevel"},
-			  "units": {"eccodes_key": "#1#heightOfBarometerAboveMeanSeaLevel->units"}
-			}
-        ]
-      },
-      "characteristic_of_pressure_tendency": {
-        "value": {
-          "eccodes_key": "#1#characteristicOfPressureTendency"
-        },
-        "units": {
-          "eccodes_key": "#1#characteristicOfPressureTendency->units"
-        },
-        "metadata":[
-			{
-			  "key": "sensor_height_above_mean_sea_level",
-			  "value": {"eccodes_key": "#1#heightOfBarometerAboveMeanSeaLevel"},
-			  "units": {"eccodes_key": "#1#heightOfBarometerAboveMeanSeaLevel->units"}
-			}
-        ]
-      },
-      "air_temperature": {
+    "observations": [
+    	{
+		  "name":"air_pressure",
+		  "value": {
+			  "eccodes_key": "#1#nonCoordinatePressure"
+		  },
+		  "units": {
+			"eccodes_key": "#1#nonCoordinatePressure->units"
+		  },
+		  "metadata":[
+				{
+				  "key": "sensor_height_above_mean_sea_level",
+				  "value": {"eccodes_key": "#1#heightOfBarometerAboveMeanSeaLevel"},
+				  "units": {"eccodes_key": "#1#heightOfBarometerAboveMeanSeaLevel->units"}
+				}
+			]
+	  	},
+      	{
+			"name":"pressure_at_mean_sea_level",
+			"value": {
+			  "eccodes_key": "#1#pressureReducedToMeanSeaLevel"
+			},
+			"units": {
+			  "eccodes_key": "#1#pressureReducedToMeanSeaLevel->units"
+			},
+			"metadata":[
+				{
+				  "key": "sensor_height_above_mean_sea_level",
+				  "value": {"eccodes_key": "#1#heightOfBarometerAboveMeanSeaLevel"},
+				  "units": {"eccodes_key": "#1#heightOfBarometerAboveMeanSeaLevel->units"}
+				}
+			]
+      	},
+      	{
+			"name":"change_of_air_pressure_over_past_3_hours",
+			"value": {
+			  "eccodes_key": "#1#3HourPressureChange"
+			},
+			"units": {
+			  "eccodes_key": "#1#3HourPressureChange->units"
+			},
+			"metadata":[
+				{
+				  "key": "sensor_height_above_mean_sea_level",
+				  "value": {"eccodes_key": "#1#heightOfBarometerAboveMeanSeaLevel"},
+				  "units": {"eccodes_key": "#1#heightOfBarometerAboveMeanSeaLevel->units"}
+				}
+			]
+      	},
+      	{
+      		"name":"characteristic_of_pressure_tendency",
+			"value": {
+			  "eccodes_key": "#1#characteristicOfPressureTendency"
+			},
+			"units": {
+			  "eccodes_key": "#1#characteristicOfPressureTendency->units"
+			},
+			"metadata":[
+				{
+				  "key": "sensor_height_above_mean_sea_level",
+				  "value": {"eccodes_key": "#1#heightOfBarometerAboveMeanSeaLevel"},
+				  "units": {"eccodes_key": "#1#heightOfBarometerAboveMeanSeaLevel->units"}
+				}
+			]
+	  },
+      {
+        "name":"air_temperature",
         "value": {
           "eccodes_key": "#1#airTemperature"
         },
@@ -113,7 +118,8 @@
 			}
         ]
       },
-      "dew_point_temperature": {
+      {
+        "name":"dew_point_temperature",
         "value": {
           "eccodes_key": "#1#dewpointTemperature"
         },
@@ -126,8 +132,10 @@
 			  "value": {"eccodes_key": "#1#heightOfSensorAboveLocalGroundOrDeckOfMarinePlatform"},
 			  "units": {"eccodes_key": "#1#heightOfSensorAboveLocalGroundOrDeckOfMarinePlatform->units"}
 			}
-        ]      },
-      "relative_humidity": {
+        ]
+      },
+      {
+        "name":"relative_humidity",
         "value": {
           "eccodes_key": "#1#relativeHumidity"
         },
@@ -141,7 +149,8 @@
 			  "units": {"eccodes_key": "#1#heightOfSensorAboveLocalGroundOrDeckOfMarinePlatform->units"}
 			}
         ]      },
-      "duration_of_sunshine_1hr": {
+      {
+        "name":"duration_of_sunshine_1hr",
         "value": {
           "eccodes_key": "#1#totalSunshine"
         },
@@ -156,7 +165,8 @@
 			}
         ]
       },
-      "duration_of_sunshine_24h": {
+      {
+        "name":"duration_of_sunshine_24h",
         "value": {
           "eccodes_key": "#2#totalSunshine"
         },
@@ -171,7 +181,8 @@
 			}
         ]
       },
-      "precipitation_amount_1h": {
+      {
+        "name":"precipitation_amount_1h",
         "value": {
           "eccodes_key": "#1#totalPrecipitationOrTotalWaterEquivalent"
         },
@@ -191,7 +202,8 @@
 			}
         ]
       },
-      "air_temperature_maximum": {
+      {
+        "name":"air_temperature_maximum",
         "value": {
           "eccodes_key": "#1#maximumTemperatureAtHeightAndOverPeriodSpecified"
         },
@@ -221,7 +233,8 @@
           }
         ]
       },
-      "air_temperature_minimum": {
+      {
+        "name":"air_temperature_minimum",
         "value": {
           "eccodes_key": "#1#minimumTemperatureAtHeightAndOverPeriodSpecified"
         },
@@ -251,7 +264,8 @@
           }
         ]
       },
-      "wind_from_direction":{
+      {
+        "name":"wind_from_direction",
         "value": {
           "eccodes_key": "#1#windDirection"
         },
@@ -281,7 +295,8 @@
           }
         ]
       },
-      "wind_speed": {
+      {
+        "name":"wind_speed",
         "value": {
           "eccodes_key": "#1#windSpeed"
         },
@@ -311,7 +326,8 @@
         	}
         ]
       },
-      "wind_speed_maximum_gust":{
+      {
+        "name":"wind_speed_maximum_gust",
         "value": {
           "eccodes_key": "#1#maximumWindGustSpeed"
         },
@@ -341,7 +357,8 @@
         	}
         ]
       },
-      "surface_downwelling_shortwave_flux_in_air_1h": {
+      {
+        "name":"surface_downwelling_shortwave_flux_in_air_1h",
         "value": {
           "eccodes_key": "#1#globalSolarRadiationIntegratedOverPeriodSpecified"
         },
@@ -361,7 +378,8 @@
         	}
         ]
       },
-      "surface_downwelling_shortwave_flux_in_air_24h": {
+      {
+        "name":"surface_downwelling_shortwave_flux_in_air_24h",
         "value": {
           "eccodes_key": "#2#globalSolarRadiationIntegratedOverPeriodSpecified"
         },
@@ -381,7 +399,7 @@
         	}
         ]
       }
-    }
+    ]
   },
   "_meta": {
   	"units":{

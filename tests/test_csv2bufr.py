@@ -111,8 +111,9 @@ def json_template():
                     {"eccodes_key": "#1#minute"}
                 ]},
             "resultTime": None,
-            "observations": {
-                "#1#airTemperature": {
+            "observations": [
+                {
+                    "name":"#1#airTemperature",
                     "value": {
                         "eccodes_key": "#1#airTemperature"
                     },
@@ -127,7 +128,8 @@ def json_template():
                     "scale": None,
                     "offset": None
                 },
-                "#1#pressureReducedToMeanSeaLevel": {
+                {
+                    "name":"#1#pressureReducedToMeanSeaLevel",
                     "value": {
                         "eccodes_key": "#1#pressureReducedToMeanSeaLevel"
                     },
@@ -143,7 +145,7 @@ def json_template():
                     "scale": None,
                     "offset": None
                 }
-            }
+            ]
         },
         "_meta": {
             "units": {
@@ -166,8 +168,9 @@ def json_result():
             "identifier": "WIGOS_0-1-2-ABCD_20211118T180000",
             "phenomenonTime": "2021-11-18T18:00:00+00:00",
             "resultTime": None,
-            "observations": {
-                "#1#airTemperature": {
+            "observations": [
+                {
+                    "name":"#1#airTemperature",
                     "value": 17.160000000000025,
                     "cf_standard_name": "air_temperature",
                     "units": "Celsius",
@@ -178,7 +181,8 @@ def json_result():
                     "scale": None,
                     "offset": None
                 },
-                "#1#pressureReducedToMeanSeaLevel": {
+                {
+                    "name":"#1#pressureReducedToMeanSeaLevel",
                     "value": 100130.0,
                     "cf_standard_name": "pressure_at_mean_sea_level",
                     "units": "Pa",
@@ -189,7 +193,7 @@ def json_result():
                     "scale": None,
                     "offset": None
                 }
-            }
+            ]
         }
     }
 
