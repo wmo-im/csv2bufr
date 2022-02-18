@@ -14,7 +14,7 @@ For example, the unexpanded descriptor list (in text, see format of descriptors 
 
 .. code::
 
-	["unexpandedDescriptors"] = ["wigosID", "year", "month", "day", "hour", "minute", \
+   ["unexpandedDescriptors"] = ["wigosID", "year", "month", "day", "hour", "minute", \
                                  "latitude", "longitude", "pressure reduced to mean sea level"]
 
 would specify that the station identifier (wigosID) followed by the date, time, location and then the pressure reduced to mean sea level would be included in the data section.
@@ -24,15 +24,15 @@ Using sequences, the above example becomes:
 
 .. code::
 
-	["unexpandedDescriptors"] = ["wigosID", "date", "time", "location", "pressure reduced to mean sea level"]
+   ["unexpandedDescriptors"] = ["wigosID", "date", "time", "location", "pressure reduced to mean sea level"]
 
 where
 
 .. code::
 
-	["date"] = ["year", "month", "day"]
-	["time"] = ["hour", "minute"]
-	["location"] = ["latitude", "longitude"]
+   ["date"] = ["year", "month", "day"]
+   ["time"] = ["hour", "minute"]
+   ["location"] = ["latitude", "longitude"]
 
 These sequences form building blocks that can be used to create much longer sequences using a small number of descriptors.
 
@@ -93,10 +93,10 @@ and the YYY component the number of replications.
 For example, to repeat the day of month, maximum and minimum temperatures 5 times we would use:
 
 .. math::
-	\left[\text{unexpandedDescriptors}\right] = \left[
-				\underbrace{\overbrace{103005}}^{\text{repeat (1) next 3 (03) descriptors 5 (005) times}}_{FXXYYY},
-				\overbrace{004003,012016,012017}^{\text{descriptors to be repeated}}
-				\right]
+   \left[\text{unexpandedDescriptors}\right] = \left[
+       \underbrace{\overbrace{103005}}^{\text{repeat (1) next 3 (03) descriptors 5 (005) times}}_{FXXYYY},
+       \overbrace{004003,012016,012017}^{\text{descriptors to be repeated}}
+       \right]
 
 In expanded form, or without using the replication, this would be equivalent to:
 
@@ -116,11 +116,11 @@ sequence of descriptors we can set the YYY element (number of replications) to z
 descriptor with a delayed replication factor.
 
 .. math::
-	\left[\text{unexpandedDescriptors}\right] = \left[
-				\underbrace{\overbrace{103000}^{\text{(repeat (1) next 3 (03) items n time)}},
-				\overbrace{031001}^{\text{(delayed number (n) of replications)}}}_{\text{replication and delayed replication factor}},
-				\overbrace{004003,012016,012017}^{\text{(descriptors to be repeated)}}
-				\right]
+   \left[\text{unexpandedDescriptors}\right] = \left[
+       \underbrace{\overbrace{103000}^{\text{(repeat (1) next 3 (03) items n time)}},
+       \overbrace{031001}^{\text{(delayed number (n) of replications)}}}_{\text{replication and delayed replication factor}},
+       \overbrace{004003,012016,012017}^{\text{(descriptors to be repeated)}}
+       \right]
 
 This works in the same way as the regular replication except that the number of replications (n) is set at the
 the time of encoding and included in data.
@@ -142,14 +142,14 @@ two different heights, e.g.:
 
 .. code-block:: python
 
-	# set height of sensor for following observations
-	[007032] = ["heightOfSensorAboveLocalGroundOrDeckOfMarinePlatform"] = 2.0
-	[012001] = ["airTemperature"] = 280.15 # air temperature at 2 m height
-	 # redefine height of sensor to 10 m
-	[007032] = ["heightOfSensorAboveLocalGroundOrDeckOfMarinePlatform"] = 10.0
-	[012001] = ["airTemperature"] = 280.07 # air temperature at 10 m height
-	# cancel height of sensor, following observations will have an undefined height
-	[007032] = ["heightOfSensorAboveLocalGroundOrDeckOfMarinePlatform"] = None
+   # set height of sensor for following observations
+   [007032] = ["heightOfSensorAboveLocalGroundOrDeckOfMarinePlatform"] = 2.0
+   [012001] = ["airTemperature"] = 280.15 # air temperature at 2 m height
+   # redefine height of sensor to 10 m
+   [007032] = ["heightOfSensorAboveLocalGroundOrDeckOfMarinePlatform"] = 10.0
+   [012001] = ["airTemperature"] = 280.07 # air temperature at 10 m height
+   # cancel height of sensor, following observations will have an undefined height
+   [007032] = ["heightOfSensorAboveLocalGroundOrDeckOfMarinePlatform"] = None
 
 
 Commonly used sequences
