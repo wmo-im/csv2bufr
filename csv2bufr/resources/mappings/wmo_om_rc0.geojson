@@ -22,7 +22,7 @@
     ]},
     "resultTime": null,
     "wigos_identifier":{
-    	"format":"{}-{}-{}-{}",
+    	"format":"{:.0f}-{:.0f}-{:.0f}-{}",
     	"args":[
 			{"eccodes_key":"#1#wigosIdentifierSeries"},
 			{"eccodes_key":"#1#wigosIssuerOfIdentifier"},
@@ -39,7 +39,6 @@
     ],
     "observations": {
     	"air_pressure":{
-
 		  "value": {
 			  "eccodes_key": "#1#nonCoordinatePressure"
 		  },
@@ -55,7 +54,6 @@
 			]
 	  	},
       	"pressure_at_mean_sea_level":{
-
 			"value": {
 			  "eccodes_key": "#1#pressureReducedToMeanSeaLevel"
 			},
