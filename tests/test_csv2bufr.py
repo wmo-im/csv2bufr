@@ -102,7 +102,7 @@ def json_template():
         "properties": {
             "identifier": None,
             "phenomenonTime": {
-                "format": "{:04d}-{:02d}-{:02d}T{:02d}:{:02d}:00+00:00",
+                "format": "{:04.0f}-{:02.0f}-{:02.0f}T{:02.0f}:{:02.0f}:00+00:00",  # noqa
                 "args": [
                     {"eccodes_key": "#1#year"},
                     {"eccodes_key": "#1#month"},
