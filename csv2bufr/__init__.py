@@ -475,7 +475,7 @@ class BUFRMessage:
         if "units" in template["_meta"]:
             units = template["_meta"]["units"]
             for u in units:
-                for o in range(len(result["properties"]["observations"])):
+                for o in result["properties"]["observations"]:
                     if result["properties"]["observations"][o]["units"] == u:
                         value = result["properties"]["observations"][o]["value"]  # noqa
                         if value is not None:
@@ -514,6 +514,8 @@ class BUFRMessage:
                     result = None
             elif "eccodes_key" in object_:
                 result = self.get_element(object_["eccodes_key"])
+                if isinstance(result,int):
+                    result = float(result)
                 if result in (CODES_MISSING_LONG, CODES_MISSING_DOUBLE):
                     result = None
             else:
