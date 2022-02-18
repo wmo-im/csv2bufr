@@ -1,7 +1,8 @@
 {
   "id": null,
   "conformsTo": [
-	"http://www.opengis.net/spec/ogcapi-features-1/1.0/req/geojson"
+	"http://www.opengis.net/spec/ogcapi-features-1/1.0/req/geojson",
+    "http://www.wmo.int/spec/om-profile-1/-/req/geojson"
   ],
   "type": "Feature",
   "geometry": {
