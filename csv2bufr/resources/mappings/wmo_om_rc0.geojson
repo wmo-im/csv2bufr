@@ -1,7 +1,7 @@
 {
   "id": null,
   "conformsTo": [
-	"http://www.opengis.net/spec/ogcapi-features-1/1.0/req/geojson",
+  "http://www.opengis.net/spec/ogcapi-features-1/1.0/req/geojson",
     "http://www.wmo.int/spec/om-profile-1/-/req/geojson"
   ],
   "type": "Feature",
@@ -23,82 +23,82 @@
     ]},
     "resultTime": null,
     "wmo:wigos_station_identifier":{
-    	"format":"{:.0f}-{:.0f}-{:.0f}-{}",
-    	"args":[
-			{"eccodes_key":"#1#wigosIdentifierSeries"},
-			{"eccodes_key":"#1#wigosIssuerOfIdentifier"},
-			{"eccodes_key":"#1#wigosIssueNumber"},
-			{"eccodes_key":"#1#wigosLocalIdentifierCharacter"}
-    	]
+      "format":"{:.0f}-{:.0f}-{:.0f}-{}",
+      "args":[
+      {"eccodes_key":"#1#wigosIdentifierSeries"},
+      {"eccodes_key":"#1#wigosIssuerOfIdentifier"},
+      {"eccodes_key":"#1#wigosIssueNumber"},
+      {"eccodes_key":"#1#wigosLocalIdentifierCharacter"}
+      ]
     },
     "metadata":[
-		{
-		  "name": "height_of_station_above_ground_level",
-		  "value": {"eccodes_key": "#1#heightOfStationGroundAboveMeanSeaLevel"},
-		  "units": {"eccodes_key": "#1#heightOfStationGroundAboveMeanSeaLevel->units"}
-		}
+    {
+      "name": "height_of_station_above_ground_level",
+      "value": {"eccodes_key": "#1#heightOfStationGroundAboveMeanSeaLevel"},
+      "units": {"eccodes_key": "#1#heightOfStationGroundAboveMeanSeaLevel->units"}
+    }
     ],
     "observations": {
-    	"air_pressure":{
-		  "value": {
-			  "eccodes_key": "#1#nonCoordinatePressure"
-		  },
-		  "units": {
-			"eccodes_key": "#1#nonCoordinatePressure->units"
-		  },
-		  "metadata":[
-				{
-				  "name": "sensor_height_above_mean_sea_level",
-				  "value": {"eccodes_key": "#1#heightOfBarometerAboveMeanSeaLevel"},
-				  "units": {"eccodes_key": "#1#heightOfBarometerAboveMeanSeaLevel->units"}
-				}
-			]
-	  	},
-      	"pressure_at_mean_sea_level":{
-			"value": {
-			  "eccodes_key": "#1#pressureReducedToMeanSeaLevel"
-			},
-			"units": {
-			  "eccodes_key": "#1#pressureReducedToMeanSeaLevel->units"
-			},
-			"metadata":[
-				{
-				  "name": "sensor_height_above_mean_sea_level",
-				  "value": {"eccodes_key": "#1#heightOfBarometerAboveMeanSeaLevel"},
-				  "units": {"eccodes_key": "#1#heightOfBarometerAboveMeanSeaLevel->units"}
-				}
-			]
-      	},
-		"change_of_air_pressure_over_past_3_hours":{
-			"value": {
-			  "eccodes_key": "#1#3HourPressureChange"
-			},
-			"units": {
-			  "eccodes_key": "#1#3HourPressureChange->units"
-			},
-			"metadata":[
-				{
-				  "name": "sensor_height_above_mean_sea_level",
-				  "value": {"eccodes_key": "#1#heightOfBarometerAboveMeanSeaLevel"},
-				  "units": {"eccodes_key": "#1#heightOfBarometerAboveMeanSeaLevel->units"}
-				}
-			]
-      	},
-      	"characteristic_of_pressure_tendency":{
-			"value": {
-			  "eccodes_key": "#1#characteristicOfPressureTendency"
-			},
-			"units": {
-			  "eccodes_key": "#1#characteristicOfPressureTendency->units"
-			},
-			"metadata":[
-				{
-				  "name": "sensor_height_above_mean_sea_level",
-				  "value": {"eccodes_key": "#1#heightOfBarometerAboveMeanSeaLevel"},
-				  "units": {"eccodes_key": "#1#heightOfBarometerAboveMeanSeaLevel->units"}
-				}
-			]
-	  },
+      "air_pressure":{
+      "value": {
+        "eccodes_key": "#1#nonCoordinatePressure"
+      },
+      "units": {
+      "eccodes_key": "#1#nonCoordinatePressure->units"
+      },
+      "metadata":[
+        {
+          "name": "sensor_height_above_mean_sea_level",
+          "value": {"eccodes_key": "#1#heightOfBarometerAboveMeanSeaLevel"},
+          "units": {"eccodes_key": "#1#heightOfBarometerAboveMeanSeaLevel->units"}
+        }
+      ]
+      },
+        "pressure_at_mean_sea_level":{
+      "value": {
+        "eccodes_key": "#1#pressureReducedToMeanSeaLevel"
+      },
+      "units": {
+        "eccodes_key": "#1#pressureReducedToMeanSeaLevel->units"
+      },
+      "metadata":[
+        {
+          "name": "sensor_height_above_mean_sea_level",
+          "value": {"eccodes_key": "#1#heightOfBarometerAboveMeanSeaLevel"},
+          "units": {"eccodes_key": "#1#heightOfBarometerAboveMeanSeaLevel->units"}
+        }
+      ]
+        },
+    "change_of_air_pressure_over_past_3_hours":{
+      "value": {
+        "eccodes_key": "#1#3HourPressureChange"
+      },
+      "units": {
+        "eccodes_key": "#1#3HourPressureChange->units"
+      },
+      "metadata":[
+        {
+          "name": "sensor_height_above_mean_sea_level",
+          "value": {"eccodes_key": "#1#heightOfBarometerAboveMeanSeaLevel"},
+          "units": {"eccodes_key": "#1#heightOfBarometerAboveMeanSeaLevel->units"}
+        }
+      ]
+        },
+        "characteristic_of_pressure_tendency":{
+      "value": {
+        "eccodes_key": "#1#characteristicOfPressureTendency"
+      },
+      "units": {
+        "eccodes_key": "#1#characteristicOfPressureTendency->units"
+      },
+      "metadata":[
+        {
+          "name": "sensor_height_above_mean_sea_level",
+          "value": {"eccodes_key": "#1#heightOfBarometerAboveMeanSeaLevel"},
+          "units": {"eccodes_key": "#1#heightOfBarometerAboveMeanSeaLevel->units"}
+        }
+      ]
+    },
       "air_temperature":{
         "value": {
           "eccodes_key": "#1#airTemperature"
@@ -107,11 +107,11 @@
           "eccodes_key": "#1#airTemperature->units"
         },
         "metadata":[
-			{
-			  "name": "sensor_height_above_local_ground",
-			  "value": {"eccodes_key": "#1#heightOfSensorAboveLocalGroundOrDeckOfMarinePlatform"},
-			  "units": {"eccodes_key": "#1#heightOfSensorAboveLocalGroundOrDeckOfMarinePlatform->units"}
-			}
+      {
+        "name": "sensor_height_above_local_ground",
+        "value": {"eccodes_key": "#1#heightOfSensorAboveLocalGroundOrDeckOfMarinePlatform"},
+        "units": {"eccodes_key": "#1#heightOfSensorAboveLocalGroundOrDeckOfMarinePlatform->units"}
+      }
         ]
       },
       "dew_point_temperature":{
@@ -122,11 +122,11 @@
           "eccodes_key": "#1#dewpointTemperature->units"
         },
         "metadata":[
-			{
-			  "name": "sensor_height_above_local_ground",
-			  "value": {"eccodes_key": "#1#heightOfSensorAboveLocalGroundOrDeckOfMarinePlatform"},
-			  "units": {"eccodes_key": "#1#heightOfSensorAboveLocalGroundOrDeckOfMarinePlatform->units"}
-			}
+      {
+        "name": "sensor_height_above_local_ground",
+        "value": {"eccodes_key": "#1#heightOfSensorAboveLocalGroundOrDeckOfMarinePlatform"},
+        "units": {"eccodes_key": "#1#heightOfSensorAboveLocalGroundOrDeckOfMarinePlatform->units"}
+      }
         ]
       },
       "relative_humidity":{
@@ -137,11 +137,11 @@
           "eccodes_key": "#1#relativeHumidity->units"
         },
         "metadata":[
-			{
-			  "name": "sensor_height_above_local_ground",
-			  "value": {"eccodes_key": "#1#heightOfSensorAboveLocalGroundOrDeckOfMarinePlatform"},
-			  "units": {"eccodes_key": "#1#heightOfSensorAboveLocalGroundOrDeckOfMarinePlatform->units"}
-			}
+      {
+        "name": "sensor_height_above_local_ground",
+        "value": {"eccodes_key": "#1#heightOfSensorAboveLocalGroundOrDeckOfMarinePlatform"},
+        "units": {"eccodes_key": "#1#heightOfSensorAboveLocalGroundOrDeckOfMarinePlatform->units"}
+      }
         ]      },
       "duration_of_sunshine_1hr":{
         "value": {
@@ -151,11 +151,11 @@
           "eccodes_key": "#1#totalSunshine->units"
         },
         "metadata":[
-			{
-			  "name": "time_period",
-			  "value": {"eccodes_key": "#2#timePeriod"},
-			  "units": {"eccodes_key": "#2#timePeriod->units"}
-			}
+      {
+        "name": "time_period",
+        "value": {"eccodes_key": "#2#timePeriod"},
+        "units": {"eccodes_key": "#2#timePeriod->units"}
+      }
         ]
       },
       "duration_of_sunshine_24h":{
@@ -166,11 +166,11 @@
           "eccodes_key": "#2#totalSunshine->units"
         },
         "metadata":[
-			{
-			  "name": "time_period",
-			  "value": {"eccodes_key": "#3#timePeriod"},
-			  "units": {"eccodes_key": "#3#timePeriod->units"}
-			}
+      {
+        "name": "time_period",
+        "value": {"eccodes_key": "#3#timePeriod"},
+        "units": {"eccodes_key": "#3#timePeriod->units"}
+      }
         ]
       },
       "precipitation_amount_1h":{
@@ -181,16 +181,16 @@
           "eccodes_key": "#1#totalPrecipitationOrTotalWaterEquivalent->units"
         },
         "metadata":[
-			{
-			  "name": "time_period",
-			  "value": {"eccodes_key": "#4#timePeriod"},
-			  "units": {"eccodes_key": "#4#timePeriod->units"}
-			},
-			{
-			  "name": "sensor_height_above_local_ground",
-			  "value": {"eccodes_key": "#5#heightOfSensorAboveLocalGroundOrDeckOfMarinePlatform"},
-			  "units": {"eccodes_key": "#5#heightOfSensorAboveLocalGroundOrDeckOfMarinePlatform->units"}
-			}
+      {
+        "name": "time_period",
+        "value": {"eccodes_key": "#4#timePeriod"},
+        "units": {"eccodes_key": "#4#timePeriod->units"}
+      },
+      {
+        "name": "sensor_height_above_local_ground",
+        "value": {"eccodes_key": "#5#heightOfSensorAboveLocalGroundOrDeckOfMarinePlatform"},
+        "units": {"eccodes_key": "#5#heightOfSensorAboveLocalGroundOrDeckOfMarinePlatform->units"}
+      }
         ]
       },
       "air_temperature_maximum":{
@@ -202,8 +202,8 @@
         },
         "metadata":[
           {
-        		"name":"cell_methods",
-        		"description":"maximum"
+            "name":"cell_methods",
+            "description":"maximum"
           },
           {
              "name":"time_period_start",
@@ -216,9 +216,9 @@
              "units":{"eccodes_key": "#7#timePeriod->units"}
           },
           {
-          	"name":"sensor_height_above_local_ground",
-          	"value":{"eccodes_key": "#6#heightOfSensorAboveLocalGroundOrDeckOfMarinePlatform"},
-          	"units":{"eccodes_key": "#6#heightOfSensorAboveLocalGroundOrDeckOfMarinePlatform->units"}
+            "name":"sensor_height_above_local_ground",
+            "value":{"eccodes_key": "#6#heightOfSensorAboveLocalGroundOrDeckOfMarinePlatform"},
+            "units":{"eccodes_key": "#6#heightOfSensorAboveLocalGroundOrDeckOfMarinePlatform->units"}
           }
         ]
       },
@@ -231,8 +231,8 @@
         },
         "metadata":[
           {
-        		"name":"cell_methods",
-        		"description":"minimum"
+            "name":"cell_methods",
+            "description":"minimum"
           },
           {
              "name":"time_period_start",
@@ -245,9 +245,9 @@
              "units":{"eccodes_key": "#9#timePeriod->units"}
           },
           {
-          	"name":"sensor_height_above_local_ground",
-          	"value":{"eccodes_key": "#6#heightOfSensorAboveLocalGroundOrDeckOfMarinePlatform"},
-          	"units":{"eccodes_key": "#6#heightOfSensorAboveLocalGroundOrDeckOfMarinePlatform->units"}
+            "name":"sensor_height_above_local_ground",
+            "value":{"eccodes_key": "#6#heightOfSensorAboveLocalGroundOrDeckOfMarinePlatform"},
+            "units":{"eccodes_key": "#6#heightOfSensorAboveLocalGroundOrDeckOfMarinePlatform->units"}
           }
         ]
       },
@@ -270,14 +270,14 @@
              "units":{"eccodes_key": "#10#timePeriod->units"}
           },
           {
-          	"name":"sensor_height_above_local_ground",
-          	"value":{"eccodes_key": "#7#heightOfSensorAboveLocalGroundOrDeckOfMarinePlatform"},
-          	"units":{"eccodes_key": "#7#heightOfSensorAboveLocalGroundOrDeckOfMarinePlatform->units"}
+            "name":"sensor_height_above_local_ground",
+            "value":{"eccodes_key": "#7#heightOfSensorAboveLocalGroundOrDeckOfMarinePlatform"},
+            "units":{"eccodes_key": "#7#heightOfSensorAboveLocalGroundOrDeckOfMarinePlatform->units"}
           },
           {
-          	"name":"wind_sensor_type",
-          	"value":{"eccodes_key": "#1#instrumentationForWindMeasurement"},
-          	"units":{"eccodes_key": "#1#instrumentationForWindMeasurement->units"}
+            "name":"wind_sensor_type",
+            "value":{"eccodes_key": "#1#instrumentationForWindMeasurement"},
+            "units":{"eccodes_key": "#1#instrumentationForWindMeasurement->units"}
           }
         ]
       },
@@ -289,26 +289,26 @@
           "eccodes_key": "#1#windSpeed->units"
         },
         "metadata":[
-        	{
-        		"name":"cell_methods",
-        		"value": {"eccodes_key": "#1#timeSignificance"},
-        		"units": {"eccodes_key": "#1#timeSignificance->units"}
-        	},
-        	{
-        		"name":"time_period",
-        		"value":{"eccodes_key": "#10#timePeriod"},
-        		"units":{"eccodes_key": "#10#timePeriod->units"}
-        	},
-        	{
-        		"name":"sensor_height_above_local_ground",
-        		"value":{"eccodes_key": "#7#heightOfSensorAboveLocalGroundOrDeckOfMarinePlatform"},
-        		"units": {"eccodes_key": "#7#heightOfSensorAboveLocalGroundOrDeckOfMarinePlatform->units"}
-        	},
-        	{
-        		"name":"wind_sensor_type",
-        		"value": {"eccodes_key": "#1#instrumentationForWindMeasurement"},
-        		"units": {"eccodes_key": "#1#instrumentationForWindMeasurement->units"}
-        	}
+          {
+            "name":"cell_methods",
+            "value": {"eccodes_key": "#1#timeSignificance"},
+            "units": {"eccodes_key": "#1#timeSignificance->units"}
+          },
+          {
+            "name":"time_period",
+            "value":{"eccodes_key": "#10#timePeriod"},
+            "units":{"eccodes_key": "#10#timePeriod->units"}
+          },
+          {
+            "name":"sensor_height_above_local_ground",
+            "value":{"eccodes_key": "#7#heightOfSensorAboveLocalGroundOrDeckOfMarinePlatform"},
+            "units": {"eccodes_key": "#7#heightOfSensorAboveLocalGroundOrDeckOfMarinePlatform->units"}
+          },
+          {
+            "name":"wind_sensor_type",
+            "value": {"eccodes_key": "#1#instrumentationForWindMeasurement"},
+            "units": {"eccodes_key": "#1#instrumentationForWindMeasurement->units"}
+          }
         ]
       },
       "wind_speed_maximum_gust":{
@@ -319,26 +319,26 @@
           "eccodes_key": "#1#maximumWindGustSpeed->units"
         },
         "metadata":[
-        	{
-        		"name":"cell_methods",
-        		"value": {"eccodes_key": "#2#timeSignificance"},
-        		"units": {"eccodes_key": "#2#timeSignificance->units"}
-        	},
+          {
+            "name":"cell_methods",
+            "value": {"eccodes_key": "#2#timeSignificance"},
+            "units": {"eccodes_key": "#2#timeSignificance->units"}
+          },
             {
-        		"name":"time_period",
-        		"value":{"eccodes_key": "#11#timePeriod"},
-        		"units":{"eccodes_key": "#11#timePeriod->units"}
-        	},
-        	{
-        		"name":"sensor_height_above_local_ground",
-        		"value":{"eccodes_key": "#7#heightOfSensorAboveLocalGroundOrDeckOfMarinePlatform"},
-        		"units":{"eccodes_key": "#7#heightOfSensorAboveLocalGroundOrDeckOfMarinePlatform->units"}
-        	},
-        	{
-        		"name":"wind_sensor_type",
-        		"value": {"eccodes_key": "#1#instrumentationForWindMeasurement"},
-        		"units": {"eccodes_key": "#1#instrumentationForWindMeasurement->units"}
-        	}
+            "name":"time_period",
+            "value":{"eccodes_key": "#11#timePeriod"},
+            "units":{"eccodes_key": "#11#timePeriod->units"}
+          },
+          {
+            "name":"sensor_height_above_local_ground",
+            "value":{"eccodes_key": "#7#heightOfSensorAboveLocalGroundOrDeckOfMarinePlatform"},
+            "units":{"eccodes_key": "#7#heightOfSensorAboveLocalGroundOrDeckOfMarinePlatform->units"}
+          },
+          {
+            "name":"wind_sensor_type",
+            "value": {"eccodes_key": "#1#instrumentationForWindMeasurement"},
+            "units": {"eccodes_key": "#1#instrumentationForWindMeasurement->units"}
+          }
         ]
       },
       "surface_downwelling_shortwave_flux_in_air_1h":{
@@ -350,14 +350,14 @@
         },
         "metadata":[
             {
-        		"name":"cell_methods",
-        		"description":"sum"
-        	},
+            "name":"cell_methods",
+            "description":"sum"
+          },
             {
-        		"name":"time_period",
-        		"value":{"eccodes_key": "#14#timePeriod"},
-        		"units":{"eccodes_key": "#14#timePeriod->units"}
-        	}
+            "name":"time_period",
+            "value":{"eccodes_key": "#14#timePeriod"},
+            "units":{"eccodes_key": "#14#timePeriod->units"}
+          }
         ]
       },
       "surface_downwelling_shortwave_flux_in_air_24h":{
@@ -368,23 +368,23 @@
           "eccodes_key": "#2#globalSolarRadiationIntegratedOverPeriodSpecified->units"
         },
         "metadata":[
-        	{
-        		"name":"cell_methods",
-        		"description":"sum"
-        	},
+          {
+            "name":"cell_methods",
+            "description":"sum"
+          },
             {
-        		"name":"time_period",
-        		"value":{"eccodes_key": "#15#timePeriod"},
-        		"units":{"eccodes_key": "#15#timePeriod->units"}
-        	}
+            "name":"time_period",
+            "value":{"eccodes_key": "#15#timePeriod"},
+            "units":{"eccodes_key": "#15#timePeriod->units"}
+          }
         ]
       }
     }
   },
   "_meta": {
-  	"units":{
-  		"K":"Celsius"
-  	}
+    "units":{
+      "K":"Celsius"
+    }
   }
 
 }

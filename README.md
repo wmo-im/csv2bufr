@@ -15,10 +15,12 @@ Example usage
 Transform data from file ``<my-csv-file.csv>`` to BUFR using template specified in file ``<csv-to-bufr-mapping.json>``
 and with station metadata file the file ``<oscar-metadata-file.json>``. Write output to ``<output-directory-path>``.
 
-	csv2bufr data transform <my-csv-file.csv> \
-			--bufr-template <csv-to-bufr-mapping.json> \
-			--station-metadata <oscar-metadata-file.json> \
-			--output <output-directory-path>
+```bash
+csv2bufr data transform <my-csv-file.csv> \
+    --bufr-template <csv-to-bufr-mapping.json> \
+    --station-metadata <oscar-metadata-file.json> \
+    --output <output-directory-path>
+```
 
 Manual / documentation
 ----------------------

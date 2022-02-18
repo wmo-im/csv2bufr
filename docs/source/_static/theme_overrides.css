@@ -10,17 +10,17 @@
 }
 
 .wy-nav-content{
-	padding:1.618em 3.236em;
-	height:100%;
-	max-width:1000px;
-	margin:auto
-	}
+    padding:1.618em 3.236em;
+    height:100%;
+    max-width:1000px;
+    margin:auto
+    }
 
 .redtext{
-	color: red;
+    color: red;
 }
 
 .centered{
-	text-align: right;
-	color: blue;
+    text-align: right;
+    color: blue;
 }

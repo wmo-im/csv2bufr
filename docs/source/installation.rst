@@ -27,7 +27,7 @@ All the above packages can be installed by running:
 
 .. code-block:: bash
 
-	pip install -r requirements.txt
+   pip install -r requirements.txt
 
 Installation
 ************
@@ -39,7 +39,7 @@ libraries and Python modules:
 
 .. code-block:: shell
 
-	docker pull wmoim/csv2bufr
+   docker pull wmoim/csv2bufr
 
 This installs a `Docker image <https://hub.docker.com/r/wmoim/csv2bufr>`_ based on Ubuntu and includes the ecCodes software library, dependencies noted above
 and the csv2bufr module (including the command line interface).
@@ -51,36 +51,37 @@ Alternatively, csv2bufr can be installed from source. First clone the repository
 
 .. code-block:: bash
 
-	git clone https://github.com/wmo-im/csv2bufr.git -b dev
-	cd csv2bufr
+   git clone https://github.com/wmo-im/csv2bufr.git -b dev
+   cd csv2bufr
 
 If running in a Docker environment, build the Docker image and run the container:
 
 .. code-block:: bash
 
-	docker build -t csv2bufr .
-	docker run -it -v ${pwd}:/app csv2bufr
-	cd /app
+   docker build -t csv2bufr .
+   docker run -it -v ${pwd}:/app csv2bufr
+   cd /app
 
 The above step can be skipped if not using Docker. Now install the module and test:
 
 .. code-block:: bash
 
-	python3 setup.py install
-	csv2bufr --help
+   python3 setup.py install
+   csv2bufr --help
 
 The following output should be shown:
 
 .. code-block:: bash
 
-	Usage: csv2bufr [OPTIONS] COMMAND [ARGS]...
-
-		csv2bufr
-
-	Options:
-	  --version  Show the version and exit.
-	  --help     Show this message and exit.
-
-	Commands:
-	  data      data workflows
-	  mappings  stored mappings
+   Usage: csv2bufr [OPTIONS] COMMAND [ARGS]...
+   
+     csv2bufr
+   
+   Options:
+     --version  Show the version and exit.
+     --help     Show this message and exit.
+   
+   Commands:
+     data      data workflows
+     mappings  stored mappings
+   

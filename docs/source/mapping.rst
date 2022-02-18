@@ -28,27 +28,27 @@ to the BUFR element indicated by the eccodes key "pressureReducedToMeanSeaLevel"
 
 .. code-block:: json
 
-	{
-		"data":[
-			{"eccodes_key": "pressureReducedToMeanSeaLevel", "csv_column": "mslp"}
-		]
-	}
+   {
+       "data":[
+           {"eccodes_key": "pressureReducedToMeanSeaLevel", "csv_column": "mslp"}
+       ]
+   }
 
 In addition to mapping to the CSV columns, constant values and values from the JSON metadata file can be mapped using the "value" and "jsonpath" fields.
 Building on the prior example:
 
 .. code-block:: json
 
-	{
-		"header":[
-			{"eccodes_key": "dataCategory", "value": 0}
-		],
-		"data":[
-			{"eccodes_key": "latitude", "jsonpath": "$.locations[0].latitude"},
-			{"eccodes_key": "longitude", "jsonpath": "$.locations[0].latitude"},
-			{"eccodes_key": "pressureReducedToMeanSeaLevel", "csv_column": "mslp"},
-		]
-	}
+   {
+       "header":[
+           {"eccodes_key": "dataCategory", "value": 0}
+       ],
+       "data":[
+           {"eccodes_key": "latitude", "jsonpath": "$.locations[0].latitude"},
+           {"eccodes_key": "longitude", "jsonpath": "$.locations[0].latitude"},
+           {"eccodes_key": "pressureReducedToMeanSeaLevel", "csv_column": "mslp"},
+       ]
+   }
 
 Would map: the ``dataCategory`` field in BUFR section 1 (see :ref:`bufr4`) to the constant value 0;
 the ``latitude`` and ``longitude`` to the elements specified by resolving the jsonpath in the metadata file;
@@ -75,9 +75,9 @@ must still be included but may be set to an empty array, e.g.
 
 .. code-block:: json
 
-	{
-		"inputDelayedDescriptorReplicationFactor": []
-	}
+   {
+       "inputDelayedDescriptorReplicationFactor": []
+   }
 
 bufr_element
 ------------
@@ -106,23 +106,23 @@ The scaled values are calculated as:
 
 .. math::
 
-	\mbox{scaled\_value} =
-		\mbox{value} \times 10^{\mbox{scale}} + \mbox{offset}
+   \mbox{scaled\_value} =
+       \mbox{value} \times 10^{\mbox{scale}} + \mbox{offset}
 
 The scaled value is then used to set the indicated BUFR element. For example:
 
 .. code-block:: json
 
-	{
-		"data":[
-			{
-				"eccodes_key": "pressureReducedToMeanSeaLevel",
-				"csv_column": "mslp",
-				"scale": 2,
-				"offset": 0
-			}
-		]
-	}
+   {
+       "data":[
+           {
+               "eccodes_key": "pressureReducedToMeanSeaLevel",
+               "csv_column": "mslp",
+               "scale": 2,
+               "offset": 0
+           }
+       ]
+   }
 
 Would convert the value contained in the "mslp" column of the CSV file from hPa to Pa by multiplying by 100 and adding 0.
 
@@ -135,16 +135,16 @@ The index is indicated within the eccodes_key using ``#index#eccodes_key``, an e
 
 .. code-block:: json
 
-	{
-		"data":[
-			{
-				"#1#eccodes_key": "pressureReducedToMeanSeaLevel",
-				"csv_column": "mslp",
-				"scale": 2,
-				"offset": 0
-			}
-		]
-	}
+   {
+       "data":[
+           {
+               "#1#eccodes_key": "pressureReducedToMeanSeaLevel",
+               "csv_column": "mslp",
+               "scale": 2,
+               "offset": 0
+           }
+       ]
+   }
 
 Units
 -----
@@ -156,28 +156,28 @@ the ``scale`` and ``offset`` fields. Some additional examples are given below.
 
 .. code-block:: json
 
-	{
-		"data":[
-			{
-				"eccodes_key": "airTemperature",
-				"csv_column": "AT-fahrenheiht",
-				"scale": -0.25527,
-				"offset": 459.67
-			},
-			{
-				"eccodes_key": "airTemperature",
-				"csv_column": "AT-celsius",
-				"scale": 0,
-				"offset": 273.15
-			},
-			{
-				"eccodes_key": "pressure",
-				"csv_column": "pressure-hPa",
-				"scale": 2,
-				"offset": 0
-			}
-		]
-	}
+   {
+       "data":[
+           {
+               "eccodes_key": "airTemperature",
+               "csv_column": "AT-fahrenheiht",
+               "scale": -0.25527,
+               "offset": 459.67
+           },
+           {
+               "eccodes_key": "airTemperature",
+               "csv_column": "AT-celsius",
+               "scale": 0,
+               "offset": 273.15
+           },
+           {
+               "eccodes_key": "pressure",
+               "csv_column": "pressure-hPa",
+               "scale": 2,
+               "offset": 0
+           }
+       ]
+   }
 
 Schema
 ------
