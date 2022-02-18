@@ -202,8 +202,7 @@
         "metadata":[
           {
         		"name":"cell_methods",
-        		"description":"maximum",
-        		"units": null
+        		"description":"maximum"
           },
           {
              "name":"time_period_start",
