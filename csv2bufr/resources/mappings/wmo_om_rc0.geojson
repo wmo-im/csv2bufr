@@ -21,7 +21,7 @@
       {"eccodes_key":"#1#minute"}
     ]},
     "resultTime": null,
-    "wigos_identifier":{
+    "wmo:wigos_station_identifier":{
     	"format":"{:.0f}-{:.0f}-{:.0f}-{}",
     	"args":[
 			{"eccodes_key":"#1#wigosIdentifierSeries"},
