@@ -39,6 +39,7 @@
     ],
     "observations": {
     	"air_pressure":{
+
 		  "value": {
 			  "eccodes_key": "#1#nonCoordinatePressure"
 		  },
@@ -54,6 +55,7 @@
 			]
 	  	},
       	"pressure_at_mean_sea_level":{
+
 			"value": {
 			  "eccodes_key": "#1#pressureReducedToMeanSeaLevel"
 			},
