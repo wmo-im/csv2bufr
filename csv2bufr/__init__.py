@@ -38,6 +38,7 @@ from eccodes import (codes_bufr_new_from_samples,
                      CODES_MISSING_LONG, CODES_MISSING_DOUBLE,
                      codes_bufr_keys_iterator_new,
                      codes_bufr_keys_iterator_next,
+                     codes_bufr_keys_iterator_delete,
                      codes_bufr_keys_iterator_get_name, CodesInternalError)
 from jsonpath_ng.ext import parser
 from jsonschema import validate
@@ -252,6 +253,7 @@ class BUFRMessage:
                             codes_get(bufr_msg, f"{key}->{attr}")
                     except Exception as e:
                         raise e
+        codes_bufr_keys_iterator_delete(iterator)
         # ============================================
         # now release the BUFR message back to eccodes
         # ============================================
