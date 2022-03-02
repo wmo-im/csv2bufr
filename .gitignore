@@ -37,3 +37,9 @@ nosetests.xml
 
 # local
 .pytest_cache
+*.bufr4
+*.geojson
+logs
+
+# pycharm
+.idea

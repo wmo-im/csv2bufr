@@ -1,0 +1,80 @@
+{
+  "$id": "wmdr.csv2bufr.wis2.0.node.wis",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "type": "object",
+    "properties": {
+      "id": {
+        "type": "string",
+        "description": "Unique id for record"
+      },
+      "type":{
+        "type": "string",
+        "description": "geojson feature type, only Features supported",
+        "enum": ["Feature"]
+      },
+      "geometry": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "description": "geometry type, only 3d point supported. Future versions will need to support additional types",
+            "enum": ["Point"]
+          },
+          "coordinates": {
+            "type": "array",
+            "items": {
+              "type": "number"
+            },
+            "minItems": 3,
+            "maxItems": 3,
+            "description": "[longitude, latitude, elevation] of station (CRS: WGS84)"
+          }
+        }
+      },
+      "properties": {
+        "type": "object",
+        "properties": {
+          "wigos_id_series": {
+            "type": "integer",
+            "description": "WIGOS identifer - series number"
+          },
+          "wigos_id_issuer": {
+            "type": "integer",
+            "description": "WIGOS identifer - issuer"
+          },
+          "wigos_id_issue_number": {
+            "type": "integer",
+            "description": "WIGOS identifer - issue number"
+          },
+          "wigos_id_local_identifier": {
+            "type": "string",
+            "description": "WIGOS identifer - local identifier"},
+          "station_name": {
+            "type": "string",
+            "description": "Name of station, platform or facility"
+          }
+        }
+      }
+    },
+  "valid_from": {
+    "type": "string",
+    "description": "date record is valid from"
+  },
+  "valid_to": {
+    "type": "string",
+    "description": "date record is valid from"
+  },
+  "_meta": {
+    "type": "object",
+    "properties": {
+      "cache_date": {
+        "type": "string",
+        "description": "date record was last downloaded"
+      },
+      "download_url": {
+        "type": "string",
+        "description": "URL where data was downloaded from"
+      }
+    }
+  }
+}

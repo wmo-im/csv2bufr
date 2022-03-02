@@ -19,21 +19,29 @@
 #
 ###############################################################################
 
-__version__ = '0.1.0'
+__version__ = "0.0.1"
 
-import argparse
+from copy import deepcopy
 import csv
+from datetime import timezone, datetime
 import hashlib
-import json
 from io import StringIO, BytesIO
+import json
 import logging
-from typing import Union
-import sys
+import os.path
+from typing import Any, Iterator, Union
 
+from cfunits import Units
+from eccodes import (codes_bufr_new_from_samples,
+                     codes_set_array, codes_set, codes_get_native_type,
+                     codes_write, codes_release, codes_get,
+                     CODES_MISSING_LONG, CODES_MISSING_DOUBLE,
+                     codes_bufr_keys_iterator_new,
+                     codes_bufr_keys_iterator_next,
+                     codes_bufr_keys_iterator_delete,
+                     codes_bufr_keys_iterator_get_name, CodesInternalError)
+from jsonpath_ng.ext import parser
 from jsonschema import validate
-
-from eccodes import (codes_bufr_new_from_samples, codes_set_array, codes_set,
-                     codes_get_native_type, codes_write, codes_release)
 
 # some 'constants'
 SUCCESS = True
@@ -42,110 +50,112 @@ MISSING = ("NA", "NaN", "NAN", "None")
 
 NULLIFY_INVALID = True  # TODO: move to env. variable
 
-# logging
-LOGLEVEL = "INFO"  # TODO: change to read in from environment variable
-
-# set format of logger and loglevel
-formatter = logging.Formatter("%(asctime)s\t%(name)s\t%(levelname)s\t%(message)s", "%Y-%m-%d %H:%M:%S")  # noqa
-ch = logging.StreamHandler()
-ch.setFormatter(formatter)
-ch.setLevel(LOGLEVEL)
-
-# now logger for this module
 LOGGER = logging.getLogger(__name__)
-LOGGER.setLevel(LOGLEVEL)
-LOGGER.addHandler(ch)
+
+THISDIR = os.path.dirname(os.path.realpath(__file__))
+MAPPINGS = f"{THISDIR}{os.sep}resources{os.sep}mappings"
+
+BUFR_TABLE_VERSION = 36  # default BUFR table version
+# list of BUFR attributes
+ATTRIBUTES = ['code', 'units', 'scale', 'reference', 'width']
+# list of ecCodes keys for BUFR headers
+HEADERS = ["edition", "masterTableNumber", "bufrHeaderCentre",
+           "bufrHeaderSubCentre", "updateSequenceNumber", "dataCategory",
+           "internationalDataSubCategory", "dataSubCategory",
+           "masterTablesVersionNumber", "localTablesVersionNumber",
+           "typicalYear", "typicalMonth", "typicalDay", "typicalHour",
+           "typicalMinute", "typicalSecond", "typicalDate", "typicalTime",
+           "numberOfSubsets", "observedData", "compressedData",
+           "unexpandedDescriptors", "subsetNumber"]
+
+# dictionary to store jsonpath parsers, these are compiled the first time that
+# they are used.
+jsonpath_parsers = dict()
 
 
-def validate_mapping_dict(mapping_dict: dict) -> bool:
+# custom error handlers
+class MappingError(Exception):
+    pass
+
+
+def parse_wigos_id(wigos_id: str) -> dict:
     """
-    Validate mapping dictionary
+    Returns the WIGOS Identifier (wigos_id) in string representation
+    as the individual components in a dictionary. The WIGOS Identifier takes
+    the following form:
 
-    :param mapping_dict: TODO: describe
+        <WIGOS identifier series>-<issuer>-<issue number>-<local identifier>
+
+    See https://community.wmo.int/wigos-station-identifier for more
+    information.
+
+    :param wigos_id: WIGOS Station Identifier (WSI) as a string, e.g.
+        "0-20000-0-ABCD123"
+
+    :returns: `dict` containing components of the WIGOS identifier:
+        "wid_series", "wid_issuer", "wid_issue_number" and "local_identifier"
+
+    """
+
+    tokens = wigos_id.split("-")
+    assert len(tokens) == 4
+    result = {
+        "wid_series": int(tokens[0]),
+        "wid_issuer": int(tokens[1]),
+        "wid_issue_number": int(tokens[2]),
+        "wid_local": tokens[3]
+    }
+    return result
+
+
+def validate_mapping(mapping: dict) -> bool:
+    """
+    Validates dictionary containing mapping to BUFR against internal schema.
+    Returns True if the dictionary passes and raises an error otherwise.
+
+    :param mapping: dictionary containing mappings to specified BUFR
+                        sequence using ecCodes key.
 
     :returns: `bool` of validation result
     """
 
-    file_schema = {
-        "type": "object",
-        "properties": {
-            "inputDelayedDescriptorReplicationFactor": {
-                "type": ["array", "null"]
-            },
-            "sequence": {
-                "type": ["array"]
-            }
-        }
-    }
+    # load internal file schema for mappings
+    file_schema = f"{MAPPINGS}{os.sep}mapping_schema.json"
+    with open(file_schema) as fh:
+        schema = json.load(fh)
+
     # now validate
     try:
-        validate(mapping_dict, file_schema)
-    except Exception as e:
-        message = "invalid mapping dictionary"
+        validate(mapping, schema)
+    except MappingError as e:
+        message = "Invalid mapping dictionary"
         LOGGER.error(message)
         raise e
-    # now schema for each element in the sequence array
-    # TODO: make optional elements optional
-    element_schema = {
-        "type": "object",
-        "properties": {
-            "key": {
-                "type": "string"
-            },
-            "value": {
-                "type": [
-                    "boolean", "object", "array", "number", "string", "null"
-                ]
-            },
-            "column": {
-                "type": ["string", "null"]
-            },
-            "valid-min": {
-                 "type": ["number", "null"]
-            },
-            "valid-max": {
-                 "type": ["number", "null"]
-            },
-            "scale": {
-                "type": ["number", "null"]
-            },
-            "offset": {
-                "type": ["number", "null"]
-            }
-        }
-    }
-
-    # now iterate over elements and validate each
-    for element in mapping_dict["sequence"]:
-        try:
-            validate(element, schema=element_schema)
-        except Exception as e:
-            message = f"invalid element ({e.json_path}) for {element['key']} in mapping file: {e.message}"  # noqa
-            LOGGER.error(message)
-            raise e
-        if (element["scale"] is None) is not (element["offset"] is None):
-            message = f"scale and offset should either both be present or both set to missing for {element['key']} in mapping file"  # noqa
-            LOGGER.error(message)
-            e = ValueError(message)
-            raise e
 
     return SUCCESS
 
 
-def apply_scaling(value: Union[NUMBERS], element: dict) -> Union[NUMBERS]:
+def apply_scaling(value: Union[NUMBERS], scale: Union[NUMBERS],
+                  offset: Union[NUMBERS]) -> Union[NUMBERS]:
     """
-    Apply simple scaling and offsets
+    Applies a simple scaling and offset to the input data value.
+    Scaling follows the BUFR conventions, e.g.
 
-    :param value: TODO describe
-    :param element: TODO describe
+    .. math::
+        \\mbox{scaled\\_value} =
+            \\mbox{value} \\times 10^{\\mbox{scale}} + \\mbox{offset}
+
+    :param value: The input value to have scaling and offset applied to
+    :param scale: The scale factor to use
+    :param offset: The offset factor to use
 
     :returns: scaled value
     """
 
     if isinstance(value, NUMBERS):
-        if None not in [element["scale"], element["offset"]]:
+        if None not in [scale, offset]:
             try:
-                value = value * pow(10, element["scale"]) + element["offset"]
+                value = value * pow(10, scale) + offset
             except Exception as e:
                 LOGGER.error(e.message)
                 raise e
@@ -159,36 +169,30 @@ def validate_value(key: str, value: Union[NUMBERS],
     """
     Check numeric values lie within specified range (if specified)
 
-    :param key: TODO describe
-    :param value: TODO describe
-    :param valid_min: TODO describe
-    :param valid_max: TODO describe
-    :param nullify_on_fail: TODO describe
+    :param key: ECCODES key used when giving feedback / logging
+    :param value: The value to validate
+    :param valid_min: Valid minimum value
+    :param valid_max: Valid maximum value
+    :param nullify_on_fail: Action to take on fail, either set to None
+                           (nullify_on_fail=True) or through an error (default)
 
     :returns: validated value
     """
+
+    # TODO move this function to the class as part of set value
 
     if value is None:
         return value
     if not isinstance(value, NUMBERS):
         # TODO: add checking against code / flag table here?
-        return(value)
-    if valid_min is not None:
-        if value < valid_min:
-            e = ValueError(f"{key}: Value ({value}) < valid min ({valid_min}).")  # noqa
+        return value
+
+    if None not in [valid_min, valid_max]:
+        if value > valid_max or value < valid_min:
+            e = ValueError(f"{key}: Value ({value}) out of valid range ({valid_min} - {valid_max}).")  # noqa
             if nullify_on_fail:
-                message = str(e) + " Element set to missing"
-                LOGGER.warning(message)
-                return None
-            else:
-                LOGGER.error(str(e))
-                raise e
-    if valid_max is not None:
-        if value > valid_max:
-            e = ValueError(f"{key}: Value ({value}) < valid max ({valid_max}).")  # noqa
-            if nullify_on_fail:
-                message = str(e) + " Element set to missing"
-                LOGGER.warning(message)
+                message = f"{e} Element set to missing"
+                LOGGER.debug(message)
                 return None
             else:
                 LOGGER.error(str(e))
@@ -197,235 +201,596 @@ def validate_value(key: str, value: Union[NUMBERS],
     return value
 
 
-def encode(mapping_dict: dict, data_dict: dict) -> BytesIO:
-    """
-    This is the primary function that does the conversion to BUFR
+class BUFRMessage:
+    def __init__(self, descriptors: list, delayed_replications: list = list(),
+                 table_version: int = BUFR_TABLE_VERSION) -> None:
+        """
+        Constructor
 
-    :param mapping_dict: dictionary containing eccodes key and mapping to
-                         data dict, includes option to specify
-                         valid min and max, scale and offset.
-    :param data_dict: dictionary containing data values
+        :param descriptors: list of BUFR descriptors to use in this instance
+                            e.g. descriptors=[301150, 307014]
+        :param delayed_replications: delayed replicators to use in the sequence
+                                     if not set ECCODES sets the delayed
+                                     replicators to 1. Omit if unsure of value
+        :param table_version: version of Master Table 0 to use, default 36
 
-    :return: BytesIO object containing BUFR message
-    """
-
-    # initialise message to be encoded
-    bufr_msg = codes_bufr_new_from_samples("BUFR4")
-
-    # set delayed replication factors if present
-    if mapping_dict["inputDelayedDescriptorReplicationFactor"] is not None:
-        codes_set_array(bufr_msg, "inputDelayedDescriptorReplicationFactor",
-                        mapping_dict["inputDelayedDescriptorReplicationFactor"])  # noqa
-
-    # ===================
-    # Now encode the data
-    # ===================
-    for element in mapping_dict["sequence"]:
-        key = element["key"]
-        value = None
-        assert value is None
-        if element["value"] is not None:
-            value = element["value"]
-        elif element["column"] is not None:
-            value = data_dict[element["column"]]
-        else:
-            # change the following to debug or leave as warning?
-            LOGGER.debug(f"No value for {key} but included in mapping file, value set to missing")  # noqa
-        # now set
-        if value is not None:
-            LOGGER.debug(f"setting value {value} for element {key}.")
-            if isinstance(value, list):
-                try:
-                    LOGGER.debug("calling codes_set_array")
-                    codes_set_array(bufr_msg, key, value)
-                except Exception as e:
-                    LOGGER.error(f"error calling codes_set_array({bufr_msg}, {key}, {value}): {e}")  # noqa
-                    raise e
-            else:
-                try:
-                    LOGGER.debug("calling codes_set")
-                    nt = codes_get_native_type(bufr_msg, key)
-                    # convert to native type, required as in Malawi data 0
-                    # encoded as "0" for some elements.
-                    if nt is int and not isinstance(value, int):
-                        LOGGER.warning(f"int expected for {key} but received {type(value)} ({value})")  # noqa
-                        if isinstance(value, float):
-                            value = int(round(value))
-                        else:
-                            value = int(value)
-                        LOGGER.warning(f"value converted to int ({value})")
-                    elif nt is float and not isinstance(value, float):
-                        LOGGER.warning(f"float expected for {key} but received {type(value)} ({value})")  # noqa
-                        value = float(value)
-                        LOGGER.warning(f"value converted to float ({value})")
-                    else:
-                        value = value
-                    codes_set(bufr_msg, key, value)
-                except Exception as e:
-                    LOGGER.error(f"error calling codes_set({bufr_msg}, {key}, {value}): {e}")  # noqa
-                    raise e
-
-    # ==============================
-    # Message now ready to be packed
-    # ==============================
-    try:
-        codes_set(bufr_msg, "pack", True)
-    except Exception as e:
-        LOGGER.error(f"error calling codes_set({bufr_msg}, 'pack', True): {e}")
-        raise e
-
-    # =======================================================
-    # now write to in memory file and return object to caller
-    # =======================================================
-    try:
-        fh = BytesIO()
-        codes_write(bufr_msg, fh)
+        """
+        # ===============================
+        # first create empty bufr message
+        # ===============================
+        bufr_msg = codes_bufr_new_from_samples("BUFR4")
+        # ===============================
+        # set delayed replication factors
+        # ===============================
+        if len(delayed_replications) > 0:
+            codes_set_array(bufr_msg,
+                            "inputDelayedDescriptorReplicationFactor",
+                            delayed_replications)
+        # ===============================
+        # set master table version number
+        # ===============================
+        codes_set(bufr_msg, "masterTablesVersionNumber", table_version)
+        # now set unexpanded descriptors
+        codes_set_array(bufr_msg, "unexpandedDescriptors", descriptors)
+        # ================================================
+        # now iterator over and add to internal dictionary
+        # ================================================
+        self.dict = dict()  # need a more descriptive name
+        iterator = codes_bufr_keys_iterator_new(bufr_msg)
+        while codes_bufr_keys_iterator_next(iterator):
+            key = codes_bufr_keys_iterator_get_name(iterator)
+            # place holder for data
+            self.dict[key] = dict()
+            self.dict[key]["value"] = None
+            # add native type, used when encoding later
+            native_type = codes_get_native_type(bufr_msg, key)
+            self.dict[key]["type"] = native_type.__name__
+            # now add attributes (excl. BUFR header elements)
+            if key not in HEADERS:
+                for attr in ATTRIBUTES:
+                    try:
+                        self.dict[key][attr] = \
+                            codes_get(bufr_msg, f"{key}->{attr}")
+                    except Exception as e:
+                        raise e
+        codes_bufr_keys_iterator_delete(iterator)
+        # ============================================
+        # now release the BUFR message back to eccodes
+        # ============================================
         codes_release(bufr_msg)
-        fh.seek(0)
-    except Exception as e:
-        LOGGER.error(f"error writing to internal BytesIO object, {e}")
-        raise e
+        # ============================================
+        # finally add last few items to class
+        # ============================================
+        self.descriptors = descriptors
+        self.delayed_replications = delayed_replications  # used when encoding
+        self.bufr = None  # placeholder for BUFR bytes
+        # ============================================
 
-    # =============================================
-    # Return BytesIO object containing BUFR message
-    # =============================================
-    return fh
+    def create_template(self) -> None:
+        template = {}
+        template["inputDelayedDescriptorReplicationFactor"] = \
+            self.delayed_replications
+        template["number_header_rows"] = 1
+        template["names_on_row"] = 1
+        template["header"] = []
+        # create header section
+        for element in HEADERS:
+            value = None
+            if element == "unexpandedDescriptors":
+                value = self.descriptors
+            entry = {
+                "eccodes_key": element,
+                "value": value,
+                "csv_column": None,
+                "jsonpath": None,
+                "valid_min": None,
+                "valid_max": None,
+                "scale": None,
+                "offset": None
+            }
+            template["header"].append(entry)
+        # now create data section
+        template["data"] = []
+        for element in self.dict:
+            if element not in HEADERS:
+                entry = {
+                    "eccodes_key": element,
+                    "value": None,
+                    "csv_column": None,
+                    "jsonpath": None,
+                    "valid_min": None,
+                    "valid_max": None,
+                    "scale": None,
+                    "offset": None
+                }
+                template["data"].append(entry)
+        # add WIGOS identifier
+        template["wigos_identifier"] = {
+            "value": None,
+            "jsonpath": None,
+            "csv_column": None
+        }
+        print(json.dumps(template, indent=4))
 
+    def reset(self) -> None:
+        """
+        Function resets BUFRMessage
 
-def transform(data: str, mappings: dict, station_metadata: dict) -> dict:
-    """
-    TODO: describe function
+        :returns: `None`
+        """
+        for key in self.dict:
+            self.dict[key]["value"] = None
+        self.bufr = None
 
-    :param data: TODO: describe
-    :param mappings: TODO: describe
-    :param station_metadata: TODO: describe
+    def set_element(self, key: str, value: object) -> None:
+        """
+        Function to set element in BUFR message
 
-    :return: `dict` of BUFR messages
-    """
+        :param key: the key of the element to set (using ECCODES keys)
+        :param value: the value of the element
 
-    # validate mappings
-    e = validate_mapping_dict(mappings)
-    if e is not SUCCESS:
-        raise ValueError("Invalid mappings")
+        :returns: `None`
+        """
 
-    LOGGER.debug("mapping dictionary validated")
+        # TODO move value validation here
 
-    # TODO: add in code to validate station_metadata
+        if value is not None and not isinstance(value, list):
+            expected_type = self.dict[key]["type"]
+            if expected_type == "int" and not isinstance(value, int):
+                LOGGER.debug(f"int expected for {key} but received {type(value)} ({value})")  # noqa
+                if isinstance(value, float):
+                    value = int(round(value))
+                else:
+                    try:
+                        value = int(value)
+                    except Exception as e:
+                        if NULLIFY_INVALID:
+                            value = None
+                            LOGGER.debug(f"{e}: Unable to convert value to int, set to None")  # noqa
+                        else:
+                            raise e
+                LOGGER.debug(f"value converted to int ({value})")
+            elif expected_type == "float" and not isinstance(value, float):
+                LOGGER.debug(f"float expected for {key} but received {type(value)} ({value})")  # noqa
+                value = float(value)
+                LOGGER.debug(f"value converted to float ({value})")
+            else:
+                value = value
+        self.dict[key]["value"] = value
 
-    # we may have multiple rows in the file, create list object to return
-    # one item per message
-    messages = {}
-    # now convert data to StringIO object
-    fh = StringIO(data)
-    # now read csv data and iterate over rows
-    reader = csv.reader(fh, delimiter=',', quoting=csv.QUOTE_NONNUMERIC)
-    rows_read = 0
-    for row in reader:
-        if rows_read == 0:
-            col_names = row
+    def get_element(self, key: str) -> Any:
+        """
+        Function to retrieve value from BUFR message
+
+        :param key: the key of the element to set (using ECCODES keys)
+
+        :returns: value of the element
+        """
+
+        # check if we want value or an attribute (indicated by ->)
+        if "->" in key:
+            tokens = key.split("->")
+            result = self.dict[tokens[0]][tokens[1]]
         else:
-            data = row
-            data_dict = dict(zip(col_names, data))
-            try:
-                data_dict = {**data_dict, **station_metadata['data']}
-            except Exception as e:
-                message = "issue merging station and data dictionaries."
-                LOGGER.error(message + str(e))
-                raise e
-            # Iterate over items to map, perform unit conversions and validate
-            for element in mappings["sequence"]:
-                value = element["value"]
-                column = element["column"]
-                # select between "value" and "column" fields.
+            result = self.dict[key]["value"]
+        return result
+
+    def as_bufr(self, use_cached: bool = False) -> bytes:
+        """
+        Function to get BUFR message encoded into bytes. Once called the bytes
+        are cached and the cached value returned unless specified otherwise.
+
+        :param use_cached: Boolean indicating whether to use cached value
+
+        :returns: bytes containing BUFR data
+        """
+
+        if use_cached and (self.bufr is not None):
+            return self.bufr
+        # ===========================
+        # initialise new BUFR message
+        # ===========================
+        bufr_msg = codes_bufr_new_from_samples("BUFR4")
+        # set delayed replications, this is needed again as we only used it the
+        # first time to set the keys
+        if len(self.delayed_replications) > 0:
+            codes_set_array(bufr_msg,
+                            "inputDelayedDescriptorReplicationFactor",
+                            self.delayed_replications)
+        # ============================
+        # iterate over keys and encode
+        # ============================
+        for eccodes_key in self.dict:
+            value = self.dict[eccodes_key]["value"]
+            if value is not None:
+                LOGGER.debug(f"setting value {value} for element {eccodes_key}.")  # noqa
+                if isinstance(value, list):
+                    try:
+                        LOGGER.debug("calling codes_set_array")
+                        codes_set_array(bufr_msg, eccodes_key, value)
+                    except Exception as e:
+                        LOGGER.error(f"error calling codes_set_array({bufr_msg}, {eccodes_key}, {value}): {e}")  # noqa
+                        raise e
+                else:
+                    try:
+                        codes_set(bufr_msg, eccodes_key, value)
+                    except Exception as e:
+                        LOGGER.error(f"error calling codes_set({bufr_msg}, {eccodes_key}, {value}): {e}")  # noqa
+                        raise e
+        # ==============================
+        # Message now ready to be packed
+        # ==============================
+        try:
+            codes_set(bufr_msg, "pack", True)
+        except CodesInternalError as e:
+            LOGGER.debug(f"error calling codes_set({bufr_msg}, 'pack', True): {e}")  # noqa
+            LOGGER.debug(json.dumps(self.dict, indent=4))
+            LOGGER.debug("null message returned")
+            codes_release(bufr_msg)
+            return self.bufr
+        except Exception as e:
+            LOGGER.error(f"error calling codes_set({bufr_msg}, 'pack', True): {e}") # noqa
+            raise e
+        # =======================================================
+        # now write to in memory file and return bytes to caller
+        # =======================================================
+        try:
+            fh = BytesIO()
+            codes_write(bufr_msg, fh)
+            codes_release(bufr_msg)
+            fh.seek(0)
+        except Exception as e:
+            LOGGER.error(f"error writing to internal BytesIO object, {e}")
+            raise e
+        # =============================================
+        # Return BUFR message bytes
+        # =============================================
+        self.bufr = fh.read()
+        return self.bufr
+
+    def md5(self) -> str:
+        """
+        Calculates and returns md5 of BUFR message
+
+        :returns: md5 of BUFR message
+        """
+        bufr = self.as_bufr(use_cached=True)
+
+        if bufr is not None:
+            return hashlib.md5(bufr).hexdigest()
+        else:
+            return None
+
+    def as_geojson(self, identifier: str, template: dict ) -> str:  # noqa
+        """
+        Returns contents of BUFR message as a geoJSON string according to the
+        specified template.
+
+        :param identifier: unique ID used to identify the message
+        :param template: dictionary containing mapping from BUFR to geoJSON
+        :param units: dictionary mapping units, e.g. {"K":"Celsius"}
+        :returns: string containing geoJSON data (from json.dumps)
+        """
+
+        _template = deepcopy(template)
+        result = self._extract(_template)
+        if "units" in template["_meta"]:
+            units = template["_meta"]["units"]
+            for u in units:
+                for o in result["properties"]["observations"]:
+                    if result["properties"]["observations"][o]["units"] == u:
+                        value = result["properties"]["observations"][o]["value"]  # noqa
+                        if value is not None:
+                            value = Units.conform(
+                                result["properties"]["observations"][o]["value"],  # noqa
+                                Units(u),
+                                Units(units[u])
+                            )
+                            result["properties"]["observations"][o]["value"] = value  # noqa
+                        result["properties"]["observations"][o]["units"] = units[u]  # noqa
+        if "_meta" in result:
+            del result["_meta"]
+        result["properties"]["identifier"] = result["id"] = identifier
+        result["properties"]["resultTime"] = datetime.now(timezone.utc).isoformat(timespec="seconds") # noqa
+        return json.dumps(result, indent=4)
+
+    def _extract(self, object_: Union[dict, list]) -> Union[dict, list]:
+        """
+        Internal function used to iterate over geoJSON template and to extract
+        data from the BUFR message into the goeJSON structure / dictionary.
+        Used by as_geojson
+
+        :param object_: the element in the geoJSON message to extract
+
+        :returns: the element with the value set from the BUFR message
+        """
+
+        if isinstance(object_, dict):
+            # check if format or eccodes in object
+            if "format" in object_:
+                assert "args" in object_
+                args = self._extract(object_["args"])
+                if None not in args:
+                    result = object_["format"].format(*args)
+                else:
+                    result = None
+            elif "eccodes_key" in object_:
+                result = self.get_element(object_["eccodes_key"])
+                if isinstance(result, int):
+                    result = float(result)
+                if result in (CODES_MISSING_LONG, CODES_MISSING_DOUBLE):
+                    result = None
+            else:
+                for k in object_:
+                    object_[k] = self._extract(object_[k])
+                result = object_
+        elif isinstance(object_, list):
+            for idx in range(len(object_)):
+                object_[idx] = self._extract(object_[idx])
+            result = object_
+        else:
+            result = object_
+
+        return result
+
+    def parse(self, data: dict, metadata: dict, mappings: dict) -> None:
+        """
+        Function to parse observation data and station metadata, mapping to the
+        specified BUFR sequence.
+
+        :param data: dictionary of key value pairs containing the
+                    data to be encoded.
+        :param metadata: dictionary containing the metadata for the station
+                        from OSCAR surface
+        :param mappings: dictionary containing list of BUFR elements to
+                        encode (specified using ECCODES key) and whether
+                        to get the value from (fixed, csv or metadata)
+        :returns: `None`
+        """
+
+        # ==================================================
+        # extract wigos ID from metadata
+        # Is this the right place for this?
+        # ==================================================
+        try:
+            wigosID = metadata["wigosIds"][0]["wid"]
+            tokens = parse_wigos_id(wigosID)
+            for token in tokens:
+                metadata["wigosIds"][0][token] = tokens[token]
+        except (Exception, AssertionError):
+            LOGGER.warning("WigosID not parsed automatically. wigosID element not in metadata?")  # noqa
+        # ==================================================
+        # now parse the data.
+        # ==================================================
+        for section in ("header", "data"):
+            for element in mappings[section]:
+                eccodes_key = element["eccodes_key"]
+                # first identify source of data
+                value = None
+                column = None
+                jsonpath = None
+                if "value" in element:
+                    value = element["value"]
+                if "csv_column" in element:
+                    column = element["csv_column"]
+                if "jsonpath" in element:
+                    jsonpath = element["jsonpath"]
+                # now get value from indicated source
                 if value is not None:
                     value = element["value"]
                 elif column is not None:
                     # get column name
-                    # make sure column is in data_dict
-                    if (column not in data_dict):
+                    # make sure column is in data
+                    if column not in data:
                         message = f"column '{column}' not found in data dictionary"  # noqa
                         raise ValueError(message)
-                    value = data_dict[column]
-                    if value in MISSING:
+                    value = data[column]
+                elif jsonpath is not None:
+                    if jsonpath not in jsonpath_parsers:
+                        jsonpath_parsers[jsonpath] = parser.parse(jsonpath)
+                    p = jsonpath_parsers[jsonpath]
+                    query = p.find(metadata)
+                    assert len(query) == 1
+                    value = query[0].value
+                else:
+                    LOGGER.debug(f"value and column both None for element {element['eccodes_key']}")  # noqa
+                # ===============================
+                # apply specified scaling to data
+                # ===============================
+                if value in MISSING:
+                    value = None
+                else:
+                    scale = None
+                    offset = None
+                    if "scale" in element:
+                        scale = element["scale"]
+                    if "offset" in element:
+                        offset = element["offset"]
+                    value = apply_scaling(value, scale, offset)
+                # ==================
+                # now validate value
+                # ==================
+                valid_min = None
+                valid_max = None
+                if "valid_min" in element:
+                    valid_min = element["valid_min"]
+                if "valid_max" in element:
+                    valid_max = element["valid_max"]
+                LOGGER.debug(f"validating value {value} for element {element['eccodes_key']} against range")  # noqa
+                try:
+                    value = validate_value(element["eccodes_key"], value,
+                                           valid_min, valid_max,
+                                           NULLIFY_INVALID)
+                    LOGGER.debug(f"value {value} validated for element {element['eccodes_key']}")  # noqa
+                except Exception as e:
+                    if NULLIFY_INVALID:
+                        LOGGER.debug(f"Error raised whilst validating {element['eccodes_key']}, value set to None")  # noqa
                         value = None
                     else:
-                        value = apply_scaling(value, element)
-                else:
-                    LOGGER.debug(f"value and column both None for element {element['key']}")  # noqa
-                # now validate value
-                LOGGER.debug(f"validating value {value} for element {element['key']}")  # noqa
-                value = validate_value(element["key"], value,
-                                       element["valid-min"],
-                                       element["valid-max"],
-                                       NULLIFY_INVALID)
+                        raise e
 
-                LOGGER.debug(f"value {value} validated for element {element['key']}")  # noqa
-                # update data dictionary
-                if column is not None:
-                    data_dict[column] = value
-                LOGGER.debug(f"value {value} updated for element {element['key']}")  # noqa
+                # ==================================================
+                # at this point we should have the eccodes key and a
+                # validated value to use, add to dict
+                # ==================================================
+                self.set_element(eccodes_key, value)
+                LOGGER.debug(f"value {value} updated for element {element['eccodes_key']}")  # noqa
 
-            # now encode the data (this one line is where the magic happens
-            # once the dictionaries have been read in)
-            msg = encode(mappings, data_dict)
-            key = hashlib.md5(msg.read()).hexdigest()
-            LOGGER.debug(key)
-            msg.seek(0)
-            messages[key] = msg
+    def get_datetime(self) -> datetime:
+        """
+        Function to extract characteristic date and time from the BUFR message
 
+        :returns: `datetime.datetime` of ISO8601 representation of the
+                  characteristic date/time
+        """
+
+        return datetime(
+            self.get_element("typicalYear"),
+            self.get_element("typicalMonth"),
+            self.get_element("typicalDay"),
+            self.get_element("typicalHour"),
+            self.get_element("typicalMinute")
+        )
+
+
+def transform(data: str, metadata: dict, mappings: dict,
+              template: dict = {}) -> Iterator[dict]:
+    """
+    This function returns an iterator to process each line in the input CSV
+    string. On each iteration a dictionary is returned containing the BUFR
+    encoded data and, if specified, a geojson representation. The mapping to
+    BUFR is specified by the "mappings" dictionary using the ecCodes keys. For
+    more information and a list of the keys see the tables at:
+
+        https://confluence.ecmwf.int/display/ECC/WMO%3D37+element+table
+
+    The dictionary returned by the iterator contains the following keys:
+
+        - ["bufr4"] = data encoded into BUFR;
+        - ["geojson"] = data encoded into geojson (only present if template specified);  # noqa
+        - ["_meta"] = metadata on the data.
+
+    The ["_meta"] element includes the following:
+
+        - ["identifier"] = identifier for report (WIGOS_<WSI>_<ISO8601>);
+        - ["md5"] = md5 checksum of BUFR encoded data;
+        - ["wigos_id"] = WIGOS identifier;
+        - ["data_date"] = characteristic date of data;
+        - ["originating_centre"] = Originating centre (see Common code table C11);  # noqa
+        - ["data_category"] = Category of data, see BUFR Table A.
+
+    :param data: string containing csv separated data. First line should
+                contain the column headers, second line the data
+    :param metadata: dictionary containing the metadata for the station
+                    from OSCAR surface
+    :param mappings: dictionary containing list of BUFR elements to
+                    encode (specified using ecCodes key) and whether
+                    to get the value from (fixed, csv or metadata)
+    :param template: dictionary containing mapping from BUFR to geoJSON
+
+    :returns: iterator
+    """
+
+    # ======================
+    # validate mapping files
+    # ======================
+    e = validate_mapping(mappings)
+    if e is not SUCCESS:
+        raise ValueError("Invalid mappings")
+    # ==========================================================
+    # Now extract descriptors and replications from mapping file
+    # ==========================================================
+    delayed_replications = mappings["inputDelayedDescriptorReplicationFactor"]
+    path = "$.header[?(@.eccodes_key=='unexpandedDescriptors')]"
+    unexpanded_descriptors = \
+        parser.parse(path).find(mappings)[0].value["value"]
+
+    path = "$.header[?(@.eccodes_key=='masterTablesVersionNumber')]"
+    table_version = parser.parse(path).find(mappings)[0].value["value"]
+
+    if "number_header_rows" in mappings:
+        nheaders = mappings["number_header_rows"]
+    else:
+        nheaders = 1
+
+    if "names_on_row" in mappings:
+        names = mappings["names_on_row"]
+    else:
+        names = 1
+
+    # =========================================
+    # Now we need to convert string back to CSV
+    # and iterate over rows
+    # =========================================
+    fh = StringIO(data)
+    reader = csv.reader(fh, delimiter=',', quoting=csv.QUOTE_NONNUMERIC)
+    # counter to keep track
+    rows_read = 0
+    # first read in and process header rows
+    while rows_read < nheaders:
+        row = next(reader)
+        if rows_read == names - 1:
+            col_names = row
+        rows_read += 1
+        continue
+
+    # initialise new BUFRMessage (and reuse later)
+    LOGGER.debug("Initializing new BUFR message")
+    message = BUFRMessage(unexpanded_descriptors, delayed_replications,
+                          table_version)
+
+    # now iterate over remaining rows
+    for row in reader:
+        result = dict()
+        LOGGER.debug(f"Processing row {rows_read}")
+        # check and make sure we have ascii data
+        for val in row:
+            if isinstance(val, str):
+                if not val.isascii():
+                    if NULLIFY_INVALID:
+                        LOGGER.debug(f"csv read error, non ASCII data detected ({val}), skipping row")  # noqa
+                        LOGGER.debug(row)
+                        continue
+                    else:
+                        raise ValueError
+        # valid data row, make dictionary
+        data_dict = dict(zip(col_names, row))
+        # reset BUFR message to clear data
+        message.reset()
+        # parse to BUFR sequence
+        LOGGER.debug("Parsing data")
+        message.parse(data_dict, metadata, mappings)
+        # encode to BUFR
+        LOGGER.debug("Parsing data")
+        result["bufr4"] = message.as_bufr()
+
+        # now identifier based on WSI and observation date as identifier
+        wsi = metadata['wigosIds'][0]['wid'] if 'wigosIds' in metadata else "N/A"  # noqa
+        isodate = message.get_datetime().strftime('%Y%m%dT%H%M%S')
+        rmk = f"WIGOS_{wsi}_{isodate}"
+
+        # now create GeoJSON if specified
+        if template:
+            LOGGER.debug("Adding GeoJSON representation")
+            result["geojson"] = message.as_geojson(rmk, template)  # noqa
+
+        # now additional metadata elements
+        LOGGER.debug("Adding metadata elements")
+        result["_meta"] = {
+            "identifier": rmk,
+            "md5": message.md5(),
+            "wigos_id": wsi,
+            "data_date": message.get_datetime(),
+            "originating_centre": message.get_element("bufrHeaderCentre"),
+            "data_category": message.get_element("dataCategory")
+        }
+
+        time_ = datetime.now(timezone.utc).isoformat()
+        LOGGER.info(f"{time_}|{result['_meta']}")
+
+        # increment ticker
         rows_read += 1
 
-    LOGGER.info(f"{rows_read - 1} rows read and converted to BUFR")
+        # now yield result back to caller
 
-    return messages
-
-
-def cli():
-    # =============
-    # get arguments
-    # =============
-    parser = argparse.ArgumentParser(description='csv2bufr')
-
-    parser.add_argument("--mapping", dest="mapping", required=True,
-                        help="JSON file mapping from CSV to BUFR")
-    parser.add_argument("--input", dest="input", required=True,
-                        help="CSV file containing data to encode")
-    parser.add_argument("--output", dest="output", required=True,
-                        help="Name of output file")
-    parser.add_argument("--wigos-id", dest="wsi", required=True,
-                        help="WIGOS station identifier, hyphen separated. e.g. 0-20000-0-ABCDEF")  # noqa
-    parser.add_argument("--fail-on-invalid", dest="invalid", default=True,
-                        help="Flag indicating whether to fail on invalid values. If true invalid values are set to missing")  # noqa
-
-    args = parser.parse_args()
-
-    # now set paths from arguments
-    csv_file = args.input
-    station_metadata_file = f"{args.config}/{args.wsi}.json"
-    mappings_file = f"{args.config}/{args.mapping}"
-    result = None
-
-    # ===========================
-    # now the code to be executed
-    # ===========================
-    with open(csv_file) as fh1, open(mappings_file) as fh2, open(station_metadata_file) as fh3:  # noqa
-        try:
-            result = transform(fh1.read(),
-                               mappings=json.load(fh2),
-                               station_metadata=json.load(fh3))
-        except Exception as err:
-            LOGGER.error(err)
-
-    # ======================
-    # now write data to file
-    # ======================
-    for item in result:
-        filename = f"{args.output}{item}.bufr4"
-        with open(filename, "wb") as fh:
-            fh.write(result[item].read())
-
-    return 0
-
-
-if __name__ == '__main__':
-    sys.exit(cli())
+        yield result
