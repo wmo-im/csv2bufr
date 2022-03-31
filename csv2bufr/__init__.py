@@ -764,8 +764,9 @@ def transform(data: str, metadata: dict, mappings: dict,
         LOGGER.debug("Parsing data")
         try:
             result["bufr4"] = message.as_bufr()
-        except:
+        except Exception as e:
             LOGGER.error("Error encoding BUFR, null returned")
+            LOGGER.error(e)
             result["bufr4"] = None
 
         # now identifier based on WSI and observation date as identifier
