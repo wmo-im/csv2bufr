@@ -762,7 +762,11 @@ def transform(data: str, metadata: dict, mappings: dict,
         message.parse(data_dict, metadata, mappings)
         # encode to BUFR
         LOGGER.debug("Parsing data")
-        result["bufr4"] = message.as_bufr()
+        try:
+            result["bufr4"] = message.as_bufr()
+        except:
+            LOGGER.error("Error encoding BUFR, null returned")
+            result["bufr4"] = None
 
         # now identifier based on WSI and observation date as identifier
         wsi = metadata['wigosIds'][0]['wid'] if 'wigosIds' in metadata else "N/A"  # noqa
