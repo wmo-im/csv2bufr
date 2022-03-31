@@ -19,7 +19,7 @@
 #
 ###############################################################################
 
-__version__ = "0.0.1"
+__version__ = "0.1.0"
 
 from copy import deepcopy
 import csv
@@ -762,7 +762,12 @@ def transform(data: str, metadata: dict, mappings: dict,
         message.parse(data_dict, metadata, mappings)
         # encode to BUFR
         LOGGER.debug("Parsing data")
-        result["bufr4"] = message.as_bufr()
+        try:
+            result["bufr4"] = message.as_bufr()
+        except Exception as e:
+            LOGGER.error("Error encoding BUFR, null returned")
+            LOGGER.error(e)
+            result["bufr4"] = None
 
         # now identifier based on WSI and observation date as identifier
         wsi = metadata['wigosIds'][0]['wid'] if 'wigosIds' in metadata else "N/A"  # noqa
