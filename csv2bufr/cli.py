@@ -96,12 +96,8 @@ def create_mappings(ctx, sequence):
               help="Name of output file")
 @click.option("--station-metadata", "station_metadata", required=True,
               help="WIGOS station identifier JSON file")
-@click.option("--geojson-template", "geojson_template", required=False,
-              default=None,
-              help="Name of file or template for GeoJSON containing mapping from BUFR to GeoJSON")  # noqa
 @cli_option_verbosity
-def transform(ctx, csv_file, mapping, output_dir, station_metadata,
-              geojson_template, verbosity):
+def transform(ctx, csv_file, mapping, output_dir, station_metadata, verbosity):
     result = None
     click.echo(f"Transforming {csv_file.name} to BUFR")
 
@@ -118,23 +114,12 @@ def transform(ctx, csv_file, mapping, output_dir, station_metadata,
     with open(mappings_file) as fh:
         mappings = json.load(fh)
 
-    # now identify geojson template to use
-    template = None
-
-    if geojson_template is not None:
-        if not os.path.isfile(geojson_template):
-            json_template_file = f"{MAPPINGS}{os.sep}{geojson_template}.geojson"  # noqa
-        else:
-            json_template_file = geojson_template
-        with open(json_template_file) as fh:
-            template = json.load(fh)
-
     metadata = None
     with open(station_metadata) as fh:
         metadata = json.load(fh)
 
     try:
-        result = transform_csv(csv_file.read(), metadata, mappings, template)
+        result = transform_csv(csv_file.read(), metadata, mappings)
     except Exception as err:
         raise click.ClickException(err)
 
@@ -144,10 +129,6 @@ def transform(ctx, csv_file, mapping, output_dir, station_metadata,
         bufr_filename = f"{output_dir}{os.sep}{key}.bufr4"
         with open(bufr_filename, "wb") as fh:
             fh.write(item["bufr4"])
-        if "geojson" in item:
-            json_filename = f"{output_dir}{os.sep}{key}.geojson"
-            with open(json_filename, "w") as fh:
-                fh.write(item["geojson"])
 
     click.echo("Done")
 

@@ -216,7 +216,7 @@ class BUFRMessage:
 
         """
         # ===============================
-        # first create empty bufr message
+        # first create empty bufr messageas_
         # ===============================
         bufr_msg = codes_bufr_new_from_samples("BUFR4")
         # ===============================
@@ -461,78 +461,6 @@ class BUFRMessage:
         else:
             return None
 
-    def as_geojson(self, identifier: str, template: dict ) -> str:  # noqa
-        """
-        Returns contents of BUFR message as a geoJSON string according to the
-        specified template.
-
-        :param identifier: unique ID used to identify the message
-        :param template: dictionary containing mapping from BUFR to geoJSON
-        :param units: dictionary mapping units, e.g. {"K":"Celsius"}
-        :returns: string containing geoJSON data (from json.dumps)
-        """
-
-        _template = deepcopy(template)
-        result = self._extract(_template)
-        if "units" in template["_meta"]:
-            units = template["_meta"]["units"]
-            for u in units:
-                for o in result["properties"]["observations"]:
-                    if result["properties"]["observations"][o]["units"] == u:
-                        value = result["properties"]["observations"][o]["value"]  # noqa
-                        if value is not None:
-                            value = Units.conform(
-                                result["properties"]["observations"][o]["value"],  # noqa
-                                Units(u),
-                                Units(units[u])
-                            )
-                            result["properties"]["observations"][o]["value"] = value  # noqa
-                        result["properties"]["observations"][o]["units"] = units[u]  # noqa
-        if "_meta" in result:
-            del result["_meta"]
-        result["properties"]["identifier"] = result["id"] = identifier
-        result["properties"]["resultTime"] = datetime.now(timezone.utc).isoformat(timespec="seconds") # noqa
-        return json.dumps(result, indent=4)
-
-    def _extract(self, object_: Union[dict, list]) -> Union[dict, list]:
-        """
-        Internal function used to iterate over geoJSON template and to extract
-        data from the BUFR message into the goeJSON structure / dictionary.
-        Used by as_geojson
-
-        :param object_: the element in the geoJSON message to extract
-
-        :returns: the element with the value set from the BUFR message
-        """
-
-        if isinstance(object_, dict):
-            # check if format or eccodes in object
-            if "format" in object_:
-                assert "args" in object_
-                args = self._extract(object_["args"])
-                if None not in args:
-                    result = object_["format"].format(*args)
-                else:
-                    result = None
-            elif "eccodes_key" in object_:
-                result = self.get_element(object_["eccodes_key"])
-                if isinstance(result, int):
-                    result = float(result)
-                if result in (CODES_MISSING_LONG, CODES_MISSING_DOUBLE):
-                    result = None
-            else:
-                for k in object_:
-                    object_[k] = self._extract(object_[k])
-                result = object_
-        elif isinstance(object_, list):
-            for idx in range(len(object_)):
-                object_[idx] = self._extract(object_[idx])
-            result = object_
-        else:
-            result = object_
-
-        return result
-
     def parse(self, data: dict, metadata: dict, mappings: dict) -> None:
         """
         Function to parse observation data and station metadata, mapping to the
@@ -653,8 +581,7 @@ class BUFRMessage:
         )
 
 
-def transform(data: str, metadata: dict, mappings: dict,
-              template: dict = {}) -> Iterator[dict]:
+def transform(data: str, metadata: dict, mappings: dict) -> Iterator[dict]:
     """
     This function returns an iterator to process each line in the input CSV
     string. On each iteration a dictionary is returned containing the BUFR
@@ -667,7 +594,6 @@ def transform(data: str, metadata: dict, mappings: dict,
     The dictionary returned by the iterator contains the following keys:
 
         - ["bufr4"] = data encoded into BUFR;
-        - ["geojson"] = data encoded into geojson (only present if template specified);  # noqa
         - ["_meta"] = metadata on the data.
 
     The ["_meta"] element includes the following:
@@ -768,11 +694,6 @@ def transform(data: str, metadata: dict, mappings: dict,
         wsi = metadata['wigosIds'][0]['wid'] if 'wigosIds' in metadata else "N/A"  # noqa
         isodate = message.get_datetime().strftime('%Y%m%dT%H%M%S')
         rmk = f"WIGOS_{wsi}_{isodate}"
-
-        # now create GeoJSON if specified
-        if template:
-            LOGGER.debug("Adding GeoJSON representation")
-            result["geojson"] = message.as_geojson(rmk, template)  # noqa
 
         # now additional metadata elements
         LOGGER.debug("Adding metadata elements")
