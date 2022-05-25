@@ -212,9 +212,9 @@ class BUFRMessage:
         :param table_version: version of Master Table 0 to use, default 36
 
         """
-        # ===============================
-        # first create empty bufr messageas_
-        # ===============================
+        # ================================
+        # first create empty bufr messages
+        # ================================
         bufr_msg = codes_bufr_new_from_samples("BUFR4")
         # ===============================
         # set delayed replication factors
