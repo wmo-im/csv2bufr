@@ -236,5 +236,3 @@ def test_transform(data_dict, station_dict, mapping_dict):
         assert sorted(item["_meta"].keys()) == item_meta_keys
 
         assert item["_meta"]["md5"] == "981938dbd97be3e5adc8e7b1c6eb642c"
-
-

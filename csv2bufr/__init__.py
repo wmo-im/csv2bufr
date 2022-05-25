@@ -21,7 +21,6 @@
 
 __version__ = "0.0.1"
 
-from copy import deepcopy
 import csv
 from datetime import timezone, datetime
 import hashlib
@@ -31,11 +30,9 @@ import logging
 import os.path
 from typing import Any, Iterator, Union
 
-from cfunits import Units
 from eccodes import (codes_bufr_new_from_samples,
                      codes_set_array, codes_set, codes_get_native_type,
                      codes_write, codes_release, codes_get,
-                     CODES_MISSING_LONG, CODES_MISSING_DOUBLE,
                      codes_bufr_keys_iterator_new,
                      codes_bufr_keys_iterator_next,
                      codes_bufr_keys_iterator_delete,
