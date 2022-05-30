@@ -7,7 +7,9 @@ More information on the BUFR format can be found in the [WMO Manual on Codes, Vo
 Install
 -------
 
-    docker pull wmoim/csv2bufr
+```bash
+docker pull wmoim/csv2bufr
+```
 
 Example usage
 -------------
@@ -25,6 +27,4 @@ csv2bufr data transform <my-csv-file.csv> \
 Manual / documentation
 ----------------------
 
-The full documentation for csv2bufr can be found at: [wmo-im.github.io/csv2bufr](https://wmo-im.github.io/csv2bufr/) including sample files.
-
-
+The full documentation for csv2bufr can be found at [https://wmo-im.github.io/csv2bufr](https://wmo-im.github.io/csv2bufr/) including sample files.
