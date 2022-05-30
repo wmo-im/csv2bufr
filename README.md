@@ -50,7 +50,6 @@ twine upload dist/*
 vi csv2bufr/__init__.py  # update __version__
 git commit -am 'back to dev'
 git push origin main
-
 ```
 ## Documentation
 
