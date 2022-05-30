@@ -582,9 +582,9 @@ def transform(data: str, metadata: dict, mappings: dict) -> Iterator[dict]:
     """
     This function returns an iterator to process each line in the input CSV
     string. On each iteration a dictionary is returned containing the BUFR
-    encoded data and, if specified, a geojson representation. The mapping to
-    BUFR is specified by the "mappings" dictionary using the ecCodes keys. For
-    more information and a list of the keys see the tables at:
+    encoded data. The mapping to BUFR is specified by the "mappings"
+    dictionary using the ecCodes keys. For more information and a list of the
+    keys see the tables at:
 
         https://confluence.ecmwf.int/display/ECC/WMO%3D37+element+table
 
@@ -609,7 +609,6 @@ def transform(data: str, metadata: dict, mappings: dict) -> Iterator[dict]:
     :param mappings: dictionary containing list of BUFR elements to
                     encode (specified using ecCodes key) and whether
                     to get the value from (fixed, csv or metadata)
-    :param template: dictionary containing mapping from BUFR to geoJSON
 
     :returns: iterator
     """

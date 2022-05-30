@@ -1,2 +1,2 @@
 include LICENSE README.md requirements.txt
-recursive-include csv2bufr *.json *.geojson
+recursive-include csv2bufr *.json
