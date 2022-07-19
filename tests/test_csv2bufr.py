@@ -230,8 +230,9 @@ def test_transform(data_dict, station_dict, mapping_dict):
         assert isinstance(item, dict)
         assert "_meta" in item
 
-        item_meta_keys = ['data_category', 'data_date', 'identifier',
-                          'md5', 'originating_centre', 'wigos_id']
+        item_meta_keys = ['data_category', 'data_date', 'geometry',
+                          'identifier', 'md5', 'originating_centre',
+                          'wigos_id']
 
         assert sorted(item["_meta"].keys()) == item_meta_keys
 

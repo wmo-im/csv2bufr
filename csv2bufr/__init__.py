@@ -701,6 +701,13 @@ def transform(data: str, metadata: dict, mappings: dict) -> Iterator[dict]:
         result["_meta"] = {
             "identifier": rmk,
             "md5": message.md5(),
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    message.get_element('#1#longitude'),
+                    message.get_element('#1#latitude')
+                ]
+            },
             "wigos_id": wsi,
             "data_date": message.get_datetime(),
             "originating_centre": message.get_element("bufrHeaderCentre"),
