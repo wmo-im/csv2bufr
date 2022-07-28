@@ -596,6 +596,7 @@ def transform(data: str, metadata: dict, mappings: dict) -> Iterator[dict]:
     The ["_meta"] element includes the following:
 
         - ["identifier"] = identifier for report (WIGOS_<WSI>_<ISO8601>);
+        - ["geometry"] = GeoJSON geometry object;
         - ["md5"] = md5 checksum of BUFR encoded data;
         - ["wigos_id"] = WIGOS identifier;
         - ["data_date"] = characteristic date of data;
@@ -701,6 +702,13 @@ def transform(data: str, metadata: dict, mappings: dict) -> Iterator[dict]:
         result["_meta"] = {
             "identifier": rmk,
             "md5": message.md5(),
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    message.get_element('#1#longitude'),
+                    message.get_element('#1#latitude')
+                ]
+            },
             "wigos_id": wsi,
             "data_date": message.get_datetime(),
             "originating_centre": message.get_element("bufrHeaderCentre"),
