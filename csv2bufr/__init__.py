@@ -52,7 +52,7 @@ LOGGER = logging.getLogger(__name__)
 THISDIR = os.path.dirname(os.path.realpath(__file__))
 MAPPINGS = f"{THISDIR}{os.sep}resources{os.sep}mappings"
 
-BUFR_TABLE_VERSION = 36  # default BUFR table version
+BUFR_TABLE_VERSION = 38  # default BUFR table version
 # list of BUFR attributes
 ATTRIBUTES = ['code', 'units', 'scale', 'reference', 'width']
 # list of ecCodes keys for BUFR headers
