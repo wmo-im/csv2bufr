@@ -43,7 +43,7 @@ from jsonschema import validate
 # some 'constants'
 SUCCESS = True
 NUMBERS = (float, int, complex)
-MISSING = ("NA", "NaN", "NAN", "None")
+MISSING = ("NA", "NaN", "NAN", "None", "")
 
 NULLIFY_INVALID = True  # TODO: move to env. variable
 
