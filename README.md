@@ -11,7 +11,7 @@ More information on the BUFR format can be found in the [WMO Manual on Codes, Vo
 
 ### Dependencies
 
-Dependencies are listed in [requirements.txt](https://github.com/wmo-im/csv2bufr/blob/main/requirements.txt]. Dependencies are automatically installed during csv2bufr installation.
+Dependencies are listed in [requirements.txt](https://github.com/wmo-im/csv2bufr/blob/main/requirements.txt). Dependencies are automatically installed during csv2bufr installation.
 
 ```bash
 docker pull wmoim/csv2bufr
