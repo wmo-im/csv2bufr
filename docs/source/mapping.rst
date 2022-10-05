@@ -14,7 +14,7 @@ This schema specifies 6 primary properties:
 - ``names_on_row`` - integer, which row the column names appear on
 - ``header`` - array of objects (see below), header section containing metadata
 - ``data`` - array of object (see below) section mapping from the CSV columns to the BUFR elements
-- ``wigos_identifier`` - object (see below), section to contain the WIGOS station identifier
+- ``wigos_station_identifier`` - object (see below), section to contain the WIGOS station identifier
 
 Out of these, only the ``inputDelayedDescriptorReplicationFactor``, ``header`` and ``data`` are mandatory,
 with the ``unexpandedDescriptors`` described on the previous page included in the ``header`` section.

@@ -75,9 +75,9 @@ class MappingError(Exception):
     pass
 
 
-def parse_wigos_id(wigos_id: str) -> dict:
+def parse_wigos_station_identifier(wigos_station_identifier: str) -> dict:
     """
-    Returns the WIGOS Identifier (wigos_id) in string representation
+    Returns WIGOS Identifier in string representation
     as the individual components in a dictionary. The WIGOS Identifier takes
     the following form:
 
@@ -86,15 +86,15 @@ def parse_wigos_id(wigos_id: str) -> dict:
     See https://community.wmo.int/wigos-station-identifier for more
     information.
 
-    :param wigos_id: WIGOS Station Identifier (WSI) as a string, e.g.
-        "0-20000-0-ABCD123"
+    :param wigos_station_identifier: WIGOS Station Identifier (WSI) as a
+                                     string, e.g.  "0-20000-0-ABCD123"
 
     :returns: `dict` containing components of the WIGOS identifier:
         "wid_series", "wid_issuer", "wid_issue_number" and "local_identifier"
 
     """
 
-    tokens = wigos_id.split("-")
+    tokens = wigos_station_identifier.split("-")
     assert len(tokens) == 4
     result = {
         "wid_series": int(tokens[0]),
@@ -302,7 +302,7 @@ class BUFRMessage:
                 }
                 template["data"].append(entry)
         # add WIGOS identifier
-        template["wigos_identifier"] = {
+        template["wigos_station_identifier"] = {
             "value": None,
             "jsonpath": None,
             "csv_column": None
@@ -479,7 +479,7 @@ class BUFRMessage:
         # ==================================================
         try:
             wigosID = metadata["wigosIds"][0]["wid"]
-            tokens = parse_wigos_id(wigosID)
+            tokens = parse_wigos_station_identifier(wigosID)
             for token in tokens:
                 metadata["wigosIds"][0][token] = tokens[token]
         except (Exception, AssertionError):
@@ -598,7 +598,7 @@ def transform(data: str, metadata: dict, mappings: dict) -> Iterator[dict]:
         - ["identifier"] = identifier for report (WIGOS_<WSI>_<ISO8601>);
         - ["geometry"] = GeoJSON geometry object;
         - ["md5"] = md5 checksum of BUFR encoded data;
-        - ["wigos_id"] = WIGOS identifier;
+        - ["wigos_station_identifier"] = WIGOS identifier;
         - ["data_date"] = characteristic date of data;
         - ["originating_centre"] = Originating centre (see Common code table C11);  # noqa
         - ["data_category"] = Category of data, see BUFR Table A.
@@ -709,7 +709,7 @@ def transform(data: str, metadata: dict, mappings: dict) -> Iterator[dict]:
                     message.get_element('#1#latitude')
                 ]
             },
-            "wigos_id": wsi,
+            "wigos_station_identifier": wsi,
             "data_date": message.get_datetime(),
             "originating_centre": message.get_element("bufrHeaderCentre"),
             "data_category": message.get_element("dataCategory")

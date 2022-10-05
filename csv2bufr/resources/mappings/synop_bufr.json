@@ -21,7 +21,7 @@
         {"eccodes_key": "typicalMinute", "csv_column": "M_Minutes"},
         {"eccodes_key": "unexpandedDescriptors", "value": [301150, 307080]}
     ],
-    "wigos_identifier": {"jsonpath": "$.wigosIds[0].wid"},
+    "wigos_station_identifier": {"jsonpath": "$.wigosIds[0].wid"},
     "data": [
         {"eccodes_key": "#1#wigosIdentifierSeries", "jsonpath": "$.wigosIds[0].wid_series"},
         {"eccodes_key": "#1#wigosIssuerOfIdentifier", "jsonpath": "$.wigosIds[0].wid_issuer"},

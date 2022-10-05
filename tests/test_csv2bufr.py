@@ -232,7 +232,7 @@ def test_transform(data_dict, station_dict, mapping_dict):
 
         item_meta_keys = ['data_category', 'data_date', 'geometry',
                           'identifier', 'md5', 'originating_centre',
-                          'wigos_id']
+                          'wigos_station_identifier']
 
         assert sorted(item["_meta"].keys()) == item_meta_keys
 
