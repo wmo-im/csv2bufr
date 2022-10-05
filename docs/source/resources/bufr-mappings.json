@@ -403,7 +403,7 @@
             "offset": null
         }
     ],
-    "wigos_identifier": {
+    "wigos_station_identifier": {
         "value": null,
         "jsonpath": null,
         "csv_column": null
