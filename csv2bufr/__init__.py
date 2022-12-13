@@ -309,10 +309,10 @@ class BUFRMessage:
                     entry = {
                         "eccodes_key": element,
                         "value": "",
-                        "valid_min": valid_min,
-                        "valid_max": valid_max,
-                        "scale": 0,
-                        "offset": 0
+                        "valid_min": f"const:{valid_min}",
+                        "valid_max": f"const:{valid_max}",
+                        "scale": "const:0",
+                        "offset": "const:0"
                     }
                 else:
                     entry = {
@@ -505,9 +505,9 @@ class BUFRMessage:
                     scale = None
                     offset = None
                     if "scale" in element:
-                        scale = element["scale"]
+                        scale = parse_value(element["scale"], data, metadata)
                     if "offset" in element:
-                        offset = element["offset"]
+                        offset = parse_value(element["offset"], data, metadata)
                     value = apply_scaling(value, scale, offset)
                 # ==================
                 # now validate value

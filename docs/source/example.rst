@@ -22,10 +22,12 @@ Data file (example-data.csv)
    :file: resources/example-data.csv
    :header-rows: 1
 
-Metadata file (example-metadata.json)
+Metadata file (example-metadata.csv)
 -------------------------------------
 
-.. literalinclude:: resources/example-metadata.json
+.. csv-table:: example-metadata.csv
+   :file: resources/example-metadata.csv
+   :header-rows: 1
 
 Creating a new mapping file
 ---------------------------
@@ -40,6 +42,9 @@ This can be invoked using the ``csv2bufr mappings create <BUFR descriptors>`` co
 generates the following file:
 
 .. literalinclude:: resources/bufr-mappings.json
+
+This file includes the representable range (``valid_min`` and ``valid_max``) for the different BUFR elements.
+These should be set to the physical range where applicable.
 
 Customising the mapping file (bufr-mappings-edited.json)
 --------------------------------------------------------
@@ -56,8 +61,8 @@ Transformation
 
 .. code-block:: bash
 
-   csv2bufr data transform ./example-data.csv --bufr-template ./bufr-mappings-edited.json \
-       --station-metadata ./example-metadata.json --output-dir ./
+   csv2bufr data transform ./example-data.csv 0-20000-0-06700 --bufr-template ./bufr-mappings-edited.json \
+       --station-metadata ./example-metadata.csv --output-dir ./
 
 The links below can be used to download the example files:
 
