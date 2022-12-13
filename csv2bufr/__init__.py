@@ -140,7 +140,7 @@ def validate_mapping(mapping: dict) -> bool:
     # now validate
     try:
         validate(mapping, schema)
-    except MappingError as e:
+    except Exception as e:
         message = "Invalid mapping dictionary"
         LOGGER.error(message)
         raise e
@@ -299,7 +299,7 @@ class BUFRMessage:
         template["data"] = []
         for element in self.dict:
             if element not in HEADERS:
-                if self.dict[element]['type'] in ('int','float'):
+                if self.dict[element]['type'] in ('int', 'float'):
                     # calulcate valid min and max
                     scale = self.dict[element]['scale']
                     offset = self.dict[element]['reference']
@@ -608,7 +608,6 @@ def transform(data: str, metadata: str, mappings: dict,
             wsi = single_row['wsi']
             metadata_dict[wsi] = deepcopy(single_row)
         fh.close()
-        print(json.dumps(metadata_dict, indent = 4))
         metadata = metadata_dict[wsi]
     elif isinstance(metadata, dict):
         if wsi in metadata:
@@ -629,7 +628,6 @@ def transform(data: str, metadata: str, mappings: dict,
 
     unexpanded_descriptors = get_("unexpandedDescriptors", mappings["header"], data = None, metadata = None)  # noqa
     table_version = get_("masterTablesVersionNumber", mappings["header"], data = None, metadata = None)  # noqa
-
 
     # =========================================
     # Now we need to convert string back to CSV
