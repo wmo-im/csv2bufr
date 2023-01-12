@@ -37,38 +37,40 @@ LOGGER.setLevel("DEBUG")
 @pytest.fixture
 def mapping_dict():
     return {
+        "inputShortDelayedDescriptorReplicationFactor": [],
         "inputDelayedDescriptorReplicationFactor": [],
-        "number_header_rows": 1,
-        "names_on_row": 1,
+        "inputExtendedDelayedDescriptorReplicationFactor": [],
+        "wigos_station_identifier": "const:0-1-2-ABCD",
+        "skip": 0,
         "header": [
-            {"eccodes_key": "edition", "value": 4},  # noqa
-            {"eccodes_key": "masterTableNumber", "value": 0},  # noqa
-            {"eccodes_key": "bufrHeaderCentre", "value": 0},  # noqa
-            {"eccodes_key": "bufrHeaderSubCentre", "value": 0},  # noqa
-            {"eccodes_key": "updateSequenceNumber", "value": 0},  # noqa
-            {"eccodes_key": "dataCategory", "value": 0},  # noqa
-            {"eccodes_key": "internationalDataSubCategory", "value": 6},  # noqa
-            {"eccodes_key": "masterTablesVersionNumber", "value": 36},  # noqa
-            {"eccodes_key": "numberOfSubsets", "value": 1},  # noqa
-            {"eccodes_key": "observedData", "value": 1},  # noqa
-            {"eccodes_key": "compressedData", "value": 0},  # noqa
-            {"eccodes_key": "typicalYear", "csv_column": "year"},  # noqa
-            {"eccodes_key": "typicalMonth", "csv_column": "month"},  # noqa
-            {"eccodes_key": "typicalDay", "csv_column": "day"},  # noqa
-            {"eccodes_key": "typicalHour", "csv_column": "hour"},  # noqa
-            {"eccodes_key": "typicalMinute", "csv_column": "minute"},  # noqa
-            {"eccodes_key": "unexpandedDescriptors","value": [301021, 301011, 301012, 10051, 12101]}  # noqa
+            {"eccodes_key": "edition", "value": "const:4"},  # noqa
+            {"eccodes_key": "masterTableNumber", "value": "const:0"},  # noqa
+            {"eccodes_key": "bufrHeaderCentre", "value": "const:0"},  # noqa
+            {"eccodes_key": "bufrHeaderSubCentre", "value": "const:0"},  # noqa
+            {"eccodes_key": "updateSequenceNumber", "value": "const:0"},  # noqa
+            {"eccodes_key": "dataCategory", "value": "const:0"},  # noqa
+            {"eccodes_key": "internationalDataSubCategory", "value": "const:6"},  # noqa
+            {"eccodes_key": "masterTablesVersionNumber", "value":  "const:36"},  # noqa
+            {"eccodes_key": "numberOfSubsets", "value":  "const:1"},  # noqa
+            {"eccodes_key": "observedData", "value":  "const:1"},  # noqa
+            {"eccodes_key": "compressedData", "value":  "const:0"},  # noqa
+            {"eccodes_key": "typicalYear", "value": "data:year"},  # noqa
+            {"eccodes_key": "typicalMonth", "value": "data:month"},  # noqa
+            {"eccodes_key": "typicalDay", "value": "data:day"},  # noqa
+            {"eccodes_key": "typicalHour", "value": "data:hour"},  # noqa
+            {"eccodes_key": "typicalMinute", "value": "data:minute"},  # noqa
+            {"eccodes_key": "unexpandedDescriptors","value": "array:301021, 301011, 301012, 10051, 12101"}  # noqa
         ],
         "data": [
-            {"eccodes_key": "#1#year", "csv_column": "year"},  # noqa
-            {"eccodes_key": "#1#month", "csv_column": "month"},  # noqa
-            {"eccodes_key": "#1#day", "csv_column": "day"},  # noqa
-            {"eccodes_key": "#1#hour", "csv_column": "hour"},  # noqa
-            {"eccodes_key": "#1#minute", "csv_column": "minute"},  # noqa
-            {"eccodes_key": "#1#latitude", "csv_column": "latitude"},  # noqa
-            {"eccodes_key": "#1#longitude", "csv_column": "longitude"},  # noqa
-            {"eccodes_key": "#1#pressureReducedToMeanSeaLevel", "csv_column": "pressure"},  # noqa
-            {"eccodes_key": "#1#airTemperature", "csv_column": "air_temperature"}  # noqa
+            {"eccodes_key": "#1#year", "value": "data:year"},  # noqa
+            {"eccodes_key": "#1#month", "value": "data:month"},  # noqa
+            {"eccodes_key": "#1#day", "value": "data:day"},  # noqa
+            {"eccodes_key": "#1#hour", "value": "data:hour"},  # noqa
+            {"eccodes_key": "#1#minute", "value": "data:minute"},  # noqa
+            {"eccodes_key": "#1#latitude", "value": "data:latitude"},  # noqa
+            {"eccodes_key": "#1#longitude", "value": "data:longitude"},  # noqa
+            {"eccodes_key": "#1#pressureReducedToMeanSeaLevel", "value": "data:pressure"},  # noqa
+            {"eccodes_key": "#1#airTemperature", "value": "data:air_temperature"}  # noqa
         ]
     }
 
@@ -128,18 +130,8 @@ def data_to_encode():
 
 
 @pytest.fixture
-def station_dict():
-    return {
-        "metadata": {
-            "last-sync": "2021-10-22"
-        },
-        "data": {
-            "station-name": "test data"
-        },
-        "wigosIds": [
-            {"wid": "0-1-2-ABCD"}
-        ]
-    }
+def wsi():
+    return "0-1-2-ABCD"
 
 
 # test to check whether eccodes is installed
@@ -166,9 +158,9 @@ def test_validate_mapping_fail():
         "header": [],
         "data": [
             {"eccodes_key": "abc", "value": 1, "offset": 1},  # noqa
-            {"eccodes_key": "def", "csv_column": "col1", "valid-min": 0, "valid-max": 10},  # noqa
-            {"eccodes_key": "ghi", "csv_column": "col2", "valid-min": 250.0, "valid-max": 350.0, "scale": 0.0, "offset":  273.15},  # noqa
-            {"eccodes_key": "jkl", "csv_column": "col3", "valid-min": 90000.0, "valid-max": 120000.0, "scale": 2.0, "offset": 0.0}  # noqa
+            {"eccodes_key": "def", "value": "col1", "valid-min": 0, "valid-max": 10},  # noqa
+            {"eccodes_key": "ghi", "value": "col2", "valid-min": 250.0, "valid-max": 350.0, "scale": 0.0, "offset":  273.15},  # noqa
+            {"eccodes_key": "jkl", "value": "col3", "valid-min": 90000.0, "valid-max": 120000.0, "scale": 2.0, "offset": 0.0}  # noqa
         ]
     }
     try:
@@ -217,7 +209,7 @@ def test_validate_value_nullify():
 
 
 # check that test transform works
-def test_transform(data_dict, station_dict, mapping_dict):
+def test_transform(data_dict, mapping_dict):
     # create CSV
     output = StringIO()
     writer = csv.DictWriter(output, quoting=csv.QUOTE_NONNUMERIC,
@@ -225,7 +217,7 @@ def test_transform(data_dict, station_dict, mapping_dict):
     writer.writeheader()
     writer.writerow(data_dict)
     data = output.getvalue()
-    result = transform(data, station_dict, mapping_dict)
+    result = transform(data, mapping_dict)
     for item in result:
         assert isinstance(item, dict)
         assert "_meta" in item

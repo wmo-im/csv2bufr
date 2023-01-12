@@ -3,17 +3,25 @@
     "$schema": "https://json-schema.org/draft/2020-12/schema",
     "type": "object",
     "properties": {
+        "inputShortDelayedDescriptorReplicationFactor": {
+            "type": "array",
+            "items": {"type": "integer"}
+        },
         "inputDelayedDescriptorReplicationFactor": {
             "type": "array",
             "items": {"type": "integer"}
         },
-        "number_header_rows": {
-            "type": "integer",
-            "description": "Number of header rows in the file"
+        "inputExtendedDelayedDescriptorReplicationFactor": {
+            "type": "array",
+            "items": {"type": "integer"}
         },
-        "names_on_row": {
+        "skip": {
             "type": "integer",
-            "description": "Which row the column names appear on"
+            "description": "Number of header rows to skip between header row and first data row"
+        },
+        "wigos_station_identifier": {
+            "type": "string",
+            "description": "Either the WIGOS station identifier for the data or the column in the CSV file containing the identifier"
         },
         "header":{
             "type": "array",
@@ -24,23 +32,14 @@
             "type": "array",
             "items": {"$ref": "#/$defs/bufr_element"},
             "description": "mapping from CSV file (or metadata json file) to BUFR"
-        },
-        "wigos_station_identifier": {
-            "type": "object",
-            "description": "Field to contain WIGOS identifier (currently unused)",
-            "properties": {
-                "csv_column": {"type": "string"},
-                "jsonpath": {"type": "string"},
-                "value": {"type": "string"}
-            },
-            "oneOf": [
-                        {"required": ["value"]},
-                        {"required": ["csv_column"]},
-                        {"required": ["jsonpath"]}
-                    ]
         }
     },
-    "required" : ["inputDelayedDescriptorReplicationFactor","header","data"],
+    "required" : [
+        "inputShortDelayedDescriptorReplicationFactor",
+        "inputDelayedDescriptorReplicationFactor",
+        "inputExtendedDelayedDescriptorReplicationFactor",
+        "wigos_station_identifier",
+        "skip","header","data"],
     "$defs":{
         "bufr_element": {
             "type": "object",
@@ -51,44 +50,29 @@
                 },
                 "value": {
                     "type": [
-                        "boolean", "object", "array", "number", "string", "integer"
+                        "string"
                     ],
-                    "description": "fixed value to use for all data using this mapping"
-                },
-                "csv_column": {
-                    "type": "string",
-                    "description": "column from the CSV file to map to the BUFR element indicated by eccodes_key"
-                },
-                "jsonpath": {
-                    "type": "string",
-                    "description": "json path to the element in the JSON metadata file"
+                    "description": "where to extract the value from, can be one off 'data','metadata','const','array' followed by the value or column header"
                 },
                 "valid_min": {
-                    "type": "number",
+                    "type": "string",
                     "description": "Minimum valid value for parameter if set"
                 },
                 "valid_max": {
-                    "type": "number",
+                    "type": "string",
                     "description": "Maximum value for for the parameter if set"
                 },
                 "scale": {
-                    "type": "number",
+                    "type": "string",
                     "description": "Value used to scale the data by before encoding using the same conventions as in BUFR"
                 },
                 "offset": {
-                    "type": "number",
+                    "type": "string",
                     "description": "Value added to the data before encoding to BUFR following the same conventions as BUFR"
                 }
             },
-            "required": ["eccodes_key"],
+            "required": ["eccodes_key", "value"],
             "allOf": [
-                {
-                    "oneOf": [
-                        {"required": ["value"]},
-                        {"required": ["csv_column"]},
-                        {"required": ["jsonpath"]}
-                    ]
-                },
                 {
                     "dependentRequired": {"scale": ["offset"]}
                 },

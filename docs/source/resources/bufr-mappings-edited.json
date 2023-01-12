@@ -1,146 +1,171 @@
 {
     "inputDelayedDescriptorReplicationFactor": [],
-    "number_header_rows": 1,
-    "names_on_row": 1,
+    "inputShortDelayedDescriptorReplicationFactor": [],
+    "inputExtendedDelayedDescriptorReplicationFactor": [],
+    "wigos_station_identifier": "data:wsi",
+    "skip": 0,
     "header": [
         {
             "eccodes_key": "edition",
-            "value": 4
+            "value": "const:4"
         },
         {
             "eccodes_key": "masterTableNumber",
-            "value": 0
+            "value": "const:0"
         },
         {
             "eccodes_key": "updateSequenceNumber",
-            "value": 0
+            "value": "const:0"
         },
         {
             "eccodes_key": "dataCategory",
-            "value": 0
+            "value": "const:0"
         },
         {
             "eccodes_key": "internationalDataSubCategory",
-            "value": 6
+            "value": "const:6"
         },
         {
             "eccodes_key": "masterTablesVersionNumber",
-            "value": 36
+            "value": "const:36"
         },
         {
             "eccodes_key": "typicalYear",
-            "csv_column": "year"
+            "value": "data:year"
         },
         {
             "eccodes_key": "typicalMonth",
-            "csv_column": "month"
+            "value": "data:month"
         },
         {
             "eccodes_key": "typicalDay",
-            "csv_column": "day"
+            "value": "data:day"
         },
         {
             "eccodes_key": "typicalHour",
-            "csv_column": "hour"
+            "value": "data:hour"
         },
         {
             "eccodes_key": "typicalMinute",
-            "csv_column": "minute"
+            "value": "data:minute"
         },
         {
             "eccodes_key": "numberOfSubsets",
-            "value": 1
+            "value": "const:1"
         },
         {
             "eccodes_key": "observedData",
-            "value": 1
+            "value": "const:1"
         },
         {
             "eccodes_key": "compressedData",
-            "value": 0
+            "value": "const:0"
         },
         {
             "eccodes_key": "unexpandedDescriptors",
-            "value": [
-                301150,
-                301011,
-                301012,
-                301021,
-                  7031,
-                302001
-            ]
+            "value": "array: 301150, 301011, 301012, 301021, 7031, 302001"
         }
     ],
     "data": [
         {
             "eccodes_key": "#1#wigosIdentifierSeries",
-            "jsonpath": "$.wigosIds[0].wid_series"
+            "value": "metadata:wsi_series",
+            "valid_min": "const:0",
+            "valid_max": "const:0"
         },
         {
             "eccodes_key": "#1#wigosIssuerOfIdentifier",
-            "jsonpath": "$.wigosIds[0].wid_issuer"
+            "value": "metadata:wsi_issuer",
+            "valid_min": "const:0",
+            "valid_max": "const:65534"
         },
         {
             "eccodes_key": "#1#wigosIssueNumber",
-            "jsonpath": "$.wigosIds[0].wid_issue_number"
+            "value": "metadata:wsi_issue_number",
+            "valid_min": "const:0",
+            "valid_max": "const:65534"
         },
         {
             "eccodes_key": "#1#wigosLocalIdentifierCharacter",
-            "jsonpath": "$.wigosIds[0].wid_local"
+            "value": "metadata:wsi_local"
         },
         {
             "eccodes_key": "#1#year",
-            "csv_column": "year"
+            "value": "data:year",
+            "valid_min": "const:2022",
+            "valid_max": "const:2025"
         },
         {
             "eccodes_key": "#1#month",
-            "csv_column": "month"
+            "value": "data:month",
+            "valid_min": "const:1",
+            "valid_max": "const:12"
         },
         {
             "eccodes_key": "#1#day",
-            "csv_column": "day"
+            "value": "data:day",
+            "valid_min": "const:1",
+            "valid_max": "const:31"
         },
         {
             "eccodes_key": "#1#hour",
-            "csv_column": "hour"
+            "value": "data:hour",
+            "valid_min": "const:0",
+            "valid_max": "const:23"
         },
         {
             "eccodes_key": "#1#minute",
-            "csv_column": "minute"
+            "value": "data:minute",
+            "valid_min": "const:0",
+            "valid_max": "const:59"
         },
         {
             "eccodes_key": "#1#latitude",
-            "csv_column": "latitude"
+            "value": "data:latitude",
+            "valid_min": "const:-90.0",
+            "valid_max": "const:90.0"
         },
         {
             "eccodes_key": "#1#longitude",
-            "csv_column": "longitude"
+            "value": "data:longitude",
+            "valid_min": "const:-180.0",
+            "valid_max": "const:180.0"
         },
         {
             "eccodes_key": "#1#heightOfBarometerAboveMeanSeaLevel",
-            "csv_column": "brmh"
+            "value": "data:brmh",
+            "valid_min": "const:-400.0",
+            "valid_max": "const:12707.0"
         },
         {
             "eccodes_key": "#1#nonCoordinatePressure",
-            "csv_column": "slp",
-            "scale": 2,
-            "offset": 0
+            "value": "data:slp",
+            "valid_min": "const:0",
+            "valid_max": "const:163820",
+            "scale": "const:2",
+            "offset": "const:0"
         },
         {
             "eccodes_key": "#1#pressureReducedToMeanSeaLevel",
-            "csv_column": "mslp",
-            "scale": 2,
-            "offset": 0
+            "value": "data:mslp",
+            "valid_min": "const:0",
+            "valid_max": "const:163820",
+            "scale": "const:2",
+            "offset": "const:0"
         },
         {
             "eccodes_key": "#1#3HourPressureChange",
-            "csv_column": "ppp",
-            "scale": 2,
-            "offset": 0
+            "value": "data:ppp",
+            "valid_min": "const:-5000",
+            "valid_max": "const:5220",
+            "scale": "const:2",
+            "offset": "const:0"
         },
         {
             "eccodes_key": "#1#characteristicOfPressureTendency",
-            "csv_column": "a"
+            "value": "data:a",
+            "valid_min": "const:0",
+            "valid_max": "const:14"
         }
     ]
 }
