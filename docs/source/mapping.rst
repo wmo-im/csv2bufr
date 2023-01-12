@@ -7,10 +7,13 @@ BUFR template mapping
 
 The mapping between the input CSV data and the output BUFR data is specified in a JSON file.
 The csv2bufr module validates the mapping file against the schema shown at the bottom of this page prior to attempted the transformation to BUFR.
-This schema specifies 4 primary properties all of which are mandatory:
+This schema specifies 7 primary properties all of which are mandatory:
 
 - ``inputDelayedDescriptorReplicationFactor`` - array of integers, values for the delayed descriptor replication factors to use
+- ``inputShortDelayedDescriptorReplicationFactor`` - array of integers, values for the short delayed descriptor replication factors to use
+- ``inputExtendedDelayedDescriptorReplicationFactor`` - array of integers, values for the extended delayed descriptor replication factors to use
 - ``skip`` - integer, the number of rows to skip between the header row and the data
+- ``wigos_station_identifier`` - either constant WIGOS station identifier (e.g. ``const:0-20000-0-123``) or column from csv data file containing the WSI (e.g. ``data:WSI_column``).
 - ``header`` - array of objects (see below), header section containing metadata
 - ``data`` - array of object (see below) section mapping from the CSV columns to the BUFR elements
 
@@ -20,7 +23,6 @@ In both cases the field ``eccodes_key`` from the ``bufr_element`` object is used
 The field ``value`` specifies where the data to encode comes from. This can be one of the following:
 
 - data: this specifies that the data should come from the data file.
-- metadata: this specifies that the data should come from the metadata file.
 - const: this specifies that a constant value should be used
 
 For example, the code block below shows how the pressure reduced to mean sea level would be mapped from the column "mslp" in the CSV file
@@ -34,7 +36,7 @@ to the BUFR element indicated by the eccodes key "pressureReducedToMeanSeaLevel"
        ]
    }
 
-The code block below gives examples for the other options:
+The code block below gives examples for both constant values and a value read from the data file:
 
 .. code-block:: json
 
@@ -43,14 +45,14 @@ The code block below gives examples for the other options:
            {"eccodes_key": "dataCategory", "value": "const:0"}
        ],
        "data":[
-           {"eccodes_key": "latitude", "value": "metadata:latitude"},
-           {"eccodes_key": "longitude", "value": "metadata:longitude"},
+           {"eccodes_key": "latitude", "value": "const:46.2234923"},
+           {"eccodes_key": "longitude", "value": "const:6.1475485"},
            {"eccodes_key": "pressureReducedToMeanSeaLevel", "value": "data:mslp"},
        ]
    }
 
 In this example, the ``dataCategory`` field in BUFR section 1 (see :ref:`bufr4`) is mapped to the constant value 0;
-the ``latitude`` and ``longitude`` to the columns in the metadata file with column names latitude and longitude respectively;
+the ``latitude`` and ``longitude`` to the value specified;
 and the ``pressureReducedToMeanSeaLevel`` to the data from the "mslp" column in the CSV file.
 
 The keys used for the header elements are listed on the :ref:`bufr4` page, with the mandatory keys highlighted in red.
@@ -62,21 +64,25 @@ Similarly the keys for the different data elements can be found at:
 
 - `<https://confluence.ecmwf.int/display/ECC/WMO%3D37+element+table>`_
 
-inputDelayedDescriptorReplicationFactor
+input<Short|Extended>DelayedDescriptorReplicationFactor
 ---------------------------------------
 Due to the way that eccodes works any delayed replication factors need to be specified before encoding and included in the mapping file.
 This currently limits the use of the delayed replication factors to static values for a given mapping. For example
 every data file that uses a given mapping file has the same optional elements present or the same number of levels in an
 atmospheric profile present.
 
-For sequences that do not include delayed replications the :redtext:`inputDelayedDescriptorReplicationFactor`
-must still be included but may be set to an empty array, e.g.
+For sequences that do not include delayed replications the :redtext:`inputDelayedDescriptorReplicationFactor` etc
+must still be included but may be set to an empty array. e.g.
 
 .. code-block:: json
 
    {
-       "inputDelayedDescriptorReplicationFactor": []
+       "inputDelayedDescriptorReplicationFactor": [],
+       "inputShortDelayedDescriptorReplicationFactor": []
+       "inputExtendedDelayedDescriptorReplicationFactor": []
    }
+
+
 
 bufr_element
 ------------
@@ -93,15 +99,14 @@ Only one source can be mapped, if multiple sources are specified the validation 
 As noted at the start of this page. the ``value`` field maps the data to one of:
 
 - data: this specifies that the data should come from the data file
-- metadata: this specifies that the data should come from the metadata file
 - const: this specifies that a constant value should be used
 
-and takes the form ``"value": "<keyword>:<column|value>"`` where ``<keyword>`` is the string ``data``, ``metadata`` or ``const``.
-``<column|value>`` can specify either the column name from the data or metadata files, or it can specify a constant value to use.
+and takes the form ``"value": "<keyword>:<column|value>"`` where ``<keyword>`` is the string ``data`` or ``const``.
+``<column|value>`` can specify either the column name from the data file or it can specify a constant value to use.
 
 The ``valid_min`` and ``valid_max`` are optional and can be used to perform a basic quality control of numeric fields.
 The values to use are specified in the same way as for the ``value`` element, with the values coming from either a
-constant value, a column in the metadata file or from the data file.
+constant value or from the data file.
 If these fields are specified the csv2bufr module checks the value indicated extracted from the source to the indicated
 valid minimum and maximum values. If outside of the range the value is set to missing.
 

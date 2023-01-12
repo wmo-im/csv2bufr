@@ -9,8 +9,7 @@ For example, the command line interface reads in data from a CSV file, converts 
 
 .. code-block:: shell
 
-   csv2bufr data transform <my-csv-file.csv> <wigos-station-identifier>\
-       --station-metadata <station-list.csv> \
+   csv2bufr data transform <my-csv-file.csv> \
        --bufr-template <csv-to-bufr-mapping.json> \
        --output <output-directory-path>
 
@@ -24,19 +23,16 @@ and writes the output to directory ``output-directory-path``:
 
 .. code-block:: shell
 
-   csv2bufr data transform <my-csv-file.csv> <wigos-station-identifier>\
-       --station-metadata <station-list.csv> \
+   csv2bufr data transform <my-csv-file.csv> \
        --bufr-template <csv-to-bufr-mapping.json> \
        --output <output-directory-path>
 
 The command is built on the `Python Click module <https://click.palletsprojects.com/en/8.0.x/>`_ and is formed of
-three components (``csv2bufr data transform``), 2 arguments and 3 options (specified by --).
-The arguments specifies the file to process and the WIGOS station identifier (WSI) of the data being processed.
-The options specific various configuration files to use.
+three components (``csv2bufr data transform``), 1 arguments and 2 mandatory options (specified by --).
+The argument specifies the file to process of the data being processed.
+The options specify various configuration files to use.
 
 #. ``my-csv-file.csv``: argument specifying the CSV data file to process
-#. ``wigos-station-identifier``: WSI of the station
-#. ``--station-metadata station-list.csv``: option followed by name of the csv file containing the station metadata
 #. ``--bufr-template csv-to-bufr-mapping.json``: option followed by the bufr mapping template to use
 #. ``--output-dir output-directory-path``: option followed by output directory to write BUFR file to. The output filename is set using the md5 checksum of the BUFR data to ensure uniqueness, future versions will use the WIGOS ID and timestamp of the data to set the filename.
 
@@ -54,6 +50,7 @@ The format of the input CSV file has a few requirements:
 - The final row in the file must contain data and not be a new line.
 - The timestamp of the records must be separated into components, i.e. year, month, day etc must each be in a separate column.
 - The date/time elements should be in Universal Time Coordinated (UTC).
+- The file must contain the WIGOS station identifier
 
 WIGOS Station Identifier
 ------------------------
@@ -61,22 +58,6 @@ WIGOS Station Identifier
 Each station must have a WIGOS Station Identifier. More information can be found in the
 `Guide to the WMO Integrated Observing System <https://library.wmo.int/doc_num.php?explnum_id=10962>`_,
 section 2 (WMO-No. 1165).
-
-Station metadata (``--station-metadata``)
------------------------------------------
-
-A file containing static station metadata in CSV format is required in addition to the data file.
-This may contain the metadata for more than one station with ine station per row, indexed by the first column.
-At a minimum the file must contain the following columns:
-
-- wsi: WIGOS station identifier
-- wsi_series: The series number from the WIGOS station identifier , 0 for stations
-- wsi_issuer: The issuer of the WIGOS station identifier, typically the WMO Member operating the station
-- wsi_issue_number: The issue number from the WIGOS station identifier
-- wsi_local: The local part of the WIGOS station identifier
-
-More information on the WIGOS identifiers can also be found in the
-`Guide to the WMO Integrated Observing System <https://library.wmo.int/doc_num.php?explnum_id=10962>`_, section 2 (WMO-No. 1165).
 
 BUFR mapping template (``--bufr-template``)
 -------------------------------------------
@@ -102,15 +83,8 @@ The command line interface uses the ``transform`` function from the csv2bufr mod
    with open("csv-to-bufr-mapping.json") as fh:
        mapping = json.load(fh)
 
-   # load metadata
-   with open("station-list.csv") as fh:
-       metadata = fh.read()
-
-   # Example WSI, used to set the wsid in the result.
-   wsi = "0-1-2-ABCD"
-
    # call transform function
-   result = transform(data, metadata, mapping, wsi)
+   result = transform(data, mapping)
 
    # iterate over items
    for item in result:

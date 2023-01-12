@@ -1,5 +1,8 @@
 {
     "inputDelayedDescriptorReplicationFactor": [],
+    "inputShortDelayedDescriptorReplicationFactor": [],
+    "inputExtendedDelayedDescriptorReplicationFactor": [],
+    "wigos_station_identifier": "data:wsi",
     "skip": 0,
     "header": [
         {

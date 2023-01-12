@@ -12,8 +12,6 @@ be found on the ecCodes documentation pages: `https://confluence.ecmwf.int/displ
 The following Python packages are required by the csv2bufr module:
 
 * `eccodes <https://pypi.org/project/eccodes/>`__ (NOTE: this is separate from the ecCodes library)
-* `jsonschema <https://pypi.org/project/jsonschema/>`_
-* `jsonpath_ng <https://pypi.org/project/jsonpath-ng/>`_
 
 Additionally, the command line interface to csv2bufr requires:
 
