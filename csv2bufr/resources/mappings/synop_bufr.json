@@ -1,6 +1,9 @@
 {
+    "inputShortDelayedDescriptorReplicationFactor": [],
     "inputDelayedDescriptorReplicationFactor": [0,0],
+    "inputExtendedDelayedDescriptorReplicationFactor": [],
     "skip": 2,
+    "wigos_station_identifier": "data:Station_ID",
     "header":[
         {"eccodes_key": "edition", "value": "const:4"},
         {"eccodes_key": "masterTableNumber", "value": "const:0"},
@@ -21,10 +24,10 @@
         {"eccodes_key": "unexpandedDescriptors", "value": "array:301150,307080"}
     ],
     "data": [
-        {"eccodes_key": "#1#wigosIdentifierSeries",                                "value":"metadata:wsi_series"},
-        {"eccodes_key": "#1#wigosIssuerOfIdentifier",                              "value":"metadata:wsi_issuer"},
-        {"eccodes_key": "#1#wigosIssueNumber",                                     "value":"metadata:wsi_issue_number"},
-        {"eccodes_key": "#1#wigosLocalIdentifierCharacter",                        "value":"metadata:wsi_local"},
+        {"eccodes_key": "#1#wigosIdentifierSeries",                                "value":"data:_wsi_series"},
+        {"eccodes_key": "#1#wigosIssuerOfIdentifier",                              "value":"data:_wsi_issuer"},
+        {"eccodes_key": "#1#wigosIssueNumber",                                     "value":"data:_wsi_issue_number"},
+        {"eccodes_key": "#1#wigosLocalIdentifierCharacter",                        "value":"data:_wsi_local"},
         {"eccodes_key": "#1#stationOrSiteName",                                    "value":"data:Station_Name"},
         {"eccodes_key": "#1#stationType",                                          "value":"data:WMO_Station_Type"},
         {"eccodes_key": "#1#year",                                                 "value":"data:M_Year",       "valid_min": "const:2000", "valid_max": "const:2100"},

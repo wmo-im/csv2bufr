@@ -90,15 +90,12 @@ def create_mappings(ctx, sequence):
 @click.command()
 @click.pass_context
 @click.argument("csv_file", type=click.File(errors="ignore"))
-@click.argument("wsi")
 @click.option("--bufr-template", "mapping", required=True,
               help="Name of file or mapping template to use to map from CSV to BUFR")  # noqa
 @click.option("--output-dir", "output_dir", required=True,
               help="Name of output file")
-@click.option("--station-metadata", "station_metadata", required=True,
-              help="WIGOS station identifier JSON file")
 @cli_option_verbosity
-def transform(ctx, csv_file, wsi, mapping, output_dir, station_metadata, verbosity):  # noqa
+def transform(ctx, csv_file, mapping, output_dir, verbosity):  # noqa
     result = None
     click.echo(f"Transforming {csv_file.name} to BUFR")
 
@@ -115,18 +112,8 @@ def transform(ctx, csv_file, wsi, mapping, output_dir, station_metadata, verbosi
     with open(mappings_file) as fh:
         mappings = json.load(fh)
 
-    metadata = None
-    file_type = os.path.splitext(station_metadata)
-
-    if file_type[1] == ".json":
-        with open(station_metadata) as fh:
-            metadata = json.load(fh)
-    else:
-        with open(station_metadata) as fh:
-            metadata = fh.read()
-
     try:
-        result = transform_csv(csv_file.read(), metadata, mappings, wsi)
+        result = transform_csv(csv_file.read(), mappings)
     except Exception as err:
         raise click.ClickException(err)
 

@@ -77,7 +77,7 @@ def index_(key, mapping):
     raise ValueError
 
 
-def parse_value(element: str, data: dict, metadata: dict):
+def parse_value(element: str, data: dict):
     data_type = element.split(":")
     if data_type[0] == "const":
         value = data_type[1]
@@ -90,11 +90,6 @@ def parse_value(element: str, data: dict, metadata: dict):
         if column not in data:
             raise ValueError
         value = data[column]
-    elif data_type[0] == "metadata":
-        column = data_type[1]
-        if column not in metadata:
-            raise ValueError
-        value = metadata[column]
     elif data_type[0] == "array":
         value = data_type[1]
         # determine if float or int
@@ -112,11 +107,11 @@ def parse_value(element: str, data: dict, metadata: dict):
 
 
 # function to retrieve data
-def get_(key: str, mapping: dict, data: dict, metadata: dict):
+def get_(key: str, mapping: dict, data: dict):
     # get position in mapping
     idx = index_(key, mapping)
     element = mapping[idx]
-    value = parse_value(element['value'], data, metadata)
+    value = parse_value(element['value'], data)
     return value
 
 
@@ -214,7 +209,10 @@ def validate_value(key: str, value: Union[NUMBERS],
 
 
 class BUFRMessage:
-    def __init__(self, descriptors: list, delayed_replications: list = list(),
+    def __init__(self, descriptors: list,
+                 short_delayed_replications: list = list(),
+                 delayed_replications: list = list(),
+                 extended_delayed_replications: list = list(),
                  table_version: int = BUFR_TABLE_VERSION) -> None:
         """
         Constructor
@@ -234,9 +232,17 @@ class BUFRMessage:
         # ===============================
         # set delayed replication factors
         # ===============================
+        if len(short_delayed_replications) > 0:
+            codes_set_array(bufr_msg,
+                            "inputShortDelayedDescriptorReplicationFactor",
+                            delayed_replications)
         if len(delayed_replications) > 0:
             codes_set_array(bufr_msg,
                             "inputDelayedDescriptorReplicationFactor",
+                            delayed_replications)
+        if len(extended_delayed_replications) > 0:
+            codes_set_array(bufr_msg,
+                            "inputExtendedDelayedDescriptorReplicationFactor",
                             delayed_replications)
         # ===============================
         # set master table version number
@@ -473,15 +479,13 @@ class BUFRMessage:
         else:
             return None
 
-    def parse(self, data: dict, metadata: dict, mappings: dict) -> None:
+    def parse(self, data: dict, mappings: dict) -> None:
         """
         Function to parse observation data and station metadata, mapping to the
         specified BUFR sequence.
 
         :param data: dictionary of key value pairs containing the
                     data to be encoded.
-        :param metadata: dictionary containing the metadata for the station
-                        from OSCAR surface
         :param mappings: dictionary containing list of BUFR elements to
                         encode (specified using ECCODES key) and whether
                         to get the value from (fixed, csv or metadata)
@@ -495,7 +499,7 @@ class BUFRMessage:
                 # get eccodes key
                 eccodes_key = element["eccodes_key"]
                 # get value
-                value = get_(eccodes_key, mappings[section], data, metadata)
+                value = get_(eccodes_key, mappings[section], data)
                 # ===============================
                 # apply specified scaling to data
                 # ===============================
@@ -505,9 +509,9 @@ class BUFRMessage:
                     scale = None
                     offset = None
                     if "scale" in element:
-                        scale = parse_value(element["scale"], data, metadata)
+                        scale = parse_value(element["scale"], data)
                     if "offset" in element:
-                        offset = parse_value(element["offset"], data, metadata)
+                        offset = parse_value(element["offset"], data)
                     value = apply_scaling(value, scale, offset)
                 # ==================
                 # now validate value
@@ -515,9 +519,9 @@ class BUFRMessage:
                 valid_min = None
                 valid_max = None
                 if "valid_min" in element:
-                    valid_min = parse_value(element["valid_min"], data, metadata)  # noqa
+                    valid_min = parse_value(element["valid_min"], data)  # noqa
                 if "valid_max" in element:
-                    valid_max = parse_value(element["valid_max"], data, metadata)  # noqa
+                    valid_max = parse_value(element["valid_max"], data)  # noqa
                 try:
                     value = validate_value(element["eccodes_key"], value,
                                            valid_min, valid_max,
@@ -552,8 +556,7 @@ class BUFRMessage:
         )
 
 
-def transform(data: str, metadata: str, mappings: dict,
-              wsi: str) -> Iterator[dict]:
+def transform(data: str, mappings: dict) -> Iterator[dict]:
     """
     This function returns an iterator to process each line in the input CSV
     string. On each iteration a dictionary is returned containing the BUFR
@@ -595,39 +598,31 @@ def transform(data: str, metadata: str, mappings: dict,
     if e is not SUCCESS:
         raise ValueError("Invalid mappings")
 
-    # ===================
-    # Parse metadata file
-    # ===================
-    if isinstance(metadata, str):
-        fh = StringIO(metadata)
-        reader = csv.reader(fh, delimiter=',', quoting=csv.QUOTE_NONE)
-        col_names = next(reader)
-        metadata_dict = {}
-        for row in reader:
-            single_row = dict(zip(col_names, row))
-            wsi = single_row['wsi']
-            metadata_dict[wsi] = deepcopy(single_row)
-        fh.close()
-        metadata = metadata_dict[wsi]
-    elif isinstance(metadata, dict):
-        if wsi in metadata:
-            metadata = metadata[wsi]
-        else:
-            LOGGER.error(f"metadata not found for {wsi} in metadata file")
-            raise ValueError
+    # Get WSI
+    wsi = mappings["wigos_station_identifier"].split(":")
+    if len(wsi) != 2:
+        raise ValueError("Invalid wigos_station_identifier mapping specified")
+    if wsi[0] == "const":
+        read_wsi_from_file = False
+        wsi_value = wsi[1]
+        wsi_field = None
     else:
-        LOGGER.error("Invalid metadata")
-        raise ValueError
+        read_wsi_from_file = True
+        wsi_field = wsi[1]
+        wsi_value = None
+
     # ==========================================================
     # Now extract descriptors and replications from mapping file
     # ==========================================================
+    short_delayed_replications = mappings["inputShortDelayedDescriptorReplicationFactor"]
     delayed_replications = mappings["inputDelayedDescriptorReplicationFactor"]
+    extended_delayed_replications = mappings["inputExtendedDelayedDescriptorReplicationFactor"]
 
     # get number of rows to skip
     skip = mappings["skip"]
 
-    unexpanded_descriptors = get_("unexpandedDescriptors", mappings["header"], data = None, metadata = None)  # noqa
-    table_version = get_("masterTablesVersionNumber", mappings["header"], data = None, metadata = None)  # noqa
+    unexpanded_descriptors = get_("unexpandedDescriptors", mappings["header"], data = None)  # noqa
+    table_version = get_("masterTablesVersionNumber", mappings["header"], data = None)  # noqa
 
     # =========================================
     # Now we need to convert string back to CSV
@@ -647,11 +642,15 @@ def transform(data: str, metadata: str, mappings: dict,
             rows_read += 1
 
     # initialise new BUFRMessage (and reuse later)
-    message = BUFRMessage(unexpanded_descriptors, delayed_replications,
+    message = BUFRMessage(unexpanded_descriptors,
+                          short_delayed_replications,
+                          delayed_replications,
+                          extended_delayed_replications,
                           table_version)
 
     # now iterate over remaining rows
     for row in reader:
+        wsi = None
         result = dict()
         # check and make sure we have ascii data
         for val in row:
@@ -665,10 +664,25 @@ def transform(data: str, metadata: str, mappings: dict,
                         raise ValueError
         # valid data row, make dictionary
         data_dict = dict(zip(col_names, row))
+        # parse and split WSI
+        try:
+            # extract WSI and split into required components
+            if read_wsi_from_file:
+                wsi = data_dict[wsi_field]
+            else:
+                wsi = wsi_value
+            wsi_series, wsi_issuer, wsi_issue_number, wsi_local = wsi.split("-")
+            data_dict["_wsi_series"] = wsi_series
+            data_dict["_wsi_issuer"] = wsi_issuer
+            data_dict["_wsi_issue_number"] = wsi_issue_number
+            data_dict["_wsi_local"] = wsi_local
+        except Exception as e:
+            LOGGER.error("Error parsing WIGOS station identifier")
+            raise ValueError(e)
         # reset BUFR message to clear data
         message.reset()
         # parse to BUFR sequence
-        message.parse(data_dict, metadata, mappings)
+        message.parse(data_dict, mappings)
         # encode to BUFR
         try:
             result["bufr4"] = message.as_bufr()

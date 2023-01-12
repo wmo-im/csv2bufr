@@ -37,7 +37,10 @@ LOGGER.setLevel("DEBUG")
 @pytest.fixture
 def mapping_dict():
     return {
+        "inputShortDelayedDescriptorReplicationFactor": [],
         "inputDelayedDescriptorReplicationFactor": [],
+        "inputExtendedDelayedDescriptorReplicationFactor": [],
+        "wigos_station_identifier": "const:0-1-2-ABCD",
         "skip": 0,
         "header": [
             {"eccodes_key": "edition", "value": "const:4"},  # noqa
@@ -127,18 +130,6 @@ def data_to_encode():
 
 
 @pytest.fixture
-def station_dict():
-    return {
-        "0-1-2-ABCD": {
-            "wsi_series": 0,
-            "wsi_issuer": 1,
-            "wsi_issue_number": 2,
-            "wsi_local": "ABCD"
-        }
-    }
-
-
-@pytest.fixture
 def wsi():
     return "0-1-2-ABCD"
 
@@ -218,7 +209,7 @@ def test_validate_value_nullify():
 
 
 # check that test transform works
-def test_transform(data_dict, station_dict, mapping_dict, wsi):
+def test_transform(data_dict, mapping_dict):
     # create CSV
     output = StringIO()
     writer = csv.DictWriter(output, quoting=csv.QUOTE_NONNUMERIC,
@@ -226,7 +217,7 @@ def test_transform(data_dict, station_dict, mapping_dict, wsi):
     writer.writeheader()
     writer.writerow(data_dict)
     data = output.getvalue()
-    result = transform(data, station_dict, mapping_dict, wsi)
+    result = transform(data, mapping_dict)
     for item in result:
         assert isinstance(item, dict)
         assert "_meta" in item
