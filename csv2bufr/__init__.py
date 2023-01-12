@@ -21,7 +21,6 @@
 
 __version__ = '0.4.dev0'
 
-from copy import deepcopy
 import csv
 from datetime import timezone, datetime
 import hashlib
