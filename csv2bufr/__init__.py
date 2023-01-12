@@ -614,9 +614,9 @@ def transform(data: str, mappings: dict) -> Iterator[dict]:
     # ==========================================================
     # Now extract descriptors and replications from mapping file
     # ==========================================================
-    short_delayed_replications = mappings["inputShortDelayedDescriptorReplicationFactor"]
+    short_delayed_replications = mappings["inputShortDelayedDescriptorReplicationFactor"]  # noqa
     delayed_replications = mappings["inputDelayedDescriptorReplicationFactor"]
-    extended_delayed_replications = mappings["inputExtendedDelayedDescriptorReplicationFactor"]
+    extended_delayed_replications = mappings["inputExtendedDelayedDescriptorReplicationFactor"]   # noqa
 
     # get number of rows to skip
     skip = mappings["skip"]
@@ -671,7 +671,7 @@ def transform(data: str, mappings: dict) -> Iterator[dict]:
                 wsi = data_dict[wsi_field]
             else:
                 wsi = wsi_value
-            wsi_series, wsi_issuer, wsi_issue_number, wsi_local = wsi.split("-")
+            wsi_series, wsi_issuer, wsi_issue_number, wsi_local = wsi.split("-")   # noqa
             data_dict["_wsi_series"] = wsi_series
             data_dict["_wsi_issuer"] = wsi_issuer
             data_dict["_wsi_issue_number"] = wsi_issue_number
