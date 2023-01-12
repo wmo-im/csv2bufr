@@ -17,10 +17,6 @@ Additionally, the command line interface to csv2bufr requires:
 
 * `click <https://pypi.org/project/click/>`_
 
-For convenience and to download station metadata from OSCAR/Surface the pyoscar Python module is recommended.
-
-* `pyoscar <https://pypi.org/project/pyoscar/>`_
-
 All the above packages can be installed by running:
 
 .. code-block:: bash
