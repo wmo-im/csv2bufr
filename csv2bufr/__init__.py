@@ -104,6 +104,7 @@ def parse_value(element: str, data: dict):
         raise ValueError
     return value
 
+
 # function to retrieve data
 def get_(key: str, mapping: dict, data: dict):
     # get position in mapping
