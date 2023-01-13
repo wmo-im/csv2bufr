@@ -223,10 +223,13 @@ def test_transform(data_dict, mapping_dict):
         assert isinstance(item, dict)
         assert "_meta" in item
 
-        item_meta_keys = ['data_category', 'data_date', 'geometry',
-                          'identifier', 'md5', 'originating_centre',
-                          'wigos_station_identifier']
+        item_meta_keys = ['geometry', 'id', 'properties']
+
+        item_meta_properties_keys = ['data_category', 'datetime',
+                                     'md5', 'originating_centre',
+                                     'wigos_station_identifier']
 
         assert sorted(item["_meta"].keys()) == item_meta_keys
+        assert sorted(item["_meta"]["properties"].keys()) == item_meta_properties_keys  # noqa
 
-        assert item["_meta"]["md5"] == "981938dbd97be3e5adc8e7b1c6eb642c"
+        assert item["_meta"]["properties"]["md5"] == "981938dbd97be3e5adc8e7b1c6eb642c"
