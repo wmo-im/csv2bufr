@@ -234,7 +234,7 @@ class BUFRMessage:
         if len(short_delayed_replications) > 0:
             codes_set_array(bufr_msg,
                             "inputShortDelayedDescriptorReplicationFactor",
-                            delayed_replications)
+                            short_delayed_replications)
         if len(delayed_replications) > 0:
             codes_set_array(bufr_msg,
                             "inputDelayedDescriptorReplicationFactor",
@@ -242,7 +242,7 @@ class BUFRMessage:
         if len(extended_delayed_replications) > 0:
             codes_set_array(bufr_msg,
                             "inputExtendedDelayedDescriptorReplicationFactor",
-                            delayed_replications)
+                            extended_delayed_replications)
         # ===============================
         # set master table version number
         # ===============================
@@ -280,6 +280,10 @@ class BUFRMessage:
         # ============================================
         self.descriptors = descriptors
         self.delayed_replications = delayed_replications  # used when encoding
+        self.short_delayed_replications = \
+            short_delayed_replications  # used when encoding
+        self.extended_delayed_replications = \
+            extended_delayed_replications  # used when encoding
         self.bufr = None  # placeholder for BUFR bytes
         # ============================================
 
@@ -287,7 +291,12 @@ class BUFRMessage:
         template = {}
         template["inputDelayedDescriptorReplicationFactor"] = \
             self.delayed_replications
-        template["skip"] = 0
+        template["inputShortDelayedDescriptorReplicationFactor"] = \
+            self.short_delayed_replications
+        template["inputExtendedDelayedDescriptorReplicationFactor"] = \
+            self.extended_delayed_replications
+        template["number_header_rows"] = 0
+        template["column_names_row"] = 0
         template["header"] = []
         # create header section
         for element in HEADERS:
@@ -618,7 +627,8 @@ def transform(data: str, mappings: dict) -> Iterator[dict]:
     extended_delayed_replications = mappings["inputExtendedDelayedDescriptorReplicationFactor"]   # noqa
 
     # get number of rows to skip
-    skip = mappings["skip"]
+    skip = mappings["number_header_rows"]
+    col_names_row = mappings["column_names_row"] - 1
 
     unexpanded_descriptors = get_("unexpandedDescriptors", mappings["header"], data = None)  # noqa
     table_version = get_("masterTablesVersionNumber", mappings["header"], data = None)  # noqa
@@ -630,14 +640,13 @@ def transform(data: str, mappings: dict) -> Iterator[dict]:
     fh = StringIO(data)
     reader = csv.reader(fh, delimiter=',', quoting=csv.QUOTE_NONNUMERIC)
 
-    # read header row to get names
-    col_names = next(reader)
-
-    # skip number of rows indicated
+    # read in header rows
     if skip > 0:
         rows_read = 0
         while rows_read < skip:
-            next(reader)
+            row = next(reader)
+            if rows_read == col_names_row:
+                col_names = row
             rows_read += 1
 
     # initialise new BUFRMessage (and reuse later)
