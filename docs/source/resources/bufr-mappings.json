@@ -3,7 +3,8 @@
     "inputShortDelayedDescriptorReplicationFactor": [],
     "inputExtendedDelayedDescriptorReplicationFactor": [],
     "wigos_station_identifier": "data:wsi",
-    "skip": 0,
+    "number_header_rows": 1,
+    "column_names_row": 1,
     "header": [
         {
             "eccodes_key": "edition",

@@ -15,9 +15,14 @@
             "type": "array",
             "items": {"type": "integer"}
         },
-        "skip": {
+        "number_header_rows": {
             "type": "integer",
-            "description": "Number of header rows to skip between header row and first data row"
+            "description": "Number of header rows in file before the data"
+        },
+        "column_names_row": {
+            "type": "integer",
+            "description": "Which header line the column names is given on"
+
         },
         "wigos_station_identifier": {
             "type": "string",
@@ -39,7 +44,8 @@
         "inputDelayedDescriptorReplicationFactor",
         "inputExtendedDelayedDescriptorReplicationFactor",
         "wigos_station_identifier",
-        "skip","header","data"],
+        "column_names_row","number_header_rows","header","data"],
+
     "$defs":{
         "bufr_element": {
             "type": "object",

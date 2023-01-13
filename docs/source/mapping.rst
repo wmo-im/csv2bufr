@@ -12,7 +12,8 @@ This schema specifies 7 primary properties all of which are mandatory:
 - ``inputDelayedDescriptorReplicationFactor`` - array of integers, values for the delayed descriptor replication factors to use
 - ``inputShortDelayedDescriptorReplicationFactor`` - array of integers, values for the short delayed descriptor replication factors to use
 - ``inputExtendedDelayedDescriptorReplicationFactor`` - array of integers, values for the extended delayed descriptor replication factors to use
-- ``skip`` - integer, the number of rows to skip between the header row and the data
+- ``number_header_rows`` - integer, the number of header rows in the file before the first data, including the row with column names.
+- ``column_names_row`` - integer, the row number that gives the column names.
 - ``wigos_station_identifier`` - either constant WIGOS station identifier (e.g. ``const:0-20000-0-123``) or column from csv data file containing the WSI (e.g. ``data:WSI_column``).
 - ``header`` - array of objects (see below), header section containing metadata
 - ``data`` - array of object (see below) section mapping from the CSV columns to the BUFR elements

@@ -41,7 +41,8 @@ def mapping_dict():
         "inputDelayedDescriptorReplicationFactor": [],
         "inputExtendedDelayedDescriptorReplicationFactor": [],
         "wigos_station_identifier": "const:0-1-2-ABCD",
-        "skip": 0,
+        "number_header_rows": 1,
+        "column_names_row": 1,
         "header": [
             {"eccodes_key": "edition", "value": "const:4"},  # noqa
             {"eccodes_key": "masterTableNumber", "value": "const:0"},  # noqa
