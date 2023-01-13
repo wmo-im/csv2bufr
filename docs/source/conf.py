@@ -22,7 +22,7 @@ import wmo_sphinx_theme
 project = 'csv2bufr'
 author = 'World Meteorological Organization (WMO)'
 license = 'This work is licensed under a Creative Commons Attribution 4.0 International License'  # noqa
-copyright = '2021-2022, ' + author + ' ' + license
+copyright = '2021-2023, ' + author + ' ' + license
 
 # The full version, including alpha/beta/rc tags
 

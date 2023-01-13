@@ -104,7 +104,6 @@ def parse_value(element: str, data: dict):
         raise ValueError
     return value
 
-
 # function to retrieve data
 def get_(key: str, mapping: dict, data: dict):
     # get position in mapping
@@ -235,6 +234,7 @@ class BUFRMessage:
             codes_set_array(bufr_msg,
                             "inputShortDelayedDescriptorReplicationFactor",
                             short_delayed_replications)
+
         if len(delayed_replications) > 0:
             codes_set_array(bufr_msg,
                             "inputDelayedDescriptorReplicationFactor",
@@ -243,6 +243,7 @@ class BUFRMessage:
             codes_set_array(bufr_msg,
                             "inputExtendedDelayedDescriptorReplicationFactor",
                             extended_delayed_replications)
+
         # ===============================
         # set master table version number
         # ===============================
@@ -291,12 +292,14 @@ class BUFRMessage:
         template = {}
         template["inputDelayedDescriptorReplicationFactor"] = \
             self.delayed_replications
+
         template["inputShortDelayedDescriptorReplicationFactor"] = \
             self.short_delayed_replications
         template["inputExtendedDelayedDescriptorReplicationFactor"] = \
             self.extended_delayed_replications
         template["number_header_rows"] = 0
         template["column_names_row"] = 0
+
         template["header"] = []
         # create header section
         for element in HEADERS:
@@ -647,6 +650,7 @@ def transform(data: str, mappings: dict) -> Iterator[dict]:
             row = next(reader)
             if rows_read == col_names_row:
                 col_names = row
+
             rows_read += 1
 
     # initialise new BUFRMessage (and reuse later)
