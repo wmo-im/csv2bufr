@@ -218,7 +218,9 @@ def test_transform(data_dict, mapping_dict):
     writer.writeheader()
     writer.writerow(data_dict)
     data = output.getvalue()
+
     result = transform(data, mapping_dict)
+
     for item in result:
         assert isinstance(item, dict)
         assert "_meta" in item
@@ -231,5 +233,4 @@ def test_transform(data_dict, mapping_dict):
 
         assert sorted(item["_meta"].keys()) == item_meta_keys
         assert sorted(item["_meta"]["properties"].keys()) == item_meta_properties_keys  # noqa
-
-        assert item["_meta"]["properties"]["md5"] == "981938dbd97be3e5adc8e7b1c6eb642c"
+        assert item["_meta"]["properties"]["md5"] == "981938dbd97be3e5adc8e7b1c6eb642c"  # noqa
