@@ -581,15 +581,19 @@ def transform(data: str, mappings: dict) -> Iterator[dict]:
     The dictionary returned by the iterator contains the following keys:
 
         - ["bufr4"] = data encoded into BUFR;
-        - ["_meta"] = metadata on the data.
+        - ["_meta"] = GeoJSON metadata on the data.
 
     The ["_meta"] element includes the following:
 
-        - ["identifier"] = identifier for report (WIGOS_<WSI>_<ISO8601>);
+        - ["id"] = identifier for report (WIGOS_<WSI>_<ISO8601>);
         - ["geometry"] = GeoJSON geometry object;
+        - ["properties"] = key/value pairs of properties/attributes
+
+    The ["_meta"]["properties"] element includes the following:
+
         - ["md5"] = md5 checksum of BUFR encoded data;
         - ["wigos_station_identifier"] = WIGOS identifier;
-        - ["data_date"] = characteristic date of data;
+        - ["datetime"] = characteristic date of data;
         - ["originating_centre"] = Originating centre (see Common code table C11);  # noqa
         - ["data_category"] = Category of data, see BUFR Table A.
 
@@ -710,8 +714,7 @@ def transform(data: str, mappings: dict) -> Iterator[dict]:
 
         # now additional metadata elements
         result["_meta"] = {
-            "identifier": rmk,
-            "md5": message.md5(),
+            "id": rmk,
             "geometry": {
                 "type": "Point",
                 "coordinates": [
@@ -719,10 +722,13 @@ def transform(data: str, mappings: dict) -> Iterator[dict]:
                     message.get_element('#1#latitude')
                 ]
             },
-            "wigos_station_identifier": wsi,
-            "data_date": message.get_datetime(),
-            "originating_centre": message.get_element("bufrHeaderCentre"),
-            "data_category": message.get_element("dataCategory")
+            "properties": {
+                "md5": message.md5(),
+                "wigos_station_identifier": wsi,
+                "datetime": message.get_datetime(),
+                "originating_centre": message.get_element("bufrHeaderCentre"),
+                "data_category": message.get_element("dataCategory")
+            }
         }
 
         time_ = datetime.now(timezone.utc).isoformat()
