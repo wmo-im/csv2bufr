@@ -87,6 +87,7 @@ def parse_value(element: str, data: dict):
     elif data_type[0] == "data":
         column = data_type[1]
         if column not in data:
+            LOGGER.error(f"Column {column} not found in input data")
             raise ValueError
         value = data[column]
     elif data_type[0] == "array":
