@@ -45,7 +45,14 @@ SUCCESS = True
 NUMBERS = (float, int, complex)
 MISSING = ("NA", "NaN", "NAN", "None", "")
 
-NULLIFY_INVALID = True  # TODO: move to env. variable
+if 'CSV2BUFR_NULLIFY_INVALID' in os.environ:
+    NULLIFY_INVALID = os.environ['CSV2BUFR_NULLIFY_INVALID']
+    if NULLIFY_INVALID == "True":
+        NULLIFY_INVALID = True
+    else:
+        NULLIFY_INVALID = False
+else:
+    NULLIFY_INVALID = False
 
 LOGGER = logging.getLogger(__name__)
 
@@ -66,13 +73,31 @@ HEADERS = ["edition", "masterTableNumber", "bufrHeaderCentre",
            "unexpandedDescriptors", "subsetNumber"]
 
 
-# function to find position in array of requested elemennt
+# Errors
+# index_, key not found
+# column not found in input data
+# invalid mapping, data type not recognised
+# invalid mapping file
+# error applying scaling to data
+# validation error, value out of range
+# error getting key for variable
+# conversion error, non-int to int
+# conversion error, non-float to float
+# eccodes, codes_set_array
+# eccodes, codes_set
+# error creating internal BytesIO for BUFR
+# error scaling data
+# error validating data
+
+
+# function to find position in array of requested element
 def index_(key, mapping):
     idx = 0
     for item in mapping:
         if item['eccodes_key'] == key:
             return idx
         idx += 1
+    LOGGER.error(f"key {key} not found in {mapping}")
     raise ValueError
 
 
@@ -87,7 +112,7 @@ def parse_value(element: str, data: dict):
     elif data_type[0] == "data":
         column = data_type[1]
         if column not in data:
-            LOGGER.error(f"Column {column} not found in input data")
+            LOGGER.error(f"Column {column} not found in input data: {data}")
             raise ValueError
         value = data[column]
     elif data_type[0] == "array":
@@ -101,7 +126,7 @@ def parse_value(element: str, data: dict):
         words = value.split(",")
         value = list(map(lambda x: func(x.strip()), words))
     else:
-        LOGGER.error(f"Data type ({data_type[0]}) not recognised in mapping")
+        LOGGER.error(f"Data type ({data_type[0]}) not recognised in mapping: {element}")  # noqa
         raise ValueError
     return value
 
@@ -109,9 +134,16 @@ def parse_value(element: str, data: dict):
 # function to retrieve data
 def get_(key: str, mapping: dict, data: dict):
     # get position in mapping
-    idx = index_(key, mapping)
-    element = mapping[idx]
-    value = parse_value(element['value'], data)
+    try:
+        idx = index_(key, mapping)
+        element = mapping[idx]
+        value = parse_value(element['value'], data)
+    except Exception as e:
+        if NULLIFY_INVALID:
+            LOGGER.warning(f"Error raised get value for {key}, None returned for {key}")  # noqa
+            value = None
+        else:
+            raise e
     return value
 
 
@@ -136,7 +168,7 @@ def validate_mapping(mapping: dict) -> bool:
     try:
         validate(mapping, schema)
     except Exception as e:
-        message = "Invalid mapping dictionary"
+        message = f"Invalid mapping dictionary {mapping}"
         LOGGER.error(message)
         raise e
 
@@ -521,11 +553,16 @@ class BUFRMessage:
                 else:
                     scale = None
                     offset = None
-                    if "scale" in element:
-                        scale = parse_value(element["scale"], data)
-                    if "offset" in element:
-                        offset = parse_value(element["offset"], data)
-                    value = apply_scaling(value, scale, offset)
+                    try:
+                        if "scale" in element:
+                            scale = parse_value(element["scale"], data)
+                        if "offset" in element:
+                            offset = parse_value(element["offset"], data)
+                        value = apply_scaling(value, scale, offset)
+                    except Exception as e:
+                        LOGGER.error(f"Error scaling data: scale={scale}, offet={offset}, value={value}")  # noqa
+                        LOGGER.error(f"data: {data}")
+                        raise e
                 # ==================
                 # now validate value
                 # ==================
@@ -542,8 +579,11 @@ class BUFRMessage:
                 except Exception as e:
                     if NULLIFY_INVALID:
                         LOGGER.warning(f"Error raised whilst validating {element['eccodes_key']}, value set to None")  # noqa
+                        LOGGER.warning(f"data: {data}")
                         value = None
                     else:
+                        LOGGER.error(f"Error raised whilst validating {element['eccodes_key']}, value set to None")  # noqa
+                        LOGGER.error(f"data: {data}")
                         raise e
 
                 # ==================================================
@@ -647,7 +687,11 @@ def transform(data: str, mappings: dict) -> Iterator[dict]:
     # and iterate over rows
     # =========================================
     fh = StringIO(data)
-    reader = csv.reader(fh, delimiter=',', quoting=csv.QUOTE_NONNUMERIC)
+    try:
+        reader = csv.reader(fh, delimiter=',', quoting=csv.QUOTE_NONNUMERIC)
+    except Exception as e:
+        LOGGER.error(f"Error reading csv data\n{data}")
+        raise e
 
     # read in header rows
     if skip > 0:
@@ -660,12 +704,15 @@ def transform(data: str, mappings: dict) -> Iterator[dict]:
             rows_read += 1
 
     # initialise new BUFRMessage (and reuse later)
-    message = BUFRMessage(unexpanded_descriptors,
-                          short_delayed_replications,
-                          delayed_replications,
-                          extended_delayed_replications,
-                          table_version)
-
+    try:
+        message = BUFRMessage(unexpanded_descriptors,
+                              short_delayed_replications,
+                              delayed_replications,
+                              extended_delayed_replications,
+                              table_version)
+    except Exception as e:
+        LOGGER.error("Error initialising BUFR message")
+        raise e
     # now iterate over remaining rows
     for row in reader:
         wsi = None
@@ -696,17 +743,19 @@ def transform(data: str, mappings: dict) -> Iterator[dict]:
             data_dict["_wsi_local"] = wsi_local
         except Exception as e:
             LOGGER.error("Error parsing WIGOS station identifier")
+            LOGGER.error(f"data:{data_dict}")
             raise ValueError(e)
         # reset BUFR message to clear data
         message.reset()
-        # parse to BUFR sequence
-        message.parse(data_dict, mappings)
-        # encode to BUFR
         try:
+            # parse to BUFR sequence
+            message.parse(data_dict, mappings)
+            # encode to BUFR
             result["bufr4"] = message.as_bufr()
         except Exception as e:
-            LOGGER.error("Error encoding BUFR, null returned")
             LOGGER.error(e)
+            LOGGER.error("Error encoding BUFR, BUFR set to None")
+            LOGGER.error(f"data:{data_dict}")
             result["bufr4"] = None
 
         # now identifier based on WSI and observation date as identifier

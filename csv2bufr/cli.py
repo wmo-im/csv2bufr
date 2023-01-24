@@ -121,8 +121,11 @@ def transform(ctx, csv_file, mapping, output_dir, verbosity):  # noqa
     for item in result:
         key = item['_meta']["id"]
         bufr_filename = f"{output_dir}{os.sep}{key}.bufr4"
-        with open(bufr_filename, "wb") as fh:
-            fh.write(item["bufr4"])
+        if item['bufr4'] is not None:
+            with open(bufr_filename, "wb") as fh:
+                fh.write(item["bufr4"])
+        else:
+            click.echo("'None' found in BUFR output, no data written")
 
     click.echo("Done")
 
