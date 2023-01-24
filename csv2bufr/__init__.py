@@ -50,7 +50,7 @@ if 'CSV2BUFR_NULLIFY_INVALID' in os.environ:
     if NULLIFY_INVALID == "True":
         NULLIFY_INVALID = True
     else:
-        NULLIFY_INVALID = False
+        NULLIFY_INVALID = True
 else:
     NULLIFY_INVALID = False
 
