@@ -22,7 +22,7 @@
 FROM ubuntu:focal
 
 ARG BUILD_PACKAGES="build-essential cmake gfortran" \
-    ECCODES_VER=2.27.0
+    ECCODES_VER=2.28.0
 
 ENV DEBIAN_FRONTEND="noninteractive" \
     TZ="Etc/UTC" \
