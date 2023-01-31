@@ -46,7 +46,5 @@ RUN echo "Acquire::Check-Valid-Until \"false\";\nAcquire::Check-Date \"false\";"
 COPY . /tmp/csv2bufr
 
 RUN cd /tmp/csv2bufr && python3 setup.py install
-    
 
 WORKDIR /
-
