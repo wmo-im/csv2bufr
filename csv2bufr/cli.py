@@ -82,7 +82,8 @@ def list_mappings(ctx):
 @click.command('create')
 @click.pass_context
 @click.argument("sequence", nargs=-1, type=int)
-def create_mappings(ctx, sequence):
+@cli_option_verbosity
+def create_mappings(ctx, sequence, verbosity):
     msg = BUFRMessage(sequence)
     msg.create_template()
 
