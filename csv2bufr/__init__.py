@@ -88,6 +88,11 @@ DEFAULTS = {
     'typicalMinute': 'data:minute'
 }
 
+
+# status codes
+FAILED = 0
+PASSED = 1
+
 # Errors
 # index_, key not found
 # column not found in input data
@@ -801,15 +806,20 @@ def transform(data: str, mappings: dict) -> Iterator[dict]:
             message.parse(data_dict, mappings)
             # encode to BUFR
             result["bufr4"] = message.as_bufr()
-            result["_status"] = {"status": "PASS"}
+            result["_status"] = {
+                "code": PASSED,
+                "message": "",
+                "errors": []
+            }
         except Exception as e:
             LOGGER.error(e)
             LOGGER.error("Error encoding BUFR, BUFR set to None")
             LOGGER.error(f"data:{data_dict}")
             result["bufr4"] = None
             result["_status"] = {
-                "status": "ERROR",
-                "message": f"Error encoding, BUFR set to None:\n\t\tError: {e}\n\t\tData: {data_dict}"  # noqa
+                "code": FAILED,
+                "message": "Error encoding row, BUFR set to None",
+                "errors": [f"Error: {e}\n\t\tData: {data_dict}"]
             }
 
         # now identifier based on WSI and observation date as identifier
