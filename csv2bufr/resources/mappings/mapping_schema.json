@@ -43,7 +43,6 @@
         "inputShortDelayedDescriptorReplicationFactor",
         "inputDelayedDescriptorReplicationFactor",
         "inputExtendedDelayedDescriptorReplicationFactor",
-        "wigos_station_identifier",
         "column_names_row","number_header_rows","header","data"],
 
     "$defs":{

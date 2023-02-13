@@ -29,7 +29,7 @@ This can be invoked using the ``csv2bufr mappings create <BUFR descriptors>`` co
 
 .. code-block:: bash
 
-   csv2bufr mappings create 301150 301011 301012 301021 007031 302001 > bufr-mappings.json
+   csv2bufr mappings create 301150 301011 301012 301021 007031 302001 --output bufr-mappings.json
 
 generates the following file:
 

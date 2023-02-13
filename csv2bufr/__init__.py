@@ -72,6 +72,21 @@ HEADERS = ["edition", "masterTableNumber", "bufrHeaderCentre",
            "numberOfSubsets", "observedData", "compressedData",
            "unexpandedDescriptors", "subsetNumber"]
 
+DEFAULTS = {
+    'edition': 'const:4',
+    'masterTableNumber': 'const:0',
+    'dataCategory': 'const:0',
+    'internationalDataSubCategory': 'const:6',
+    'masterTablesVersionNumber': f'const:{BUFR_TABLE_VERSION}',
+    'numberOfSubsets': 'const:1',
+    'observedData': 'const:1',
+    'compressedData': 'const:0',
+    'typicalYear': 'data:year',
+    'typicalMonth': 'data:month',
+    'typicalDay': 'data:day',
+    'typicalHour': 'data:hour',
+    'typicalMinute': 'data:minute'
+}
 
 # Errors
 # index_, key not found
@@ -331,8 +346,8 @@ class BUFRMessage:
             self.short_delayed_replications
         template["inputExtendedDelayedDescriptorReplicationFactor"] = \
             self.extended_delayed_replications
-        template["number_header_rows"] = 0
-        template["column_names_row"] = 0
+        template["number_header_rows"] = 1
+        template["column_names_row"] = 1
 
         template["header"] = []
         # create header section
@@ -341,6 +356,10 @@ class BUFRMessage:
             if element == "unexpandedDescriptors":
                 value = ",".join(str(x) for x in self.descriptors)
                 value = f"array:{value}"
+            elif element in DEFAULTS:
+                value = DEFAULTS.get(element)
+                if value is None:
+                    value = ""
             entry = {
                 "eccodes_key": element,
                 "value": value
@@ -350,6 +369,7 @@ class BUFRMessage:
         template["data"] = []
         for element in self.dict:
             if element not in HEADERS:
+                element_stub = element.split("#")[2]
                 if self.dict[element]['type'] in ('int', 'float'):
                     # calulcate valid min and max
                     scale = self.dict[element]['scale']
@@ -359,7 +379,7 @@ class BUFRMessage:
                     valid_max = round((pow(2, width) - 2 + offset) * pow(10, -1 * scale), scale)  # noqa
                     entry = {
                         "eccodes_key": element,
-                        "value": "",
+                        "value": f"data:{element_stub}",
                         "valid_min": f"const:{valid_min}",
                         "valid_max": f"const:{valid_max}",
                         "scale": "const:0",
@@ -368,11 +388,11 @@ class BUFRMessage:
                 else:
                     entry = {
                         "eccodes_key": element,
-                        "value": "",
+                        "value": f"data:{element_stub}"
                     }
                 template["data"].append(entry)
 
-        print(json.dumps(template, indent=4))
+        return template
 
     def reset(self) -> None:
         """
@@ -655,18 +675,40 @@ def transform(data: str, mappings: dict) -> Iterator[dict]:
     if e is not SUCCESS:
         raise ValueError("Invalid mappings")
 
-    # Get WSI
-    wsi = mappings["wigos_station_identifier"].split(":")
-    if len(wsi) != 2:
-        raise ValueError("Invalid wigos_station_identifier mapping specified")
-    if wsi[0] == "const":
-        read_wsi_from_file = False
-        wsi_value = wsi[1]
-        wsi_field = None
+    # identify how we are getting the WSi
+    wsi = mappings.get("wigos_station_identifier")
+    if wsi is not None:
+        wsi = wsi.split(":")
+        if len(wsi) != 2:
+            raise ValueError(
+                "Invalid wigos_station_identifier mapping specified")
+        if wsi[0] == "const":
+            wsi_kind = 1
+            wsi_value = wsi[1]
+            wsi_field = None
+        else:
+            wsi_kind = 2
+            wsi_field = wsi[1]
+            wsi_value = None
     else:
-        read_wsi_from_file = True
-        wsi_field = wsi[1]
-        wsi_value = None
+        wigosIdentifierSeries = None
+        wigosIssuerOfIdentifier = None
+        wigosIssueNumber = None
+        wigosLocalIdentifierCharacter = None
+        for item in mappings["data"]:
+            if item["eccodes_key"] == "#1#wigosIdentifierSeries":
+                wigosIdentifierSeries = item["value"]
+            if item["eccodes_key"] == "#1#wigosIssuerOfIdentifier":
+                wigosIssuerOfIdentifier = item["value"]
+            if item["eccodes_key"] == "#1#wigosIssueNumber":
+                wigosIssueNumber = item["value"]
+            if item["eccodes_key"] == "#1#wigosLocalIdentifierCharacter":
+                wigosLocalIdentifierCharacter = item["value"]
+        if None in (wigosIdentifierSeries, wigosIssuerOfIdentifier,
+                    wigosIssueNumber, wigosLocalIdentifierCharacter):
+            raise ValueError(
+                "Invalid wigos_station_identifier mapping specified")
+        wsi_kind = 3
 
     # ==========================================================
     # Now extract descriptors and replications from mapping file
@@ -732,10 +774,17 @@ def transform(data: str, mappings: dict) -> Iterator[dict]:
         # parse and split WSI
         try:
             # extract WSI and split into required components
-            if read_wsi_from_file:
+            if wsi_kind == 2:
                 wsi = data_dict[wsi_field]
-            else:
+            elif wsi_kind == 1:
                 wsi = wsi_value
+            elif wsi_kind == 3:
+                wsi = '-'.join(
+                               (parse_value(wigosIdentifierSeries, data_dict),  # noqa
+                                parse_value(wigosIssuerOfIdentifier, data_dict),  # noqa
+                                parse_value(wigosIssueNumber, data_dict),  # noqa
+                                parse_value(wigosLocalIdentifierCharacter, data_dict)))  # noqa
+
             wsi_series, wsi_issuer, wsi_issue_number, wsi_local = wsi.split("-")   # noqa
             data_dict["_wsi_series"] = wsi_series
             data_dict["_wsi_issuer"] = wsi_issuer

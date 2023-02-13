@@ -82,10 +82,16 @@ def list_mappings(ctx):
 @click.command('create')
 @click.pass_context
 @click.argument("sequence", nargs=-1, type=int)
+@click.option("--output", "output", help="File to save the template to")
 @cli_option_verbosity
-def create_mappings(ctx, sequence, verbosity):
+def create_mappings(ctx, sequence, output, verbosity):
     msg = BUFRMessage(sequence)
-    msg.create_template()
+    template = msg.create_template()
+    if output:
+        with open(output, "w") as fh:
+            fh.write(json.dumps(template, indent=4))
+    else:
+        print(json.dumps(template, indent=4))
 
 
 @click.command()
