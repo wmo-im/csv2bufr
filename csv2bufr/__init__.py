@@ -752,11 +752,16 @@ def transform(data: str, mappings: dict) -> Iterator[dict]:
             message.parse(data_dict, mappings)
             # encode to BUFR
             result["bufr4"] = message.as_bufr()
+            result["_status"] = {"status": "PASS"}
         except Exception as e:
             LOGGER.error(e)
             LOGGER.error("Error encoding BUFR, BUFR set to None")
             LOGGER.error(f"data:{data_dict}")
             result["bufr4"] = None
+            result["_status"] = {
+                "status": "ERROR",
+                "message": f"Error encoding, BUFR set to None:\n\t\tError: {e}\n\t\tData: {data_dict}"  # noqa
+            }
 
         # now identifier based on WSI and observation date as identifier
         isodate = message.get_datetime().strftime('%Y%m%dT%H%M%S')
