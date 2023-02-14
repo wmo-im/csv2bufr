@@ -806,7 +806,7 @@ def transform(data: str, mappings: dict) -> Iterator[dict]:
             message.parse(data_dict, mappings)
             # encode to BUFR
             result["bufr4"] = message.as_bufr()
-            result["_status"] = {
+            status = {
                 "code": PASSED,
                 "message": "",
                 "errors": []
@@ -816,7 +816,7 @@ def transform(data: str, mappings: dict) -> Iterator[dict]:
             LOGGER.error("Error encoding BUFR, BUFR set to None")
             LOGGER.error(f"data:{data_dict}")
             result["bufr4"] = None
-            result["_status"] = {
+            status = {
                 "code": FAILED,
                 "message": "Error encoding row, BUFR set to None",
                 "errors": [f"Error: {e}\n\t\tData: {data_dict}"]
@@ -842,7 +842,8 @@ def transform(data: str, mappings: dict) -> Iterator[dict]:
                 "datetime": message.get_datetime(),
                 "originating_centre": message.get_element("bufrHeaderCentre"),
                 "data_category": message.get_element("dataCategory")
-            }
+            },
+            "result": status
         }
 
         time_ = datetime.now(timezone.utc).isoformat()
