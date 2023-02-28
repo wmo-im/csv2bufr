@@ -64,5 +64,5 @@ jobs:
           cache-to: type=gha,mode=max
           platforms: linux/arm64, linux/amd64
           push: true
-          tags: ${{ steps.metadata.output.tags }}
+          tags: wip # ${{ steps.metadata.output.tags }}
           labels: ${{ steps.meta.outputs.labels }}
