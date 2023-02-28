@@ -46,7 +46,7 @@ jobs:
         uses: docker/setup-buildx-action@v1
 
       - name: Docker meta
-        id: meta
+        id: metadata
         uses: docker/metadata-action@v4
         with:
           images: |
@@ -64,5 +64,5 @@ jobs:
           cache-to: type=gha,mode=max
           platforms: linux/arm64, linux/amd64
           push: true
-          tags: wip # ${{ steps.metadata.output.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
+          tags: ${{ steps.metadata.output.tags }}
+          labels: ${{ steps.metadata.outputs.labels }}
