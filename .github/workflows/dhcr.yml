@@ -5,12 +5,14 @@
 
 name: publish images
 
-on:
-  push:
-    branches:
-      - main
-  release:
-    types: [published]
+on: [ push, pull_request ]
+
+#on:
+#  push:
+#    branches:
+#      - main
+#  release:
+#    types: [published]
 
 env:
   DOCKER_ORG: wmoim
