@@ -28,6 +28,18 @@
             "type": "string",
             "description": "Either the WIGOS station identifier for the data or the column in the CSV file containing the identifier"
         },
+        "delimiter": {
+            "type": "string",
+            "description": "The delimiter used to separate fields in the input csv file, must be one of ',', ';'. '|' or [tab]"
+        },
+        "quoting": {
+            "type": "string",
+            "description": "CSV quoting method to use, must be one of QUOTE_NONNUMERIC, QUOTE_ALL, QUOTE_MINIMAL or QUOTE_NONE"
+        },
+        "quotechar": {
+            "type": "string",
+            "description": "quote character to use, e.g. \", ' etc"
+        },
         "header":{
             "type": "array",
             "items": {"$ref": "#/$defs/bufr_element"},

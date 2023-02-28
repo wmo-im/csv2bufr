@@ -31,14 +31,22 @@ from csv2bufr import __version__, BUFRMessage, transform as transform_csv
 THISDIR = os.path.dirname(os.path.realpath(__file__))
 MAPPINGS = f"{THISDIR}{os.sep}resources{os.sep}mappings"
 
+# configure logging
+LOGGER = logging.getLogger()
+LOGGER.setLevel(logging.DEBUG)
+
+handler = logging.StreamHandler(sys.stderr)
+handler.setLevel(logging.ERROR)
+
+LOGGER.addHandler(handler)
+
 
 def cli_option_verbosity(f):
     logging_options = ["ERROR", "WARNING", "INFO", "DEBUG", "NOTSET"]
 
     def callback(ctx, param, value):
         if value is not None:
-            logging.basicConfig(stream=sys.stdout,
-                                level=getattr(logging, value))
+            LOGGER.setLevel(getattr(logging, value))
         return True
 
     return click.option("--verbosity", "-v",

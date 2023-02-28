@@ -24,6 +24,7 @@ __version__ = '0.5.dev0'
 import csv
 from datetime import timezone, datetime
 import hashlib
+import importlib
 from io import StringIO, BytesIO
 import json
 import logging
@@ -92,6 +93,11 @@ DEFAULTS = {
 # status codes
 FAILED = 0
 PASSED = 1
+
+DELIMITER = ","
+QUOTING = "QUOTE_NONNUMERIC"
+QUOTECHAR = '"'
+
 
 # Errors
 # index_, key not found
@@ -561,6 +567,7 @@ class BUFRMessage:
                         to get the value from (fixed, csv or metadata)
         :returns: `None`
         """
+
         # ==================================================
         # Parse the data.
         # ==================================================
@@ -729,15 +736,40 @@ def transform(data: str, mappings: dict) -> Iterator[dict]:
     unexpanded_descriptors = get_("unexpandedDescriptors", mappings["header"], data = None)  # noqa
     table_version = get_("masterTablesVersionNumber", mappings["header"], data = None)  # noqa
 
+    # check if we have delimiter
+    if "delimiter" in mappings:
+        LOGGER.error(mappings["delimiter"])
+        _delimiter = mappings["delimiter"]
+        if _delimiter not in [",", ";", "|", "\t"]:
+            LOGGER.error("Invalid delimiter specified in mapping template, reverting to comma ','")  # noqa
+            _delimiter = ","
+    else:
+        _delimiter = DELIMITER
+
+    # quoting
+    module = importlib.import_module('csv')
+    if 'QUOTING' in mappings:
+        _quoting = mappings['QUOTING']
+    else:
+        _quoting = QUOTING
+
+    _quoting = getattr(module, _quoting)
+
+    if 'QUOTECHAR' in mappings:
+        _quotechar = mappings['QUOTECHAR']
+    else:
+        _quotechar = QUOTECHAR
+
     # =========================================
     # Now we need to convert string back to CSV
     # and iterate over rows
     # =========================================
     fh = StringIO(data)
     try:
-        reader = csv.reader(fh, delimiter=',', quoting=csv.QUOTE_NONNUMERIC)
+        reader = csv.reader(fh, delimiter=_delimiter, quoting=_quoting,
+                            quotechar=_quotechar)
     except Exception as e:
-        LOGGER.error(f"Error reading csv data\n{data}")
+        LOGGER.critical(f"Error reading csv data\n{data}")
         raise e
 
     # read in header rows
@@ -758,7 +790,7 @@ def transform(data: str, mappings: dict) -> Iterator[dict]:
                               extended_delayed_replications,
                               table_version)
     except Exception as e:
-        LOGGER.error("Error initialising BUFR message")
+        LOGGER.critical("Error initialising BUFR message")
         raise e
     # now iterate over remaining rows
     for row in reader:
@@ -769,8 +801,8 @@ def transform(data: str, mappings: dict) -> Iterator[dict]:
             if isinstance(val, str):
                 if not val.isascii():
                     if NULLIFY_INVALID:
-                        LOGGER.warning(f"csv read error, non ASCII data detected ({val}), skipping row")  # noqa
-                        LOGGER.warning(row)
+                        LOGGER.error(f"csv read error, non ASCII data detected ({val}), skipping row")  # noqa
+                        LOGGER.error(row)
                         continue
                     else:
                         raise ValueError
