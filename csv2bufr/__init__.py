@@ -73,6 +73,11 @@ HEADERS = ["edition", "masterTableNumber", "bufrHeaderCentre",
            "numberOfSubsets", "observedData", "compressedData",
            "unexpandedDescriptors", "subsetNumber"]
 
+HEADERS_EXCLUDE = ['typicalTime', 'typicalDate', 'localTablesVersionNumber',
+                   'bufrHeaderSubCentre', 'updateSequenceNumber',
+                   'dataSubCategory', 'localTablesVersionNumber',
+                   'subsetNumber']
+
 DEFAULTS = {
     'edition': 'const:4',
     'masterTableNumber': 'const:0',
@@ -86,7 +91,8 @@ DEFAULTS = {
     'typicalMonth': 'data:month',
     'typicalDay': 'data:day',
     'typicalHour': 'data:hour',
-    'typicalMinute': 'data:minute'
+    'typicalMinute': 'data:minute',
+    'typicalSecond': 'const:0'
 }
 
 
@@ -363,6 +369,8 @@ class BUFRMessage:
         template["header"] = []
         # create header section
         for element in HEADERS:
+            if element in HEADERS_EXCLUDE:
+                continue
             value = ""
             if element == "unexpandedDescriptors":
                 value = ",".join(str(x) for x in self.descriptors)
@@ -387,7 +395,7 @@ class BUFRMessage:
                     offset = self.dict[element]['reference']
                     width = self.dict[element]['width']
                     valid_min = round((0 + offset) * pow(10, -1 * scale), scale)  # noqa
-                    valid_max = round((pow(2, width) - 2 + offset) * pow(10, -1 * scale), scale)  # noqa
+                    valid_max = round((pow(2, width) - 1 + offset) * pow(10, -1 * scale), scale)  # noqa
                     entry = {
                         "eccodes_key": element,
                         "value": f"data:{element_stub}",
