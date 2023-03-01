@@ -18,6 +18,7 @@
 # under the License.
 #
 ###############################################################################
+import logging
 from pygeoapi.process.base import BaseProcessor
 
 from csv2bufr import transform
