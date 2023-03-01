@@ -5,14 +5,12 @@
 
 name: publish images
 
-on: [ push ]
-
-#on:
-#  push:
-#    branches:
-#      - main
-#  release:
-#    types: [published]
+on:
+  push:
+    branches:
+      - main
+  release:
+    types: [published]
 
 env:
   DOCKER_ORG: wmoim
@@ -54,7 +52,6 @@ jobs:
           images: |
             ${{ env.DOCKER_ORG }}/${{ matrix.image }}
           tags: |
-            type=raw,value=wip-{{branch}}-{{sha}}
             type=raw,value=latest,enable={{is_default_branch}}
             type=pep440,pattern={{version}}
 
