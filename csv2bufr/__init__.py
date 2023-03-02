@@ -24,7 +24,6 @@ __version__ = '0.5.dev0'
 import csv
 from datetime import timezone, datetime
 import hashlib
-import importlib
 from io import StringIO, BytesIO
 import json
 import logging
@@ -755,13 +754,12 @@ def transform(data: str, mappings: dict) -> Iterator[dict]:
         _delimiter = DELIMITER
 
     # quoting
-    module = importlib.import_module('csv')
     if 'QUOTING' in mappings:
         _quoting = mappings['QUOTING']
     else:
         _quoting = QUOTING
 
-    _quoting = getattr(module, _quoting)
+    _quoting = getattr(csv, _quoting)
 
     if 'QUOTECHAR' in mappings:
         _quotechar = mappings['QUOTECHAR']
