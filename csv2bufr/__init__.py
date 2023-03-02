@@ -72,6 +72,37 @@ HEADERS = ["edition", "masterTableNumber", "bufrHeaderCentre",
            "numberOfSubsets", "observedData", "compressedData",
            "unexpandedDescriptors", "subsetNumber"]
 
+HEADERS_EXCLUDE = ['typicalTime', 'typicalDate', 'localTablesVersionNumber',
+                   'bufrHeaderSubCentre', 'updateSequenceNumber',
+                   'dataSubCategory', 'localTablesVersionNumber',
+                   'subsetNumber']
+
+DEFAULTS = {
+    'edition': 'const:4',
+    'masterTableNumber': 'const:0',
+    'dataCategory': 'const:0',
+    'internationalDataSubCategory': 'const:6',
+    'masterTablesVersionNumber': f'const:{BUFR_TABLE_VERSION}',
+    'numberOfSubsets': 'const:1',
+    'observedData': 'const:1',
+    'compressedData': 'const:0',
+    'typicalYear': 'data:year',
+    'typicalMonth': 'data:month',
+    'typicalDay': 'data:day',
+    'typicalHour': 'data:hour',
+    'typicalMinute': 'data:minute',
+    'typicalSecond': 'const:0'
+}
+
+
+# status codes
+FAILED = 0
+PASSED = 1
+
+DELIMITER = ","
+QUOTING = "QUOTE_NONNUMERIC"
+QUOTECHAR = '"'
+
 
 # Errors
 # index_, key not found
@@ -331,16 +362,22 @@ class BUFRMessage:
             self.short_delayed_replications
         template["inputExtendedDelayedDescriptorReplicationFactor"] = \
             self.extended_delayed_replications
-        template["number_header_rows"] = 0
-        template["column_names_row"] = 0
+        template["number_header_rows"] = 1
+        template["column_names_row"] = 1
 
         template["header"] = []
         # create header section
         for element in HEADERS:
+            if element in HEADERS_EXCLUDE:
+                continue
             value = ""
             if element == "unexpandedDescriptors":
                 value = ",".join(str(x) for x in self.descriptors)
                 value = f"array:{value}"
+            elif element in DEFAULTS:
+                value = DEFAULTS.get(element)
+                if value is None:
+                    value = ""
             entry = {
                 "eccodes_key": element,
                 "value": value
@@ -350,16 +387,17 @@ class BUFRMessage:
         template["data"] = []
         for element in self.dict:
             if element not in HEADERS:
+                element_stub = element.split("#")[2]
                 if self.dict[element]['type'] in ('int', 'float'):
                     # calulcate valid min and max
                     scale = self.dict[element]['scale']
                     offset = self.dict[element]['reference']
                     width = self.dict[element]['width']
                     valid_min = round((0 + offset) * pow(10, -1 * scale), scale)  # noqa
-                    valid_max = round((pow(2, width) - 2 + offset) * pow(10, -1 * scale), scale)  # noqa
+                    valid_max = round((pow(2, width) - 1 + offset) * pow(10, -1 * scale), scale)  # noqa
                     entry = {
                         "eccodes_key": element,
-                        "value": "",
+                        "value": f"data:{element_stub}",
                         "valid_min": f"const:{valid_min}",
                         "valid_max": f"const:{valid_max}",
                         "scale": "const:0",
@@ -368,11 +406,11 @@ class BUFRMessage:
                 else:
                     entry = {
                         "eccodes_key": element,
-                        "value": "",
+                        "value": f"data:{element_stub}"
                     }
                 template["data"].append(entry)
 
-        print(json.dumps(template, indent=4))
+        return template
 
     def reset(self) -> None:
         """
@@ -536,6 +574,7 @@ class BUFRMessage:
                         to get the value from (fixed, csv or metadata)
         :returns: `None`
         """
+
         # ==================================================
         # Parse the data.
         # ==================================================
@@ -655,18 +694,40 @@ def transform(data: str, mappings: dict) -> Iterator[dict]:
     if e is not SUCCESS:
         raise ValueError("Invalid mappings")
 
-    # Get WSI
-    wsi = mappings["wigos_station_identifier"].split(":")
-    if len(wsi) != 2:
-        raise ValueError("Invalid wigos_station_identifier mapping specified")
-    if wsi[0] == "const":
-        read_wsi_from_file = False
-        wsi_value = wsi[1]
-        wsi_field = None
+    # identify how we are getting the WSi
+    wsi = mappings.get("wigos_station_identifier")
+    if wsi is not None:
+        wsi = wsi.split(":")
+        if len(wsi) != 2:
+            raise ValueError(
+                "Invalid wigos_station_identifier mapping specified")
+        if wsi[0] == "const":
+            wsi_kind = 1
+            wsi_value = wsi[1]
+            wsi_field = None
+        else:
+            wsi_kind = 2
+            wsi_field = wsi[1]
+            wsi_value = None
     else:
-        read_wsi_from_file = True
-        wsi_field = wsi[1]
-        wsi_value = None
+        wigosIdentifierSeries = None
+        wigosIssuerOfIdentifier = None
+        wigosIssueNumber = None
+        wigosLocalIdentifierCharacter = None
+        for item in mappings["data"]:
+            if item["eccodes_key"] == "#1#wigosIdentifierSeries":
+                wigosIdentifierSeries = item["value"]
+            if item["eccodes_key"] == "#1#wigosIssuerOfIdentifier":
+                wigosIssuerOfIdentifier = item["value"]
+            if item["eccodes_key"] == "#1#wigosIssueNumber":
+                wigosIssueNumber = item["value"]
+            if item["eccodes_key"] == "#1#wigosLocalIdentifierCharacter":
+                wigosLocalIdentifierCharacter = item["value"]
+        if None in (wigosIdentifierSeries, wigosIssuerOfIdentifier,
+                    wigosIssueNumber, wigosLocalIdentifierCharacter):
+            raise ValueError(
+                "Invalid wigos_station_identifier mapping specified")
+        wsi_kind = 3
 
     # ==========================================================
     # Now extract descriptors and replications from mapping file
@@ -682,15 +743,39 @@ def transform(data: str, mappings: dict) -> Iterator[dict]:
     unexpanded_descriptors = get_("unexpandedDescriptors", mappings["header"], data = None)  # noqa
     table_version = get_("masterTablesVersionNumber", mappings["header"], data = None)  # noqa
 
+    # check if we have delimiter
+    if "delimiter" in mappings:
+        LOGGER.error(mappings["delimiter"])
+        _delimiter = mappings["delimiter"]
+        if _delimiter not in [",", ";", "|", "\t"]:
+            LOGGER.error("Invalid delimiter specified in mapping template, reverting to comma ','")  # noqa
+            _delimiter = ","
+    else:
+        _delimiter = DELIMITER
+
+    # quoting
+    if 'QUOTING' in mappings:
+        _quoting = mappings['QUOTING']
+    else:
+        _quoting = QUOTING
+
+    _quoting = getattr(csv, _quoting)
+
+    if 'QUOTECHAR' in mappings:
+        _quotechar = mappings['QUOTECHAR']
+    else:
+        _quotechar = QUOTECHAR
+
     # =========================================
     # Now we need to convert string back to CSV
     # and iterate over rows
     # =========================================
     fh = StringIO(data)
     try:
-        reader = csv.reader(fh, delimiter=',', quoting=csv.QUOTE_NONNUMERIC)
+        reader = csv.reader(fh, delimiter=_delimiter, quoting=_quoting,
+                            quotechar=_quotechar)
     except Exception as e:
-        LOGGER.error(f"Error reading csv data\n{data}")
+        LOGGER.critical(f"Error reading csv data\n{data}")
         raise e
 
     # read in header rows
@@ -711,7 +796,7 @@ def transform(data: str, mappings: dict) -> Iterator[dict]:
                               extended_delayed_replications,
                               table_version)
     except Exception as e:
-        LOGGER.error("Error initialising BUFR message")
+        LOGGER.critical("Error initialising BUFR message")
         raise e
     # now iterate over remaining rows
     for row in reader:
@@ -722,8 +807,8 @@ def transform(data: str, mappings: dict) -> Iterator[dict]:
             if isinstance(val, str):
                 if not val.isascii():
                     if NULLIFY_INVALID:
-                        LOGGER.warning(f"csv read error, non ASCII data detected ({val}), skipping row")  # noqa
-                        LOGGER.warning(row)
+                        LOGGER.error(f"csv read error, non ASCII data detected ({val}), skipping row")  # noqa
+                        LOGGER.error(row)
                         continue
                     else:
                         raise ValueError
@@ -732,10 +817,17 @@ def transform(data: str, mappings: dict) -> Iterator[dict]:
         # parse and split WSI
         try:
             # extract WSI and split into required components
-            if read_wsi_from_file:
+            if wsi_kind == 2:
                 wsi = data_dict[wsi_field]
-            else:
+            elif wsi_kind == 1:
                 wsi = wsi_value
+            elif wsi_kind == 3:
+                wsi = '-'.join(
+                               (parse_value(wigosIdentifierSeries, data_dict),  # noqa
+                                parse_value(wigosIssuerOfIdentifier, data_dict),  # noqa
+                                parse_value(wigosIssueNumber, data_dict),  # noqa
+                                parse_value(wigosLocalIdentifierCharacter, data_dict)))  # noqa
+
             wsi_series, wsi_issuer, wsi_issue_number, wsi_local = wsi.split("-")   # noqa
             data_dict["_wsi_series"] = wsi_series
             data_dict["_wsi_issuer"] = wsi_issuer
@@ -752,15 +844,20 @@ def transform(data: str, mappings: dict) -> Iterator[dict]:
             message.parse(data_dict, mappings)
             # encode to BUFR
             result["bufr4"] = message.as_bufr()
-            result["_status"] = {"status": "PASS"}
+            status = {
+                "code": PASSED,
+                "message": "",
+                "errors": []
+            }
         except Exception as e:
             LOGGER.error(e)
             LOGGER.error("Error encoding BUFR, BUFR set to None")
             LOGGER.error(f"data:{data_dict}")
             result["bufr4"] = None
-            result["_status"] = {
-                "status": "ERROR",
-                "message": f"Error encoding, BUFR set to None:\n\t\tError: {e}\n\t\tData: {data_dict}"  # noqa
+            status = {
+                "code": FAILED,
+                "message": "Error encoding row, BUFR set to None",
+                "errors": [f"Error: {e}\n\t\tData: {data_dict}"]
             }
 
         # now identifier based on WSI and observation date as identifier
@@ -783,7 +880,8 @@ def transform(data: str, mappings: dict) -> Iterator[dict]:
                 "datetime": message.get_datetime(),
                 "originating_centre": message.get_element("bufrHeaderCentre"),
                 "data_category": message.get_element("dataCategory")
-            }
+            },
+            "result": status
         }
 
         time_ = datetime.now(timezone.utc).isoformat()

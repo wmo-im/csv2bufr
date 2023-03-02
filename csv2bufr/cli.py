@@ -31,14 +31,22 @@ from csv2bufr import __version__, BUFRMessage, transform as transform_csv
 THISDIR = os.path.dirname(os.path.realpath(__file__))
 MAPPINGS = f"{THISDIR}{os.sep}resources{os.sep}mappings"
 
+# configure logging
+LOGGER = logging.getLogger()
+LOGGER.setLevel(logging.DEBUG)
+
+handler = logging.StreamHandler(sys.stderr)
+handler.setLevel(logging.ERROR)
+
+LOGGER.addHandler(handler)
+
 
 def cli_option_verbosity(f):
     logging_options = ["ERROR", "WARNING", "INFO", "DEBUG", "NOTSET"]
 
     def callback(ctx, param, value):
         if value is not None:
-            logging.basicConfig(stream=sys.stdout,
-                                level=getattr(logging, value))
+            LOGGER.setLevel(getattr(logging, value))
         return True
 
     return click.option("--verbosity", "-v",
@@ -82,10 +90,16 @@ def list_mappings(ctx):
 @click.command('create')
 @click.pass_context
 @click.argument("sequence", nargs=-1, type=int)
+@click.option("--output", "output", help="File to save the template to")
 @cli_option_verbosity
-def create_mappings(ctx, sequence, verbosity):
+def create_mappings(ctx, sequence, output, verbosity):
     msg = BUFRMessage(sequence)
-    msg.create_template()
+    template = msg.create_template()
+    if output:
+        with open(output, "w") as fh:
+            fh.write(json.dumps(template, indent=4))
+    else:
+        print(json.dumps(template, indent=4))
 
 
 @click.command()
