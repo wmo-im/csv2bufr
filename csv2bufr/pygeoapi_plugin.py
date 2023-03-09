@@ -26,8 +26,8 @@ from csv2bufr import transform
 LOGGER = logging.getLogger(__name__)
 
 PROCESS_METADATA = {
-                    "version": "0.0.1",
-                    "id": "csv2bufr",
+                    "version": "0.1.0",
+                    "id": "csv2bufr-transform",
                     "title": {"en": "csv2bufr"},
                     "description": {"en": "Process to convert CSV data to BUFR"},  # noqa
                     "keywords": [],
