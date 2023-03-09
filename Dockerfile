@@ -32,7 +32,8 @@ WORKDIR /tmp
 COPY . /tmp/csv2bufr
 
 RUN cd /tmp/csv2bufr && python3 setup.py install
-    
 
-WORKDIR /
+RUN adduser wis2user
+USER wis2user
+WORKDIR /home/wis2user
 
