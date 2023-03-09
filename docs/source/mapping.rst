@@ -108,8 +108,9 @@ and takes the form ``"value": "<keyword>:<column|value>"`` where ``<keyword>`` i
 The ``valid_min`` and ``valid_max`` are optional and can be used to perform a basic quality control of numeric fields.
 The values to use are specified in the same way as for the ``value`` element, with the values coming from either a
 constant value or from the data file.
-If these fields are specified the csv2bufr module checks the value indicated extracted from the source to the indicated
-valid minimum and maximum values. If outside of the range the value is set to missing.
+If these fields are specified the csv2bufr module checks the value extracted from the source to the indicated
+valid minimum and maximum values. If outside of the range the value is set to missing. This check is applied before any
+scaling of the data.
 
 The ``scale`` and ``offset`` fields are conditionally optional, either both can be omitted or both can included.
 Including only one will result in a failed validation of the mapping file. These allow simple unit conversions to be performed,
