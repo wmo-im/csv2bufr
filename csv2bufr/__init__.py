@@ -584,27 +584,9 @@ class BUFRMessage:
                 eccodes_key = element["eccodes_key"]
                 # get value
                 value = get_(eccodes_key, mappings[section], data)
-                # ===============================
-                # apply specified scaling to data
-                # ===============================
-                if value in MISSING:
-                    value = None
-                else:
-                    scale = None
-                    offset = None
-                    try:
-                        if "scale" in element:
-                            scale = parse_value(element["scale"], data)
-                        if "offset" in element:
-                            offset = parse_value(element["offset"], data)
-                        value = apply_scaling(value, scale, offset)
-                    except Exception as e:
-                        LOGGER.error(f"Error scaling data: scale={scale}, offet={offset}, value={value}")  # noqa
-                        LOGGER.error(f"data: {data}")
-                        raise e
-                # ==================
-                # now validate value
-                # ==================
+                # ==============
+                # validate value
+                # ==============
                 valid_min = None
                 valid_max = None
                 if "valid_min" in element:
@@ -622,6 +604,25 @@ class BUFRMessage:
                         value = None
                     else:
                         LOGGER.error(f"Error raised whilst validating {element['eccodes_key']}, value set to None")  # noqa
+                        LOGGER.error(f"data: {data}")
+                        raise e
+
+                # ===================================
+                # now apply specified scaling to data
+                # ===================================
+                if value in MISSING:
+                    value = None
+                else:
+                    scale = None
+                    offset = None
+                    try:
+                        if "scale" in element:
+                            scale = parse_value(element["scale"], data)
+                        if "offset" in element:
+                            offset = parse_value(element["offset"], data)
+                        value = apply_scaling(value, scale, offset)
+                    except Exception as e:
+                        LOGGER.error(f"Error scaling data: scale={scale}, offet={offset}, value={value}")  # noqa
                         LOGGER.error(f"data: {data}")
                         raise e
 
