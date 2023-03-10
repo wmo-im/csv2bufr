@@ -66,15 +66,15 @@ PROCESS_METADATA = {
     },
     "example": {
         "inputs": {
-            "data":"wsi,year,month,day,hour,minute,latitude,longitude,slp,mslp,ppp,a,brmh\\\n0-20000-0-06700,2022,2,10,6,0,46.2475,6.12774,978.3,1029.9,-0.4,8,412.3",  # noqa
-            "mapping": '''{
+            "data":r"wsi,year,month,day,hour,minute,latitude,longitude,slp,mslp,ppp,a,brmh\n0-20000-0-06700,2022,2,10,6,0,46.2475,6.12774,978.3,1029.9,-0.4,8,412.3",  # noqa
+            "mapping": {
                 "inputDelayedDescriptorReplicationFactor": [],
                 "inputShortDelayedDescriptorReplicationFactor": [],
                 "inputExtendedDelayedDescriptorReplicationFactor": [],
                 "wigos_station_identifier": "data:wsi",
                 "number_header_rows": 1,
                 "column_names_row": 1,
-                "QUOTING": "QUOTE_NONE"
+                "QUOTING": "QUOTE_NONE",
                 "header": [
                     {"eccodes_key": "edition", "value": "const:4"},
                     {"eccodes_key": "masterTableNumber", "value": "const:0"},
@@ -110,7 +110,7 @@ PROCESS_METADATA = {
                     {"eccodes_key": "#1#3HourPressureChange", "value": "data:ppp", "valid_min": "const:-5000", "valid_max": "const:5220", "scale": "const:2", "offset": "const:0"},
                     {"eccodes_key": "#1#characteristicOfPressureTendency", "value": "data:a", "valid_min": "const:0", "valid_max": "const:14"}
                 ]
-            }'''  # noqa
+            }
         },
         "output": {"messages": []}
     },
