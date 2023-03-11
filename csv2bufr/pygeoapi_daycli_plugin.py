@@ -25,7 +25,7 @@ from csv2bufr import BUFRMessage
 
 LOGGER = logging.getLogger(__name__)
 
-class _template:
+class _template():
     def __init__(self):
         self.template = {
             "inputShortDelayedDescriptorReplicationFactor": [],
@@ -117,6 +117,16 @@ class _template:
         idx = self.get_idx(self.template[section], key)
         self.template[section][idx]['value'] = value
 
+    def get_idx(self,elements, key):
+        idx = 0
+        position = None
+        for element in elements:
+            if key == element['eccodes_key']:
+                position = idx
+                break
+            idx += 1
+        return position
+
 PROCESS_METADATA = {
     "version": "0.1.0",
     "id": "daycli-encoder",
@@ -153,14 +163,14 @@ def element(elements, key, value):
 def update_template(template, metadata):
     wsi = f"const:{metadata['station_identification']['wigos_identifier']}"
     wsi_series, wsi_issuer, wsi_issue, wsi_local = wsi.split("-")
-    template.set_element('header', 'bufrHeaderCentre', f"const:{metadata['data_identification','originating_centre']}")
-    template.set_element('header', 'bufrHeaderSubCentre', f"const:{metadata['data_identification','originating_subcentre']}")
+    template.set_element('header', 'bufrHeaderCentre', f"const:{metadata['data_identification']['originating_centre']}")
+    template.set_element('header', 'bufrHeaderSubCentre', f"const:{metadata['data_identification']['originating_subcentre']}")
     template.set_element('data','wsi_series', f"const:{wsi_series}")
     template.set_element('data','wsi_issuer', f"const:{wsi_issuer}")
     template.set_element('data','wsi_issue', f"const:{wsi_issue}")
     template.set_element('data','wsi_local', f"const:{wsi_local}")
-    template.set_element('data','#1#latitude', f"const:{metadata['station_location','latitude']}")
-    template.set_element('data','#1#longitude', f"const:{metadata['station_location','longitude']}")
+    template.set_element('data','#1#latitude', f"const:{metadata['station_location']['latitude']}")
+    template.set_element('data','#1#longitude', f"const:{metadata['station_location']['longitude']}")
     template.set_element('data','#1#heightOfStationGroundAboveMeanSeaLevel', f"const:{metadata['station_location']['station_height_above_sea_level']}")
     template.set_element('data','#1#methodUsedToCalculateTheAverageDailyTemperature', f"const:{metadata['observing_practices']['method_of_calculating_mean_temperature']}")
     template.set_element('data','#1#timePeriod', f"const:{metadata['observing_practices']['total_precipitation_day_offset']}")
