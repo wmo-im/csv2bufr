@@ -233,7 +233,7 @@ class daycliProcessor(BaseProcessor):
 
         # update mapping template
         template = _template()
-        template = update_template(template, data['metadata'])
+        template = update_template(template, data['properties']['metadata'])
 
 
         bufr = []
