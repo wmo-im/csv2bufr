@@ -248,7 +248,7 @@ class daycliProcessor(BaseProcessor):
                 # create new BUFR msg
                 message = BUFRMessage([307075],[],[],[],38)
                 # parse data
-                message.parse(day, template)
+                message.parse(day, template.template)
                 # encode
                 result = message.as_bufr()
             except Exception as e:
