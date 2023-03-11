@@ -139,7 +139,7 @@ def parse_value(element: str, data: dict):
         if "." in value:
             value = float(value)
         elif "'" in value:
-            value = f"{value}"
+            value = f"{value}".replace("'","")
         else:
             value = int(value)
     elif data_type[0] == "data":
