@@ -33,7 +33,6 @@ class _template():
             "inputExtendedDelayedDescriptorReplicationFactor": [],
             "number_header_rows": 1,
             "column_names_row": 1,
-            "wigos_station_identifier": "data:wigos_station_identifier",
             "header": [
                 {"eccodes_key": "edition", "value": "const:4"},
                 {"eccodes_key": "masterTableNumber", "value": "const:0"},
@@ -153,27 +152,16 @@ PROCESS_METADATA = {
     }
 }
 
-def element(elements, key, value):
-    idx = 0
-    position = None
-    for element in elements:
-        if key == element['eccodes_key']:
-            position = idx
-            break
-        idx += 1
-    return position
-
-# need to fix this to index elements, e.g. bufrHeaderCentre by index
-
 def update_template(template, metadata):
-    wsi = f"const:{metadata['station_identification']['wigos_identifier']}"
+    wsi = metadata['station_identification']['wigos_identifier']
     wsi_series, wsi_issuer, wsi_issue, wsi_local = wsi.split("-")
+    wsi_local = f"'{wsi_local}'"
     template.set_element('header', 'bufrHeaderCentre', f"const:{metadata['data_identification']['originating_centre']}")
     template.set_element('header', 'bufrHeaderSubCentre', f"const:{metadata['data_identification']['originating_subcentre']}")
-    template.set_element('data','#1#wsi_series', f"const:{wsi_series}")
-    template.set_element('data','#1#wsi_issuer', f"const:{wsi_issuer}")
-    template.set_element('data','#1#wsi_issue', f"const:{wsi_issue}")
-    template.set_element('data','#1#wsi_local', f"const:{wsi_local}")
+    template.set_element('data','#1#wigosIdentifierSeries', f"const:{wsi_series}")
+    template.set_element('data','#1#wigosIssuerOfIdentifier', f"const:{wsi_issuer}")
+    template.set_element('data','#1#wigosIssueNumber', f"const:{wsi_issue}")
+    template.set_element('data','#1#wigosLocalIdentifierCharacter', f"const:{wsi_local}")
     template.set_element('data','#1#latitude', f"const:{metadata['station_location']['latitude']}")
     template.set_element('data','#1#longitude', f"const:{metadata['station_location']['longitude']}")
     template.set_element('data','#1#heightOfStationGroundAboveMeanSeaLevel', f"const:{metadata['station_location']['station_height_above_sea_level']}")

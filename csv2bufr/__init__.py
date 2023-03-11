@@ -138,6 +138,8 @@ def parse_value(element: str, data: dict):
         value = data_type[1]
         if "." in value:
             value = float(value)
+        elif "'" in value:
+            value = f"{value}"
         else:
             value = int(value)
     elif data_type[0] == "data":
@@ -171,6 +173,7 @@ def get_(key: str, mapping: dict, data: dict):
         value = parse_value(element['value'], data)
     except Exception as e:
         if NULLIFY_INVALID:
+            print(e)
             LOGGER.warning(f"Error raised get value for {key}, None returned for {key}")  # noqa
             value = None
         else:
