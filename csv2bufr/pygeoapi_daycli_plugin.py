@@ -115,7 +115,12 @@ class _template():
 
     def set_element(self, section, key, value):
         idx = self.get_idx(self.template[section], key)
-        self.template[section][idx]['value'] = value
+        if idx is None:
+            self.template[section].append({
+                "eccodes_key": key, "value": value
+            })
+        else:
+            self.template[section][idx]['value'] = value
 
     def get_idx(self,elements, key):
         idx = 0
