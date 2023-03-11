@@ -83,6 +83,7 @@ CSV2BUFR_TEMPLATE = {
             {"eccodes_key": "#1#totalSnowDepth", "value": "data:total_snow_depth"},
             {"eccodes_key": "#1#totalSnowDepth->associatedField", "value": "data:total_snow_depth_flag"},
             {"eccodes_key": "#1#totalSnowDepth->associatedField->associatedFieldSignificance", "value": "const:5"},
+            {"eccodes_key": "#1#heightOfSensorAboveLocalGroundOrDeckOfMarinePlatform", "value": "const:0"},
             {"eccodes_key": "#4#timePeriod", "value": "const:0"},
             {"eccodes_key": "#4#hour", "value": "const:0"},
             {"eccodes_key": "#4#minute", "value": "const:0"},
@@ -159,6 +160,7 @@ def update_template(template, metadata):
     template['data']['#3#hour'] = f"const:{hour}"
     template['data']['#3#minute'] = f"const:{minute}"
     template['data']['#3#second'] = f"const:{second}"
+    template['data']['#1#heightOfSensorAboveLocalGroundOrDeckOfMarinePlatform'] = f"const:{metadata['station_location']['thermometer_height_above_local_ground']}"
     template['data']['#4#timePeriod'] = f"const:{metadata['observing_practices']['maximum_temperature_day_offset']}"
     hour, minute, second = metadata['observing_practices']['maximum_temperature_start_time'].split(":")
     template['data']['#4#houre'] = f"const:{hour}"
@@ -174,6 +176,7 @@ def update_template(template, metadata):
     template['data']['#6#hour'] = f"const:{hour}"
     template['data']['#6#minute'] = f"const:{minute}"
     template['data']['#6#second'] = f"const:{second}"
+    return template
 
 
 class daycliProcessor(BaseProcessor):
@@ -208,6 +211,9 @@ class daycliProcessor(BaseProcessor):
         # todo
 
         # update mapping template
+        template = update_template(CSV2BUFR_TEMPLATE, data['metadata'])
+
+
         bufr = []
         errors = []
         idx = 0
@@ -220,7 +226,7 @@ class daycliProcessor(BaseProcessor):
                 # create new BUFR msg
                 message = BUFRMessage([307075],[],[],[],38)
                 # parse data
-                message.parse(day, CSV2BUFR_TEMPLATE)
+                message.parse(day, template)
                 # encode
                 result = message.as_bufr()
             except Exception as e:
