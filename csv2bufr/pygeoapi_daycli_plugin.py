@@ -110,9 +110,9 @@ CSV2BUFR_TEMPLATE = {
 
 PROCESS_METADATA = {
     "version": "0.1.0",
-    "id": "csv2bufr-transform",
-    "title": {"en": "csv2bufr"},
-    "description": {"en": "Process to convert CSV data to BUFR"},  # noqa
+    "id": "daycli-encoder",
+    "title": {"en": "daycli-encoder"},
+    "description": {"en": "Process to convert DAYCLI data to BUFR"},  # noqa
     "keywords": [],
     "links": [{
         "type": "text/html",
