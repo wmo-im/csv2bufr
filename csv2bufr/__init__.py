@@ -156,7 +156,7 @@ def parse_value(element: str, data: dict):
         # split into words, strip white space and convert
         words = value.split(",")
         value = list(map(lambda x: func(x.strip()), words))
-    elif (data_type is None) or (data_type == ""):
+    elif data_type in ["", None]:
         return None
     else:
         LOGGER.error(f"Data type ({data_type[0]}) not recognised in mapping: {element}")  # noqa
