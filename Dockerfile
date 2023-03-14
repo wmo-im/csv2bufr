@@ -28,7 +28,8 @@ ENV DEBIAN_FRONTEND="noninteractive" \
     PATH="${PATH}:/opt/eccodes/bin"
 
 RUN apt-get update -y \
-    && apt-get install -y vim emacs nedit nano git
+    && apt-get install -y vim emacs nedit nano
+
 
 WORKDIR /tmp
 
