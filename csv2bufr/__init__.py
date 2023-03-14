@@ -366,7 +366,9 @@ class BUFRMessage:
             self.extended_delayed_replications
         template["number_header_rows"] = 1
         template["column_names_row"] = 1
-
+        template["delimiter"] = ","
+        template["quoting"] = "QUOTE_NONE"
+        template["quotechar"] = ""
         template["header"] = []
         # create header section
         for element in HEADERS:
@@ -748,7 +750,6 @@ def transform(data: str, mappings: dict) -> Iterator[dict]:
 
     # check if we have delimiter
     if "delimiter" in mappings:
-        LOGGER.error(mappings["delimiter"])
         _delimiter = mappings["delimiter"]
         if _delimiter not in [",", ";", "|", "\t"]:
             LOGGER.error("Invalid delimiter specified in mapping template, reverting to comma ','")  # noqa
@@ -759,6 +760,8 @@ def transform(data: str, mappings: dict) -> Iterator[dict]:
     # quoting
     if 'QUOTING' in mappings:
         _quoting = mappings['QUOTING']
+    elif 'quoting' in mappings:
+        _quoting = mappings['quoting']
     else:
         _quoting = QUOTING
 
@@ -766,6 +769,8 @@ def transform(data: str, mappings: dict) -> Iterator[dict]:
 
     if 'QUOTECHAR' in mappings:
         _quotechar = mappings['QUOTECHAR']
+    if 'quotechar' in mappings:
+        _quotechar = mappings['quotechar']
     else:
         _quotechar = QUOTECHAR
 

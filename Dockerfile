@@ -27,6 +27,9 @@ ENV DEBIAN_FRONTEND="noninteractive" \
     ECCODES_DIR=/opt/eccodes \
     PATH="${PATH}:/opt/eccodes/bin"
 
+RUN apt-get update -y \
+    && apt-get install -y vim emacs nedit nano git
+
 WORKDIR /tmp
 
 COPY . /tmp/csv2bufr
