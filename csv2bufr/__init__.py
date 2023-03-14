@@ -156,6 +156,8 @@ def parse_value(element: str, data: dict):
         # split into words, strip white space and convert
         words = value.split(",")
         value = list(map(lambda x: func(x.strip()), words))
+    elif (data_type is None) or (data_type == ""):
+        return None
     else:
         LOGGER.error(f"Data type ({data_type[0]}) not recognised in mapping: {element}")  # noqa
         raise ValueError
@@ -823,11 +825,10 @@ def transform(data: str, mappings: dict) -> Iterator[dict]:
             elif wsi_kind == 1:
                 wsi = wsi_value
             elif wsi_kind == 3:
-                wsi = '-'.join(
-                               (parse_value(wigosIdentifierSeries, data_dict),  # noqa
-                                parse_value(wigosIssuerOfIdentifier, data_dict),  # noqa
-                                parse_value(wigosIssueNumber, data_dict),  # noqa
-                                parse_value(wigosLocalIdentifierCharacter, data_dict)))  # noqa
+                wsi = f"{parse_value(wigosIdentifierSeries, data_dict)}"
+                wsi += f"-{parse_value(wigosIssuerOfIdentifier, data_dict)}"
+                wsi += f"-{parse_value(wigosIssueNumber, data_dict)}"
+                wsi += f"-{parse_value(wigosLocalIdentifierCharacter, data_dict)}"  # noqa
 
             wsi_series, wsi_issuer, wsi_issue_number, wsi_local = wsi.split("-")   # noqa
             data_dict["_wsi_series"] = wsi_series
