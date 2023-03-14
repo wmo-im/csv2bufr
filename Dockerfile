@@ -30,6 +30,7 @@ ENV DEBIAN_FRONTEND="noninteractive" \
 RUN apt-get update -y \
     && apt-get install -y vim emacs nedit nano
 
+
 WORKDIR /tmp
 
 COPY . /tmp/csv2bufr
