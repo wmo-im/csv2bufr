@@ -37,7 +37,11 @@ COPY . /tmp/csv2bufr
 
 RUN cd /tmp/csv2bufr && python3 setup.py install
 
-RUN adduser wis2user
+RUN groupadd -g 1001 wis2users
+RUN useradd -u 1001 wis2user
+RUN usermod -aG wis2users wis2user
+
+
 USER wis2user
 WORKDIR /home/wis2user
 
