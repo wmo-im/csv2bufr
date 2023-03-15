@@ -22,7 +22,6 @@
 import json
 import logging
 import os.path
-import sys
 
 import click
 
@@ -34,11 +33,6 @@ MAPPINGS = f"{THISDIR}{os.sep}resources{os.sep}mappings"
 # configure logging
 LOGGER = logging.getLogger()
 LOGGER.setLevel(logging.DEBUG)
-
-handler = logging.StreamHandler(sys.stderr)
-handler.setLevel(logging.ERROR)
-
-LOGGER.addHandler(handler)
 
 
 def cli_option_verbosity(f):
@@ -112,7 +106,7 @@ def create_mappings(ctx, sequence, output, verbosity):
 @cli_option_verbosity
 def transform(ctx, csv_file, mapping, output_dir, verbosity):  # noqa
     result = None
-    click.echo(f"Transforming {csv_file.name} to BUFR")
+    click.echo(f"\n\tTransforming {csv_file.name} to BUFR ...")
 
     # identify mapping to use
     if not os.path.isfile(mapping):
@@ -132,17 +126,23 @@ def transform(ctx, csv_file, mapping, output_dir, verbosity):  # noqa
     except Exception as err:
         raise click.ClickException(err)
 
-    click.echo("Writing data to file")
+    click.echo("\n\t... Processing subsets:")
     for item in result:
         key = item['_meta']["id"]
         bufr_filename = f"{output_dir}{os.sep}{key}.bufr4"
         if item['bufr4'] is not None:
-            with open(bufr_filename, "wb") as fh:
-                fh.write(item["bufr4"])
-        else:
-            click.echo("'None' found in BUFR output, no data written")
+            try:
+                with open(bufr_filename, "wb") as fh:
+                    fh.write(item["bufr4"])
+                    nbytes = fh.tell()
 
-    click.echo("Done")
+                click.echo(f"\t..... {nbytes} bytes written to {bufr_filename}")  # noqa
+            except Exception as err:
+                raise click.ClickException(err)
+        else:
+            click.echo("'\tNone' found in BUFR output, no data written")
+
+    click.echo("\n\tEnd of processing, exiting.\n")
 
 
 data.add_command(transform)
