@@ -256,9 +256,7 @@ class daycliProcessor(BaseProcessor):
                 # parse data
                 message.parse(day, template.template)
                 # encode
-                LOGGER.error(message.as_bufr())
-                result = base64.b64encode(message.as_bufr()).decode("ascii")  # noqa convert base64 in ascii for JSON serialisation
-                # need to check why b64 above is needed when we haven't needed to do this before!
+                result = base64.b64encode(message.as_bufr()).decode("utf-8")  # noqa make utf-8 for json serialisation
             except Exception as e:
                 LOGGER.error(e)
                 LOGGER.error("Error creating BUFRMessage")
