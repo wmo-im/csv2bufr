@@ -18,6 +18,7 @@
 # under the License.
 #
 ###############################################################################
+import base64
 import logging
 from pygeoapi.process.base import BaseProcessor
 
@@ -250,7 +251,8 @@ class daycliProcessor(BaseProcessor):
                 # parse data
                 message.parse(day, template.template)
                 # encode
-                result = message.as_bufr()
+                result = base64.b64encode(message.as_bufr()).decode("ascii")  # noqa convert base64 in ascii for JSON serialisation
+                # need to check why b64 above is needed when we haven't needed to do this before!
             except Exception as e:
                 LOGGER.error(e)
                 LOGGER.error("Error creating BUFRMessage")
