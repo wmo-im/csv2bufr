@@ -20,6 +20,8 @@
 ###############################################################################
 import base64
 import logging
+import time
+
 from pygeoapi.process.base import BaseProcessor
 
 from csv2bufr import BUFRMessage
@@ -240,6 +242,9 @@ class daycliProcessor(BaseProcessor):
         bufr = []
         errors = []
         idx = 0
+        if 'sleep' in data:
+            time.sleep(data['sleep'])
+
         for day in data['properties']['data']:
             # parse date and add to day
             day['year'], day['month'], day['day'] = day['nominal_reporting_day'].split('-')  # noqa
@@ -251,6 +256,7 @@ class daycliProcessor(BaseProcessor):
                 # parse data
                 message.parse(day, template.template)
                 # encode
+                LOGGER.error(message.as_bufr())
                 result = base64.b64encode(message.as_bufr()).decode("ascii")  # noqa convert base64 in ascii for JSON serialisation
                 # need to check why b64 above is needed when we haven't needed to do this before!
             except Exception as e:
