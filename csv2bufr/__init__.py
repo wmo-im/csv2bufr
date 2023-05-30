@@ -261,7 +261,7 @@ def validate_value(key: str, value: Union[NUMBERS],
         return value
 
     if None not in [valid_min, valid_max]:
-        if value > valid_max or value < valid_min:
+        if (value > valid_max) or (value < valid_min):
             e = ValueError(f"{key}: Value ({value}) out of valid range ({valid_min} - {valid_max}).")  # noqa
             if nullify_on_fail:
                 LOGGER.warning(f"{e}; Element set to missing")
@@ -393,7 +393,7 @@ class BUFRMessage:
             if element not in HEADERS:
                 element_stub = element.split("#")[2]
                 if self.dict[element]['type'] in ('int', 'float'):
-                    # calulcate valid min and max
+                    # calculate valid min and max
                     scale = self.dict[element]['scale']
                     offset = self.dict[element]['reference']
                     width = self.dict[element]['width']
@@ -445,7 +445,7 @@ class BUFRMessage:
                     value = int(round(value))
                 else:
                     try:
-                        value = int(value)
+                        value = int(float(value))
                     except Exception as e:
                         if NULLIFY_INVALID:
                             value = None
@@ -588,6 +588,11 @@ class BUFRMessage:
                 eccodes_key = element["eccodes_key"]
                 # get value
                 value = get_(eccodes_key, mappings[section], data)
+                # convert to expected data type
+                expected_type = self.dict[eccodes_key]["type"]
+                if (expected_type in ("float", "int")) and \
+                        (eccodes_key not in HEADERS):
+                    value = float(value)
                 # ==============
                 # validate value
                 # ==============
