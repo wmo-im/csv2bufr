@@ -101,8 +101,8 @@ def create_mappings(ctx, sequence, output, verbosity):
 @click.argument("csv_file", type=click.File(errors="ignore"))
 @click.option("--bufr-template", "mapping", required=True,
               help="Name of file or mapping template to use to map from CSV to BUFR")  # noqa
-@click.option("--output-dir", "output_dir", required=True,
-              help="Name of output file")
+@click.option("--output-dir", "output_dir", required=False,
+              help="Name of output file", default='.')
 @cli_option_verbosity
 def transform(ctx, csv_file, mapping, output_dir, verbosity):  # noqa
     result = None
