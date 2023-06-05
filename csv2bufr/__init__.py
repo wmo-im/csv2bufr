@@ -236,8 +236,8 @@ def apply_scaling(value: Union[NUMBERS], scale: Union[NUMBERS],
 
 
 def validate_value(key: str, value: Union[NUMBERS],
-                   valid_min: Union[NUMBERS],
-                   valid_max: Union[NUMBERS],
+                   valid_min: Union[NUMBERS] = float('-inf'),
+                   valid_max: Union[NUMBERS] = float('+inf'),
                    nullify_on_fail: bool = False) -> Union[NUMBERS]:
     """
     Check numeric values lie within specified range (if specified)
@@ -267,7 +267,7 @@ def validate_value(key: str, value: Union[NUMBERS],
                 LOGGER.warning(f"{e}; Element set to missing")
                 return None
             else:
-                LOGGER.error(str(e))
+                # LOGGER.error(str(e))
                 raise e
 
     return value
@@ -612,8 +612,8 @@ class BUFRMessage:
                         LOGGER.warning(f"data: {data}")
                         value = None
                     else:
-                        LOGGER.error(f"Error raised whilst validating {element['eccodes_key']}, value set to None")  # noqa
-                        LOGGER.error(f"data: {data}")
+                        # LOGGER.error(f"Error raised whilst validating {element['eccodes_key']}, raising error")  # noqa
+                        # LOGGER.error(f"data: {data}")
                         raise e
 
                 # ===================================
@@ -851,6 +851,7 @@ def transform(data: str, mappings: dict) -> Iterator[dict]:
             raise ValueError(e)
         # reset BUFR message to clear data
         message.reset()
+        cksum = None
         try:
             # parse to BUFR sequence
             message.parse(data_dict, mappings)
@@ -861,6 +862,7 @@ def transform(data: str, mappings: dict) -> Iterator[dict]:
                 "message": "",
                 "errors": []
             }
+            cksum = message.md5()
         except Exception as e:
             LOGGER.error(e)
             LOGGER.error("Error encoding BUFR, BUFR set to None")
@@ -887,7 +889,7 @@ def transform(data: str, mappings: dict) -> Iterator[dict]:
                 ]
             },
             "properties": {
-                "md5": message.md5(),
+                "md5": cksum,
                 "wigos_station_identifier": wsi,
                 "datetime": message.get_datetime(),
                 "originating_centre": message.get_element("bufrHeaderCentre"),
