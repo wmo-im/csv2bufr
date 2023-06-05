@@ -140,7 +140,7 @@ def transform(ctx, csv_file, mapping, output_dir, verbosity):  # noqa
             except Exception as err:
                 raise click.ClickException(err)
         else:
-            click.echo("'\tNone' found in BUFR output, no data written")
+            click.echo("\t'None' found in BUFR output, no data written")
 
     click.echo("\n\tEnd of processing, exiting.\n")
 
