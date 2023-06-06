@@ -19,7 +19,7 @@
 #
 ###############################################################################
 
-__version__ = '0.6.dev2'
+__version__ = '0.6.2'
 
 import csv
 from datetime import timezone, datetime
@@ -588,11 +588,18 @@ class BUFRMessage:
                 eccodes_key = element["eccodes_key"]
                 # get value
                 value = get_(eccodes_key, mappings[section], data)
-                # convert to expected data type
-                expected_type = self.dict[eccodes_key]["type"]
-                if (expected_type in ("float", "int")) and \
-                        (eccodes_key not in HEADERS):
-                    value = float(value)
+                if value in MISSING:
+                    value = None
+                else:
+                    # convert to expected data type
+                    expected_type = self.dict[eccodes_key]["type"]
+                    if (expected_type in ("float", "int")) and \
+                            (eccodes_key not in HEADERS):
+                        try:
+                            value = float(value)
+                        except Exception as e:
+                            LOGGER.error("Error converting to expected type")
+                            raise e
                 # ==============
                 # validate value
                 # ==============
