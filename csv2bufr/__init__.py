@@ -19,7 +19,7 @@
 #
 ###############################################################################
 
-__version__ = '0.6.dev4'
+__version__ = '0.6.3'
 
 import csv
 from datetime import timezone, datetime
@@ -43,7 +43,7 @@ from jsonschema import validate
 # some 'constants'
 SUCCESS = True
 NUMBERS = (float, int, complex)
-MISSING = ("NA", "NaN", "NAN", "None", "")
+MISSING = ("NA", "NaN", "NAN", "None", "", None)
 
 if 'CSV2BUFR_NULLIFY_INVALID' in os.environ:
     NULLIFY_INVALID = os.environ['CSV2BUFR_NULLIFY_INVALID']
@@ -173,7 +173,7 @@ def get_(key: str, mapping: dict, data: dict):
         value = parse_value(element['value'], data)
     except Exception as e:
         if NULLIFY_INVALID:
-            LOGGER.warning(f"Error raised get value for {key}, None returned for {key}")  # noqa
+            LOGGER.warning(f"Warning raised getting value for {key}, None returned for {key}")  # noqa
             value = None
         else:
             raise e
@@ -598,7 +598,7 @@ class BUFRMessage:
                         try:
                             value = float(value)
                         except Exception as e:
-                            LOGGER.error("Error converting to expected type")
+                            LOGGER.error(f"Error converting value ({value}) to expected type")  # noqa
                             raise e
                 # ==============
                 # validate value
