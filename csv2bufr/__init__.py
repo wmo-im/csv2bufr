@@ -598,7 +598,7 @@ class BUFRMessage:
                         try:
                             value = float(value)
                         except Exception as e:
-                            LOGGER.error(f"Error converting value ({value}) to expected type")
+                            LOGGER.error(f"Error converting value ({value}) to expected type")  # noqa
                             raise e
                 # ==============
                 # validate value
