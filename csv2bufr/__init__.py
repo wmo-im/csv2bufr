@@ -128,7 +128,10 @@ def index_(key, mapping):
         if item['eccodes_key'] == key:
             return idx
         idx += 1
-    LOGGER.error(f"key {key} not found in {mapping}")
+    if NULLIFY_INVALID:
+        LOGGER.warning(f"key {key} not found in {mapping}")
+    else:
+        LOGGER.error(f"key {key} not found in {mapping}")
     raise ValueError
 
 
@@ -143,7 +146,10 @@ def parse_value(element: str, data: dict):
     elif data_type[0] == "data":
         column = data_type[1]
         if column not in data:
-            LOGGER.error(f"Column {column} not found in input data: {data}")
+            if NULLIFY_INVALID:
+                LOGGER.warning(f"Column {column} not found in input data: {data}")  # noqa
+            else:
+                LOGGER.error(f"Column {column} not found in input data: {data}")  # noqa
             raise ValueError
         value = data[column]
     elif data_type[0] == "array":
@@ -473,13 +479,23 @@ class BUFRMessage:
 
         :returns: value of the element
         """
+        result = None
+        try:
+            # check if we want value or an attribute (indicated by ->)
+            if "->" in key:
+                tokens = key.split("->")
+                result = self.dict[tokens[0]][tokens[1]]
+            else:
+                result = self.dict[key]["value"]
 
-        # check if we want value or an attribute (indicated by ->)
-        if "->" in key:
-            tokens = key.split("->")
-            result = self.dict[tokens[0]][tokens[1]]
-        else:
-            result = self.dict[key]["value"]
+        except Exception as e:
+            if NULLIFY_INVALID:
+                result = None
+                LOGGER.warning(f"Error {e} whilst fetching {key} from data, None returned")  # noqa
+            else:
+                msg = f"Error {e} whilst fetching {key} from data"
+                raise RuntimeError(msg)
+
         return result
 
     def as_bufr(self, use_cached: bool = False) -> bytes:
@@ -528,13 +544,13 @@ class BUFRMessage:
         try:
             codes_set(bufr_msg, "pack", True)
         except CodesInternalError as e:
-            LOGGER.error(f"error calling codes_set({bufr_msg}, 'pack', True): {e}")  # noqa
-            LOGGER.error(json.dumps(self.dict, indent=4))
-            LOGGER.error("null message returned")
+            LOGGER.warning(f"error calling codes_set({bufr_msg}, 'pack', True): {e}")  # noqa
+            LOGGER.warning("null message returned")
             codes_release(bufr_msg)
             return self.bufr
         except Exception as e:
             LOGGER.error(f"error calling codes_set({bufr_msg}, 'pack', True): {e}") # noqa
+            LOGGER.error(json.dumps(self.dict, indent=4))
             raise e
         # =======================================================
         # now write to in memory file and return bytes to caller
@@ -655,6 +671,17 @@ class BUFRMessage:
         :returns: `datetime.datetime` of ISO8601 representation of the
                   characteristic date/time
         """
+
+        if None in [
+            self.get_element("typicalYear"),
+            self.get_element("typicalMonth"),
+            self.get_element("typicalDay"),
+            self.get_element("typicalHour"),
+            self.get_element("typicalMinute")
+        ]:
+            msg = 'Invalid datetime'
+            LOGGER.error(msg)
+            raise RuntimeError(msg)
 
         return datetime(
             self.get_element("typicalYear"),
@@ -870,6 +897,29 @@ def transform(data: str, mappings: dict) -> Iterator[dict]:
                 "errors": []
             }
             cksum = message.md5()
+            # now identifier based on WSI and observation date as identifier
+            isodate = message.get_datetime().strftime('%Y%m%dT%H%M%S')
+            rmk = f"WIGOS_{wsi}_{isodate}"
+            # now additional metadata elements
+            result["_meta"] = {
+                "id": rmk,
+                "geometry": {
+                    "type": "Point",
+                    "coordinates": [
+                        message.get_element('#1#longitude'),
+                        message.get_element('#1#latitude')
+                    ]
+                },
+                "properties": {
+                    "md5": cksum,
+                    "wigos_station_identifier": wsi,
+                    "datetime": message.get_datetime(),
+                    "originating_centre": message.get_element("bufrHeaderCentre"),  # noqa
+                    "data_category": message.get_element("dataCategory")
+                },
+                "result": status
+            }
+
         except Exception as e:
             LOGGER.error(e)
             LOGGER.error("Error encoding BUFR, BUFR set to None")
@@ -880,30 +930,21 @@ def transform(data: str, mappings: dict) -> Iterator[dict]:
                 "message": "Error encoding row, BUFR set to None",
                 "errors": [f"Error: {e}\n\t\tData: {data_dict}"]
             }
-
-        # now identifier based on WSI and observation date as identifier
-        isodate = message.get_datetime().strftime('%Y%m%dT%H%M%S')
-        rmk = f"WIGOS_{wsi}_{isodate}"
-
-        # now additional metadata elements
-        result["_meta"] = {
-            "id": rmk,
-            "geometry": {
-                "type": "Point",
-                "coordinates": [
-                    message.get_element('#1#longitude'),
-                    message.get_element('#1#latitude')
-                ]
-            },
-            "properties": {
-                "md5": cksum,
-                "wigos_station_identifier": wsi,
-                "datetime": message.get_datetime(),
-                "originating_centre": message.get_element("bufrHeaderCentre"),
-                "data_category": message.get_element("dataCategory")
-            },
-            "result": status
-        }
+            result["_meta"] = {
+                "id": None,
+                "geometry": {
+                    "type": None,
+                    "coordinates": None
+                },
+                "properties": {
+                    "md5": None,
+                    "wigos_station_identifier": None,
+                    "datetime": None,
+                    "originating_centre": None,
+                    "data_category": None
+                },
+                "result": status
+            }
 
         time_ = datetime.now(timezone.utc).isoformat()
         LOGGER.info(f"{time_}|{result['_meta']}")
