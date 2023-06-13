@@ -106,7 +106,7 @@ def create_mappings(ctx, sequence, output, verbosity):
 @cli_option_verbosity
 def transform(ctx, csv_file, mapping, output_dir, verbosity):  # noqa
     result = None
-    click.echo(f"\n\tTransforming {csv_file.name} to BUFR ...")
+    click.echo(f"\nCLI:\t... Transforming {csv_file.name} to BUFR ...")
 
     # identify mapping to use
     if not os.path.isfile(mapping):
@@ -126,7 +126,7 @@ def transform(ctx, csv_file, mapping, output_dir, verbosity):  # noqa
     except Exception as err:
         raise click.ClickException(err)
 
-    click.echo("\n\t... Processing subsets:")
+    click.echo("CLI:\t... Processing subsets:")
     for item in result:
         key = item['_meta']["id"]
         bufr_filename = f"{output_dir}{os.sep}{key}.bufr4"
@@ -136,13 +136,13 @@ def transform(ctx, csv_file, mapping, output_dir, verbosity):  # noqa
                     fh.write(item["bufr4"])
                     nbytes = fh.tell()
 
-                click.echo(f"\t..... {nbytes} bytes written to {bufr_filename}")  # noqa
+                click.echo(f"CLI:\t..... {nbytes} bytes written to {bufr_filename}")  # noqa
             except Exception as err:
                 raise click.ClickException(err)
         else:
-            click.echo("\t'None' found in BUFR output, no data written")
+            click.echo("CLI:\t..... 'None' found in BUFR output, no data written")  # noqa
 
-    click.echo("\n\tEnd of processing, exiting.\n")
+    click.echo("CLI:\tEnd of processing, exiting.\n")
 
 
 data.add_command(transform)
