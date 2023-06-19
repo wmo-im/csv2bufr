@@ -84,16 +84,31 @@ def list_mappings(ctx):
 @click.command('create')
 @click.pass_context
 @click.argument("sequence", nargs=-1, type=int)
-@click.option("--output", "output", help="File to save the template to")
+@click.option("--output", "output", help="Template name to save mapping to (excluding file extension")  # noqa
+@click.option("--write-csv", "csv_header", help="Write csv header line", type=bool)  # noqa
 @cli_option_verbosity
-def create_mappings(ctx, sequence, output, verbosity):
+def create_mappings(ctx, sequence, output, csv_header, verbosity):
     msg = BUFRMessage(sequence)
     template = msg.create_template()
     if output:
-        with open(output, "w") as fh:
+        outfile = f'{output}.json'
+        with open(outfile, "w") as fh:
             fh.write(json.dumps(template, indent=4))
     else:
         print(json.dumps(template, indent=4))
+
+    if csv_header:
+        headers = []
+        for column in template['data']:
+            field = column['value'].split(":")[1]
+            headers.append(field)
+        headers = ','.join(headers)
+        if output:
+            outfile = f'{output}.csv'
+            with open(outfile, "w") as fh:
+                fh.write(headers)
+        else:
+            print(headers)
 
 
 @click.command()
