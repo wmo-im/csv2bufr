@@ -100,9 +100,10 @@ def create_mappings(ctx, sequence, output, csv_header, verbosity):
     if csv_header:
         headers = []
         for column in template['data']:
+            click.echo(column)
             field = column['value'].split(":")[1]
             headers.append(field)
-        headers = ','.join(headers)
+        headers = '\n'.join(headers)
         if output:
             outfile = f'{output}.csv'
             with open(outfile, "w") as fh:
