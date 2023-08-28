@@ -1,3 +1,4 @@
 click
+numpy==1.21.6
 eccodes
 jsonschema
