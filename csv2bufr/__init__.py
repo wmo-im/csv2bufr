@@ -373,6 +373,7 @@ class BUFRMessage:
         self.extended_delayed_replications = \
             extended_delayed_replications  # used when encoding
         self.bufr = None  # placeholder for BUFR bytes
+        self._hash = None # placeholder for hash of data
         # ============================================
 
     def create_template(self) -> None:
@@ -568,7 +569,7 @@ class BUFRMessage:
             codes_release(bufr_msg)
             return self.bufr
         except Exception as e:
-            LOGGER.error(f"error calling codes_set({bufr_msg}, 'pack', True): {e}") # noqa
+            LOGGER.error(f"Error calling codes_set({bufr_msg}, 'pack', True): {e}") # noqa
             LOGGER.error(json.dumps(self.dict, indent=4))
             raise e
         # =======================================================
@@ -586,6 +587,13 @@ class BUFRMessage:
         # Return BUFR message bytes
         # =============================================
         self.bufr = fh.read()
+        try:
+            # set hash
+            self._hash = hashlib.md5(self.bufr).hexdigest()
+        except Exception as e:
+            LOGGER.error(f"Error calculating hash (md5) of BUFR string: {self.bufr}")  # noqa
+            raise e
+
         return self.bufr
 
     def md5(self) -> str:
@@ -595,12 +603,7 @@ class BUFRMessage:
         :returns: md5 of BUFR message
         """
         global _warnings
-        bufr = self.as_bufr(use_cached=True)
-
-        if bufr is not None:
-            return hashlib.md5(bufr).hexdigest()
-        else:
-            return None
+        return self._hash
 
     def parse(self, data: dict, mappings: dict) -> None:
         """
@@ -676,7 +679,7 @@ class BUFRMessage:
                         value = apply_scaling(value, scale, offset)
                     except Exception as e:
                         LOGGER.error(f"Error scaling data: scale={scale}, offet={offset}, value={value}")  # noqa
-                        LOGGER.error(f"data: {data}")
+                        LOGGER.debug(f"data: {data}")
                         raise e
 
                 # ==================================================
@@ -876,7 +879,7 @@ def transform(data: str, mappings: dict) -> Iterator[dict]:
                 if not val.isascii():
                     if NULLIFY_INVALID:
                         LOGGER.error(f"csv read error, non ASCII data detected ({val}), skipping row")  # noqa
-                        LOGGER.error(row)
+                        LOGGER.debug(row)
                         continue
                     else:
                         raise ValueError
@@ -902,7 +905,7 @@ def transform(data: str, mappings: dict) -> Iterator[dict]:
             data_dict["_wsi_local"] = wsi_local
         except Exception as e:
             LOGGER.error("Error parsing WIGOS station identifier")
-            LOGGER.error(f"data:{data_dict}")
+            LOGGER.debug(f"data:{data_dict}")
             raise ValueError(e)
         # reset BUFR message to clear data
         message.reset()
@@ -943,9 +946,8 @@ def transform(data: str, mappings: dict) -> Iterator[dict]:
             }
 
         except Exception as e:
-            LOGGER.error(e)
-            LOGGER.error("Error encoding BUFR, BUFR set to None")
-            LOGGER.error(f"data:{data_dict}")
+            LOGGER.error(f"Error encoding BUFR, BUFR set to None\n\t{e}")
+            LOGGER.debug(f"data:{data_dict}")
             result["bufr4"] = None
             status = {
                 "code": FAILED,
