@@ -373,7 +373,7 @@ class BUFRMessage:
         self.extended_delayed_replications = \
             extended_delayed_replications  # used when encoding
         self.bufr = None  # placeholder for BUFR bytes
-        self._hash = None # placeholder for hash of data
+        self._hash = None  # placeholder for hash of data
         # ============================================
 
     def create_template(self) -> None:
