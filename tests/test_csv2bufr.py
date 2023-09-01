@@ -29,6 +29,8 @@ import pytest
 from csv2bufr import (validate_mapping, apply_scaling, validate_value,
                       transform, SUCCESS)
 
+import csv2bufr.templates as c2bt
+
 LOGGER = logging.getLogger(__name__)
 LOGGER.setLevel("DEBUG")
 
@@ -234,3 +236,7 @@ def test_transform(data_dict, mapping_dict):
         assert sorted(item["_meta"].keys()) == item_meta_keys
         assert sorted(item["_meta"]["properties"].keys()) == item_meta_properties_keys  # noqa
         assert item["_meta"]["properties"]["md5"] == "981938dbd97be3e5adc8e7b1c6eb642c"  # noqa
+
+
+def test_templates():
+    assert c2bt.load_template('aws-template') is not None
