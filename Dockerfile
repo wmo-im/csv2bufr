@@ -28,7 +28,8 @@ ENV DEBIAN_FRONTEND="noninteractive" \
     PATH="${PATH}:/opt/eccodes/bin"
 
 RUN apt-get update -y \
-    && apt-get install -y vim emacs nedit nano
+    && apt-get install -y vim emacs nedit nano git \
+    && pip3 install --no-cache-dir git+https://github.com/wmo-im/csv2bufr-templates@main  # ToDo - move to requirements.txt
 
 WORKDIR /tmp
 

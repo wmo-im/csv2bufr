@@ -26,6 +26,7 @@ import os.path
 import click
 
 from csv2bufr import __version__, BUFRMessage, transform as transform_csv
+import csv2bufr_templates as c2bt
 
 THISDIR = os.path.dirname(os.path.realpath(__file__))
 MAPPINGS = f"{THISDIR}{os.sep}resources{os.sep}mappings"
@@ -108,18 +109,21 @@ def transform(ctx, csv_file, mapping, output_dir, verbosity):  # noqa
     result = None
     click.echo(f"\nCLI:\t... Transforming {csv_file.name} to BUFR ...")
 
-    # identify mapping to use
+    # load / identify mapping to use
     if not os.path.isfile(mapping):
-        mappings_file = f"{MAPPINGS}{os.sep}{mapping}.json"
-        if not os.path.isfile(mappings_file):
-            raise click.ClickException(
-                f"Invalid stored mapping ({mappings_file})")
+        try:
+            mappings = c2bt.load_template(mapping)
+            if mappings is None:
+                raise click.ClickException(
+                    f"Error loading mappings {mapping}")
+        except Exception as err:
+            raise click.ClickException(err)
     else:
-        mappings_file = mapping
-
-    # load mappings
-    with open(mappings_file) as fh:
-        mappings = json.load(fh)
+        try:
+            with open(mapping) as fh:
+                mappings = json.load(fh)
+        except Exception as err:
+            raise click.ClickException(err)
 
     try:
         result = transform_csv(csv_file.read(), mappings)
