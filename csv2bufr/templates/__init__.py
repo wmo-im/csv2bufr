@@ -18,11 +18,11 @@
 # under the License.
 #
 ###############################################################################
-
 import json
 import logging
 import os
 from pathlib import Path
+from typing import Union
 
 TEMPLATE_DIRS = []
 
@@ -36,7 +36,17 @@ if 'CSV2BUFR_TEMPLATES' in os.environ:
 TEMPLATE_DIRS.append(Path(__file__).resolve().parent / 'resources')
 
 
-def load_template(template_name):
+def load_template(template_name: str) -> Union[dict, None]:
+    """
+    Checks whether specified template exists and loads file.
+    Returns none and prints a warning if no template found.
+
+    :param template_name: The name of the template (without file extension)
+                          to load.
+
+    :returns: BUFR template as a dictionary or none in the case of template
+              not found.
+    """
     template = None
     # iterate over directories and load file
     for dir_ in TEMPLATE_DIRS:
@@ -51,12 +61,18 @@ def load_template(template_name):
 
     if template is None:
         LOGGER.warning(f"Requested template '{template_name}' not found." +
-                       f" Search path = {TEMPLATE_DIRS}")
+                       f" Search path = {TEMPLATE_DIRS}. Please update " +
+                       "search path (e.g. 'export CSV2BUFR_TEMPLATE=...')"
+                       )
 
     return template
 
 
-def list_templates():
+def list_templates() -> list:
+    """
+    :returns: List of known templates in search path (CSV2BUFR_TEMPLATES).
+              An empty list is return if no templates are found.
+    """
     templates = []
     for dir_ in TEMPLATE_DIRS:
         try:
