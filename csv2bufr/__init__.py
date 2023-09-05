@@ -19,7 +19,7 @@
 #
 ###############################################################################
 
-__version__ = '0.6.dev4'
+__version__ = '0.7.0'
 
 import csv
 from datetime import timezone, datetime
