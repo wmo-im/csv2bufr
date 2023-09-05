@@ -22,7 +22,7 @@
 import json
 import logging
 import os
-import pathlib
+from pathlib import Path
 
 TEMPLATE_DIRS = []
 
@@ -30,21 +30,20 @@ LOGGER = logging.getLogger(__name__)
 
 # Set user defined location first
 if 'CSV2BUFR_TEMPLATES' in os.environ:
-    TEMPLATE_DIRS.append(os.environ['CSV2BUFR_TEMPLATES'])
+    TEMPLATE_DIRS.append(Path(os.environ['CSV2BUFR_TEMPLATES']))
 
 # Now add defaults
-TEMPLATE_DIRS.append(
-    f"{os.path.dirname(os.path.realpath(__file__))}{os.sep}resources")
+TEMPLATE_DIRS.append(Path(__file__).resolve().parent / 'resources')
 
 
 def load_template(template_name):
     template = None
     # iterate over directories and load file
-    for dir in TEMPLATE_DIRS:
+    for dir_ in TEMPLATE_DIRS:
         try:
-            template_file = f"{dir}{os.sep}{template_name}.json"
-            if os.path.isfile(template_file):
-                with open(template_file, 'r') as fh:
+            template_file = dir_ / f"{template_name}.json"
+            if template_file.is_file():
+                with template_file.open() as fh:
                     template = json.load(fh)
                     break
         except Exception as e:
@@ -59,13 +58,11 @@ def load_template(template_name):
 
 def list_templates():
     templates = []
-    for dir in TEMPLATE_DIRS:
+    for dir_ in TEMPLATE_DIRS:
         try:
-            _templates = os.listdir(dir)
-            for template in _templates:
-                path = pathlib.Path(template)
-                if path.suffix == ".json":
-                    templates.append(path.stem)
+            for template in dir_.iterdir():
+                if template.suffix == ".json":
+                    templates.append(template.stem)
         except Exception as e:
             LOGGER.warning(f"Error raised listing csv2bufr templates: {e}." +
                            "Directory skipped.")
