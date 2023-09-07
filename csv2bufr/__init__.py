@@ -19,7 +19,7 @@
 #
 ###############################################################################
 
-__version__ = '0.7.0'
+__version__ = '0.7.dev1'
 
 import csv
 from datetime import timezone, datetime
@@ -154,7 +154,6 @@ def parse_value(element: str, data: dict):
         if column not in data:
             msg = f"Column {column} not found in input data: {data}"
             if NULLIFY_INVALID:
-                LOGGER.warning("HERE")
                 LOGGER.warning(msg)  # noqa
                 _warnings.append(msg)
             else:
