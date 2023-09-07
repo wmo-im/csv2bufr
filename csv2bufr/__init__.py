@@ -190,13 +190,12 @@ def get_(key: str, mapping: dict, data: dict):
         value = parse_value(element['value'], data)
     except Exception as e:
         msg = f"Warning raised getting value for {key}, None returned for {key}"  # noqa
-        e.add_note(msg)
         if NULLIFY_INVALID:
             LOGGER.warning(msg)  # noqa
             _warnings.append(msg)
             value = None
         else:
-            raise e
+            raise KeyError(msg)
     return value
 
 
@@ -221,10 +220,9 @@ def validate_mapping(mapping: dict) -> bool:
     try:
         validate(mapping, schema)
     except Exception as e:
-        msg = f"Invalid mapping dictionary {mapping}"
-        e.add_note(msg)
-        LOGGER.error(f"{e}")
-        raise e
+        msg = f"Invalid BUFR template mapping file: {mapping}"
+        LOGGER.error(f"{msg}")
+        raise RuntimeError(msg)
 
     return SUCCESS
 
@@ -251,10 +249,9 @@ def apply_scaling(value: Union[NUMBERS], scale: Union[NUMBERS],
             try:
                 value = value * pow(10, scale) + offset
             except Exception as e:
-                msg = f"Error applying scaling and offset"
-                e.add_note(msg)
-                LOGGER.error(f"{e}")
-                raise e
+                msg = f"Error ({e}) applying scaling and offset"
+                LOGGER.error(f"{msg}")
+                raise RuntimeError(msg)
     return value
 
 
@@ -285,14 +282,13 @@ def validate_value(key: str, value: Union[NUMBERS],
 
     if None not in [valid_min, valid_max]:
         if (value > valid_max) or (value < valid_min):
-            e = ValueError(f"{key}: Value ({value}) out of valid range ({valid_min} - {valid_max}).")  # noqa
+            msg = f"{key}: Value ({value}) out of valid range ({valid_min} - {valid_max})."  # noqa
             if nullify_on_fail:
-                LOGGER.warning(f"{e}; Element set to missing")
-                _warnings.append(f"{e}; Element set to missing")
+                LOGGER.warning(f"{msg}; Element set to missing")
+                _warnings.append(f"{msg}; Element set to missing")
                 return None
             else:
-                # LOGGER.error(str(e))
-                raise e
+                raise ValueError(msg)
 
     return value
 
@@ -362,7 +358,10 @@ class BUFRMessage:
                         self.dict[key][attr] = \
                             codes_get(bufr_msg, f"{key}->{attr}")
                     except Exception as e:
-                        raise e
+                        msg = f"Error ({e}) getting attribute {attr} for {key}."  # noqa
+                        LOGGER.error(f"{msg}")
+                        raise RuntimeError(msg)
+
         codes_bufr_keys_iterator_delete(iterator)
         # ============================================
         # now release the BUFR message back to eccodes
@@ -479,7 +478,7 @@ class BUFRMessage:
                             LOGGER.warning(f"{e}: Unable to convert value {value} to int for {key}, set to None")  # noqa
                             _warnings.append(f"{e}: Unable to convert value {value} to int for {key}, set to None")  # noqa
                         else:
-                            raise e
+                            raise RuntimeError(f"{e}: Unable to convert value {value} to int for {key}")  # noqa
             elif expected_type == "float" and not isinstance(value, float):
                 try:
                     value = float(value)
@@ -489,7 +488,7 @@ class BUFRMessage:
                         LOGGER.warning(f"{e}: Unable to convert value {value} to float for {key}, set to None")  # noqa
                         _warnings.append(f"{e}: Unable to convert value {value} to float for {key}, set to None")  # noqa
                     else:
-                        raise e
+                        raise RuntimeError(f"{e}: Unable to convert value {value} to float for {key}")  # noqa
             else:
                 value = value
         self.dict[key]["value"] = value
@@ -518,9 +517,8 @@ class BUFRMessage:
                 LOGGER.warning(f"Error {e} whilst fetching {key} from data, None returned")  # noqa
                 _warnings.append(f"Error {e} whilst fetching {key} from data, None returned")  # noqa
             else:
-                msg = f"Error whilst fetching {key} from data"
-                e.add_note(msg)
-                raise e
+                msg = f"Error {e} whilst fetching {key} from data."
+                raise RuntimeError(msg)
 
         return result
 
@@ -556,36 +554,32 @@ class BUFRMessage:
                     try:
                         codes_set_array(bufr_msg, eccodes_key, value)
                     except Exception as e:
-                        msg = f"error calling codes_set_array({bufr_msg}, {eccodes_key}, {value})"
-                        e.add_note(msg)
-                        LOGGER.error(f"{e}")  # noqa
-                        raise e
+                        msg = f"Error ({e}) calling codes_set_array({bufr_msg}, {eccodes_key}, {value})"
+                        LOGGER.error(f"{msg}")  # noqa
+                        raise RuntimeError(msg)
                 else:
                     try:
                         codes_set(bufr_msg, eccodes_key, value)
                     except Exception as e:
-                        msg = f"error calling codes_set({bufr_msg}, {eccodes_key}, {value})"  # noqa
-                        e.add_note(msg)
-                        LOGGER.error(f"{e}")  # noqa
-                        raise e
+                        msg = f"Error ({e}) calling codes_set({bufr_msg}, {eccodes_key}, {value})"  # noqa
+                        LOGGER.error(f"{msg}")  # noqa
+                        raise RuntimeError(msg)
         # ==============================
         # Message now ready to be packed
         # ==============================
         try:
             codes_set(bufr_msg, "pack", True)
         except CodesInternalError as e:
-            msg = f"Error calling codes_set({bufr_msg}, 'pack', True). Null message returned"  # noqa
-            e.add_note(msg)
-            LOGGER.warning(f"{e}")  # noqa
-            _warnings.append(f"{e}")  # noqa
+            msg = f"Error ({e}) calling codes_set({bufr_msg}, 'pack', True). Null message returned"  # noqa
+            LOGGER.warning(f"{msg}")  # noqa
+            _warnings.append(f"{msg}")  # noqa
             codes_release(bufr_msg)
             return self.bufr
         except Exception as e:
-            msg = f"Error calling codes_set({bufr_msg}, 'pack', True)"
-            e.add_note(msg)
-            LOGGER.error(f"{e}") # noqa
+            msg = f"Error ({e}) calling codes_set({bufr_msg}, 'pack', True)"
+            LOGGER.error(f"{msg}") # noqa
             LOGGER.debug(json.dumps(self.dict, indent=4))
-            raise e
+            raise RuntimeError(msg)
         # =======================================================
         # now write to in memory file and return bytes to caller
         # =======================================================
@@ -595,10 +589,9 @@ class BUFRMessage:
             codes_release(bufr_msg)
             fh.seek(0)
         except Exception as e:
-            msg = f"error writing to internal BytesIO object"
-            e.add_note(msg)
-            LOGGER.error(f"{e}")
-            raise e
+            msg = f"Error ({e}) writing to internal BytesIO object"
+            LOGGER.error(f"{msg}")
+            raise RuntimeError(msg)
         # =============================================
         # Return BUFR message bytes
         # =============================================
@@ -607,10 +600,9 @@ class BUFRMessage:
             # set hash
             self._hash = hashlib.md5(self.bufr).hexdigest()
         except Exception as e:
-            msg = f"Error calculating hash (md5) of BUFR string: {self.bufr}"
-            e.add_note(msg)
-            LOGGER.error(f"{e}") # noqa
-            raise e
+            msg = f"Error ({e}) calculating hash (md5) of BUFR string: {self.bufr}"
+            LOGGER.error(f"{msg}") # noqa
+            raise RuntimeError(msg)
 
         return self.bufr
 
@@ -656,10 +648,9 @@ class BUFRMessage:
                         try:
                             value = float(value)
                         except Exception as e:
-                            msg = f"Error converting value ({value}) to expected type"  # noqa
-                            e.add_note(msg)
+                            msg = f"Error ({e}) converting value ({value}) to expected type"  # noqa
                             LOGGER.error(f"{e}")
-                            raise e
+                            raise RuntimeError(msg)
                 # ==============
                 # validate value
                 # ==============
@@ -698,11 +689,10 @@ class BUFRMessage:
                             offset = parse_value(element["offset"], data)
                         value = apply_scaling(value, scale, offset)
                     except Exception as e:
-                        msg = f"Error scaling data: scale={scale}, offet={offset}, value={value}"  # noqa
-                        e.add_note(msg)
-                        LOGGER.error(f"{e}")  # noqa
+                        msg = f"Error ({e}) scaling data: scale={scale}, offet={offset}, value={value}"  # noqa
+                        LOGGER.error(f"{msg}")  # noqa
                         LOGGER.debug(f"data: {data}")
-                        raise e
+                        raise RuntimeError(msg)
 
                 # ==================================================
                 # at this point we should have the eccodes key and a
@@ -869,10 +859,9 @@ def transform(data: str, mappings: dict) -> Iterator[dict]:
         reader = csv.reader(fh, delimiter=_delimiter, quoting=_quoting,
                             quotechar=_quotechar)
     except Exception as e:
-        msg = f"Error reading csv data\n{data}"
-        e.add_note(msg)
-        LOGGER.critical(f"{e}")
-        raise e
+        msg = f"Error ({e}) reading csv data\n{data}"
+        LOGGER.critical(f"{msg}")
+        raise RuntimeError(msg)
 
     # read in header rows
     if skip > 0:
@@ -892,9 +881,10 @@ def transform(data: str, mappings: dict) -> Iterator[dict]:
                               extended_delayed_replications,
                               table_version)
     except Exception as e:
-        e.add_note("Error initialising BUFR message")
-        LOGGER.critical(f"{e}")
-        raise e
+        msg = f"Error ({e}) initialising BUFR message"
+        LOGGER.critical(f"{msg}")
+        raise RuntimeError(msg)
+
     # now iterate over remaining rows
     for row in reader:
         wsi = None
@@ -932,11 +922,10 @@ def transform(data: str, mappings: dict) -> Iterator[dict]:
             data_dict["_wsi_issue_number"] = wsi_issue_number
             data_dict["_wsi_local"] = wsi_local
         except Exception as e:
-            msg = f"Error parsing WIGOS station identifier"
-            e.add_note(msg)
-            LOGGER.error(f"{e}")
+            msg = f"Error ({e}) parsing WIGOS station identifier"
+            LOGGER.error(f"{msg}")
             LOGGER.debug(f"data:{data_dict}")
-            raise ValueError(e)
+            raise ValueError(msg)
         # reset BUFR message to clear data
         message.reset()
         cksum = None
@@ -976,15 +965,14 @@ def transform(data: str, mappings: dict) -> Iterator[dict]:
             }
 
         except Exception as e:
-            msg = f"Error encoding BUFR, BUFR set to None"
-            e.add_note(msg)
-            LOGGER.error(f"{e}")
+            msg = f"Error ({e}) encoding BUFR, BUFR set to None"
+            LOGGER.error(f"{msg}")
             LOGGER.debug(f"data:{data_dict}")
             result["bufr4"] = None
             status = {
                 "code": FAILED,
                 "message": "Error encoding row, BUFR set to None",
-                "errors": [f"Error: {e}\n\t\tData: {data_dict}"],
+                "errors": [f"{msg}\n\t\tData: {data_dict}"],
                 "warnings": _warnings
             }
             result["_meta"] = {
