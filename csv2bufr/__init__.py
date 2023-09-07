@@ -924,7 +924,7 @@ def transform(data: str, mappings: dict) -> Iterator[dict]:
             data_dict["_wsi_issue_number"] = wsi_issue_number
             data_dict["_wsi_local"] = wsi_local
         except KeyError as e:
-            msg = f"Error, key {e} not found parsing WIGOS station identifier"  # noqa
+            msg = f"Error, key {e} not found in input data when building WIGOS station identifier"  # noqa
             # LOGGER.error(f"{msg}")
             LOGGER.debug(f"data:{data_dict}")
             raise KeyError(msg)
