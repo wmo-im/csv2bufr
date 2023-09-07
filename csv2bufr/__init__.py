@@ -131,13 +131,14 @@ def index_(key, mapping):
             return idx
         idx += 1
     if NULLIFY_INVALID:
-        msg = f"key {key} not found in {mapping}"
+        msg = f"Warning: key {key} not found in {mapping}"
         LOGGER.warning(msg)
         _warnings.append(msg)
         return None
     else:
-        LOGGER.error(f"key {key} not found in {mapping}")
-        raise ValueError
+        msg = f"Error: key {key} not found in {mapping}"
+        LOGGER.error(msg)
+        raise ValueError(msg)
 
 
 def parse_value(element: str, data: dict):
@@ -158,7 +159,7 @@ def parse_value(element: str, data: dict):
                 _warnings.append(msg)
             else:
                 LOGGER.error(msg)  # noqa
-                raise ValueError
+                raise ValueError(msg)
         value = data[column]
     elif data_type[0] == "array":
         value = data_type[1]
@@ -173,8 +174,9 @@ def parse_value(element: str, data: dict):
     elif data_type[0] in ["", None]:
         return None
     else:
-        LOGGER.error(f"Data type ({data_type[0]}) not recognised in mapping: {element}")  # noqa
-        raise ValueError
+        msg = f"Data type ({data_type[0]}) not recognised in mapping: {element}"
+        LOGGER.error(msg)  # noqa
+        raise ValueError(msg)
     return value
 
 
@@ -188,6 +190,7 @@ def get_(key: str, mapping: dict, data: dict):
         value = parse_value(element['value'], data)
     except Exception as e:
         msg = f"Warning raised getting value for {key}, None returned for {key}"  # noqa
+        e.add_note(msg)
         if NULLIFY_INVALID:
             LOGGER.warning(msg)  # noqa
             _warnings.append(msg)
@@ -218,8 +221,9 @@ def validate_mapping(mapping: dict) -> bool:
     try:
         validate(mapping, schema)
     except Exception as e:
-        message = f"Invalid mapping dictionary {mapping}"
-        LOGGER.error(message)
+        msg = f"Invalid mapping dictionary {mapping}"
+        e.add_note(msg)
+        LOGGER.error(f"{e}")
         raise e
 
     return SUCCESS
@@ -247,7 +251,9 @@ def apply_scaling(value: Union[NUMBERS], scale: Union[NUMBERS],
             try:
                 value = value * pow(10, scale) + offset
             except Exception as e:
-                LOGGER.error(e.message)
+                msg = f"Error applying scaling and offset"
+                e.add_note(msg)
+                LOGGER.error(f"{e}")
                 raise e
     return value
 
@@ -512,8 +518,9 @@ class BUFRMessage:
                 LOGGER.warning(f"Error {e} whilst fetching {key} from data, None returned")  # noqa
                 _warnings.append(f"Error {e} whilst fetching {key} from data, None returned")  # noqa
             else:
-                msg = f"Error {e} whilst fetching {key} from data"
-                raise RuntimeError(msg)
+                msg = f"Error whilst fetching {key} from data"
+                e.add_note(msg)
+                raise e
 
         return result
 
@@ -549,13 +556,17 @@ class BUFRMessage:
                     try:
                         codes_set_array(bufr_msg, eccodes_key, value)
                     except Exception as e:
-                        LOGGER.error(f"error calling codes_set_array({bufr_msg}, {eccodes_key}, {value}): {e}")  # noqa
+                        msg = f"error calling codes_set_array({bufr_msg}, {eccodes_key}, {value})"
+                        e.add_note(msg)
+                        LOGGER.error(f"{e}")  # noqa
                         raise e
                 else:
                     try:
                         codes_set(bufr_msg, eccodes_key, value)
                     except Exception as e:
-                        LOGGER.error(f"error calling codes_set({bufr_msg}, {eccodes_key}, {value}): {e}")  # noqa
+                        msg = f"error calling codes_set({bufr_msg}, {eccodes_key}, {value})"  # noqa
+                        e.add_note(msg)
+                        LOGGER.error(f"{e}")  # noqa
                         raise e
         # ==============================
         # Message now ready to be packed
@@ -563,13 +574,17 @@ class BUFRMessage:
         try:
             codes_set(bufr_msg, "pack", True)
         except CodesInternalError as e:
-            LOGGER.warning(f"Error calling codes_set({bufr_msg}, 'pack', True): {e}. Null message returned")  # noqa
-            _warnings.append(f"Error calling codes_set({bufr_msg}, 'pack', True): {e}. Null message returned")  # noqa
+            msg = f"Error calling codes_set({bufr_msg}, 'pack', True). Null message returned"  # noqa
+            e.add_note(msg)
+            LOGGER.warning(f"{e}")  # noqa
+            _warnings.append(f"{e}")  # noqa
             codes_release(bufr_msg)
             return self.bufr
         except Exception as e:
-            LOGGER.error(f"Error calling codes_set({bufr_msg}, 'pack', True): {e}") # noqa
-            LOGGER.error(json.dumps(self.dict, indent=4))
+            msg = f"Error calling codes_set({bufr_msg}, 'pack', True)"
+            e.add_note(msg)
+            LOGGER.error(f"{e}") # noqa
+            LOGGER.debug(json.dumps(self.dict, indent=4))
             raise e
         # =======================================================
         # now write to in memory file and return bytes to caller
@@ -580,7 +595,9 @@ class BUFRMessage:
             codes_release(bufr_msg)
             fh.seek(0)
         except Exception as e:
-            LOGGER.error(f"error writing to internal BytesIO object, {e}")
+            msg = f"error writing to internal BytesIO object"
+            e.add_note(msg)
+            LOGGER.error(f"{e}")
             raise e
         # =============================================
         # Return BUFR message bytes
@@ -590,7 +607,9 @@ class BUFRMessage:
             # set hash
             self._hash = hashlib.md5(self.bufr).hexdigest()
         except Exception as e:
-            LOGGER.error(f"Error calculating hash (md5) of BUFR string: {self.bufr}")  # noqa
+            msg = f"Error calculating hash (md5) of BUFR string: {self.bufr}"
+            e.add_note(msg)
+            LOGGER.error(f"{e}") # noqa
             raise e
 
         return self.bufr
@@ -637,7 +656,9 @@ class BUFRMessage:
                         try:
                             value = float(value)
                         except Exception as e:
-                            LOGGER.error(f"Error converting value ({value}) to expected type")  # noqa
+                            msg = f"Error converting value ({value}) to expected type"  # noqa
+                            e.add_note(msg)
+                            LOGGER.error(f"{e}")
                             raise e
                 # ==============
                 # validate value
@@ -677,7 +698,9 @@ class BUFRMessage:
                             offset = parse_value(element["offset"], data)
                         value = apply_scaling(value, scale, offset)
                     except Exception as e:
-                        LOGGER.error(f"Error scaling data: scale={scale}, offet={offset}, value={value}")  # noqa
+                        msg = f"Error scaling data: scale={scale}, offet={offset}, value={value}"  # noqa
+                        e.add_note(msg)
+                        LOGGER.error(f"{e}")  # noqa
                         LOGGER.debug(f"data: {data}")
                         raise e
 
@@ -702,7 +725,7 @@ class BUFRMessage:
             self.get_element("typicalHour"),
             self.get_element("typicalMinute")
         ]:
-            msg = 'Invalid datetime'
+            msg = 'Error: invalid datetime'
             LOGGER.error(msg)
             raise RuntimeError(msg)
 
@@ -814,7 +837,8 @@ def transform(data: str, mappings: dict) -> Iterator[dict]:
     if "delimiter" in mappings:
         _delimiter = mappings["delimiter"]
         if _delimiter not in [",", ";", "|", "\t"]:
-            LOGGER.error("Invalid delimiter specified in mapping template, reverting to comma ','")  # noqa
+            msg = "Invalid delimiter specified in mapping template, reverting to comma ','"  # noqa
+            LOGGER.warning(msg)
             _delimiter = ","
     else:
         _delimiter = DELIMITER
@@ -845,7 +869,9 @@ def transform(data: str, mappings: dict) -> Iterator[dict]:
         reader = csv.reader(fh, delimiter=_delimiter, quoting=_quoting,
                             quotechar=_quotechar)
     except Exception as e:
-        LOGGER.critical(f"Error reading csv data\n{data}")
+        msg = f"Error reading csv data\n{data}"
+        e.add_note(msg)
+        LOGGER.critical(f"{e}")
         raise e
 
     # read in header rows
@@ -866,7 +892,8 @@ def transform(data: str, mappings: dict) -> Iterator[dict]:
                               extended_delayed_replications,
                               table_version)
     except Exception as e:
-        LOGGER.critical("Error initialising BUFR message")
+        e.add_note("Error initialising BUFR message")
+        LOGGER.critical(f"{e}")
         raise e
     # now iterate over remaining rows
     for row in reader:
@@ -877,11 +904,13 @@ def transform(data: str, mappings: dict) -> Iterator[dict]:
             if isinstance(val, str):
                 if not val.isascii():
                     if NULLIFY_INVALID:
-                        LOGGER.error(f"csv read error, non ASCII data detected ({val}), skipping row")  # noqa
+                        msg = f"csv read error, non ASCII data detected ({val}), skipping row"  # noqa
+                        LOGGER.warning(msg)  # noqa
                         LOGGER.debug(row)
                         continue
                     else:
-                        raise ValueError
+                        msg = f"csv read error, non ASCII data detected ({val})"  # noqa
+                        raise ValueError(msg)
         # valid data row, make dictionary
         data_dict = dict(zip(col_names, row))
         # parse and split WSI
@@ -903,7 +932,9 @@ def transform(data: str, mappings: dict) -> Iterator[dict]:
             data_dict["_wsi_issue_number"] = wsi_issue_number
             data_dict["_wsi_local"] = wsi_local
         except Exception as e:
-            LOGGER.error("Error parsing WIGOS station identifier")
+            msg = f"Error parsing WIGOS station identifier"
+            e.add_note(msg)
+            LOGGER.error(f"{e}")
             LOGGER.debug(f"data:{data_dict}")
             raise ValueError(e)
         # reset BUFR message to clear data
@@ -945,7 +976,9 @@ def transform(data: str, mappings: dict) -> Iterator[dict]:
             }
 
         except Exception as e:
-            LOGGER.error(f"Error encoding BUFR, BUFR set to None\n\t{e}")
+            msg = f"Error encoding BUFR, BUFR set to None"
+            e.add_note(msg)
+            LOGGER.error(f"{e}")
             LOGGER.debug(f"data:{data_dict}")
             result["bufr4"] = None
             status = {
