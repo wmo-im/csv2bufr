@@ -137,7 +137,7 @@ def index_(key, mapping):
         return None
     else:
         msg = f"Error: key {key} not found in {mapping}"
-        LOGGER.error(msg)
+        # LOGGER.error(msg)
         raise ValueError(msg)
 
 
@@ -158,7 +158,7 @@ def parse_value(element: str, data: dict):
                 LOGGER.warning(msg)  # noqa
                 _warnings.append(msg)
             else:
-                LOGGER.error(msg)  # noqa
+                # LOGGER.error(msg)  # noqa
                 raise ValueError(msg)
         value = data[column]
     elif data_type[0] == "array":
@@ -175,7 +175,7 @@ def parse_value(element: str, data: dict):
         return None
     else:
         msg = f"Data type ({data_type[0]}) not recognised in mapping: {element}"
-        LOGGER.error(msg)  # noqa
+        # LOGGER.error(msg)  # noqa
         raise ValueError(msg)
     return value
 
@@ -221,7 +221,7 @@ def validate_mapping(mapping: dict) -> bool:
         validate(mapping, schema)
     except Exception as e:
         msg = f"Invalid BUFR template mapping file: {mapping}"
-        LOGGER.error(f"{msg}")
+        #LOGGER.error(f"{msg}")
         raise RuntimeError(msg)
 
     return SUCCESS
@@ -250,7 +250,7 @@ def apply_scaling(value: Union[NUMBERS], scale: Union[NUMBERS],
                 value = value * pow(10, scale) + offset
             except Exception as e:
                 msg = f"Error ({e}) applying scaling and offset"
-                LOGGER.error(f"{msg}")
+                # LOGGER.error(f"{msg}")
                 raise RuntimeError(msg)
     return value
 
@@ -359,7 +359,7 @@ class BUFRMessage:
                             codes_get(bufr_msg, f"{key}->{attr}")
                     except Exception as e:
                         msg = f"Error ({e}) getting attribute {attr} for {key}."  # noqa
-                        LOGGER.error(f"{msg}")
+                        # LOGGER.error(f"{msg}")
                         raise RuntimeError(msg)
 
         codes_bufr_keys_iterator_delete(iterator)
@@ -555,14 +555,14 @@ class BUFRMessage:
                         codes_set_array(bufr_msg, eccodes_key, value)
                     except Exception as e:
                         msg = f"Error ({e}) calling codes_set_array({bufr_msg}, {eccodes_key}, {value})"
-                        LOGGER.error(f"{msg}")  # noqa
+                        # LOGGER.error(f"{msg}")  # noqa
                         raise RuntimeError(msg)
                 else:
                     try:
                         codes_set(bufr_msg, eccodes_key, value)
                     except Exception as e:
                         msg = f"Error ({e}) calling codes_set({bufr_msg}, {eccodes_key}, {value})"  # noqa
-                        LOGGER.error(f"{msg}")  # noqa
+                        # LOGGER.error(f"{msg}")  # noqa
                         raise RuntimeError(msg)
         # ==============================
         # Message now ready to be packed
@@ -577,7 +577,7 @@ class BUFRMessage:
             return self.bufr
         except Exception as e:
             msg = f"Error ({e}) calling codes_set({bufr_msg}, 'pack', True)"
-            LOGGER.error(f"{msg}") # noqa
+            # LOGGER.error(f"{msg}") # noqa
             LOGGER.debug(json.dumps(self.dict, indent=4))
             raise RuntimeError(msg)
         # =======================================================
@@ -590,7 +590,7 @@ class BUFRMessage:
             fh.seek(0)
         except Exception as e:
             msg = f"Error ({e}) writing to internal BytesIO object"
-            LOGGER.error(f"{msg}")
+            # LOGGER.error(f"{msg}")
             raise RuntimeError(msg)
         # =============================================
         # Return BUFR message bytes
@@ -601,7 +601,7 @@ class BUFRMessage:
             self._hash = hashlib.md5(self.bufr).hexdigest()
         except Exception as e:
             msg = f"Error ({e}) calculating hash (md5) of BUFR string: {self.bufr}"
-            LOGGER.error(f"{msg}") # noqa
+            # LOGGER.error(f"{msg}") # noqa
             raise RuntimeError(msg)
 
         return self.bufr
@@ -649,7 +649,7 @@ class BUFRMessage:
                             value = float(value)
                         except Exception as e:
                             msg = f"Error ({e}) converting value ({value}) to expected type"  # noqa
-                            LOGGER.error(f"{e}")
+                            # LOGGER.error(f"{e}")
                             raise RuntimeError(msg)
                 # ==============
                 # validate value
@@ -690,7 +690,7 @@ class BUFRMessage:
                         value = apply_scaling(value, scale, offset)
                     except Exception as e:
                         msg = f"Error ({e}) scaling data: scale={scale}, offet={offset}, value={value}"  # noqa
-                        LOGGER.error(f"{msg}")  # noqa
+                        # LOGGER.error(f"{msg}")  # noqa
                         LOGGER.debug(f"data: {data}")
                         raise RuntimeError(msg)
 
@@ -716,7 +716,7 @@ class BUFRMessage:
             self.get_element("typicalMinute")
         ]:
             msg = 'Error: invalid datetime'
-            LOGGER.error(msg)
+            # LOGGER.error(msg)
             raise RuntimeError(msg)
 
         return datetime(
@@ -921,9 +921,14 @@ def transform(data: str, mappings: dict) -> Iterator[dict]:
             data_dict["_wsi_issuer"] = wsi_issuer
             data_dict["_wsi_issue_number"] = wsi_issue_number
             data_dict["_wsi_local"] = wsi_local
+        except KeyError as e:
+            msg = f"Error, key {e} not found parsing WIGOS station identifier"  # noqa
+            # LOGGER.error(f"{msg}")
+            LOGGER.debug(f"data:{data_dict}")
+            raise KeyError(msg)
         except Exception as e:
             msg = f"Error ({e}) parsing WIGOS station identifier"
-            LOGGER.error(f"{msg}")
+            # LOGGER.error(f"{msg}")
             LOGGER.debug(f"data:{data_dict}")
             raise ValueError(msg)
         # reset BUFR message to clear data
