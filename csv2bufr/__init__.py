@@ -829,6 +829,7 @@ def transform(data: str, mappings: dict) -> Iterator[dict]:
         if _delimiter not in [",", ";", "|", "\t"]:
             msg = "Invalid delimiter specified in mapping template, reverting to comma ','"  # noqa
             LOGGER.warning(msg)
+            _warnings.append(msg)
             _delimiter = ","
     else:
         _delimiter = DELIMITER
@@ -896,6 +897,7 @@ def transform(data: str, mappings: dict) -> Iterator[dict]:
                     if NULLIFY_INVALID:
                         msg = f"csv read error, non ASCII data detected ({val}), skipping row"  # noqa
                         LOGGER.warning(msg)  # noqa
+                        _warnings.append(msg)
                         LOGGER.debug(row)
                         continue
                     else:
