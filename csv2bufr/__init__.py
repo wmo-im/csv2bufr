@@ -174,7 +174,7 @@ def parse_value(element: str, data: dict):
     elif data_type[0] in ["", None]:
         return None
     else:
-        msg = f"Data type ({data_type[0]}) not recognised in mapping: {element}"
+        msg = f"Data type ({data_type[0]}) not recognised in mapping: {element}"  # noqa
         # LOGGER.error(msg)  # noqa
         raise ValueError(msg)
     return value
@@ -189,7 +189,7 @@ def get_(key: str, mapping: dict, data: dict):
         element = mapping[idx]
         value = parse_value(element['value'], data)
     except Exception as e:
-        msg = f"Warning raised getting value for {key}, None returned for {key}"  # noqa
+        msg = f"Warning ({e}) raised getting value for {key}, None returned for {key}"  # noqa
         if NULLIFY_INVALID:
             LOGGER.warning(msg)  # noqa
             _warnings.append(msg)
@@ -220,8 +220,7 @@ def validate_mapping(mapping: dict) -> bool:
     try:
         validate(mapping, schema)
     except Exception as e:
-        msg = f"Invalid BUFR template mapping file: {mapping}"
-        #LOGGER.error(f"{msg}")
+        msg = f"Warning ({e}). Invalid BUFR template mapping file: {mapping}"
         raise RuntimeError(msg)
 
     return SUCCESS
@@ -554,8 +553,7 @@ class BUFRMessage:
                     try:
                         codes_set_array(bufr_msg, eccodes_key, value)
                     except Exception as e:
-                        msg = f"Error ({e}) calling codes_set_array({bufr_msg}, {eccodes_key}, {value})"
-                        # LOGGER.error(f"{msg}")  # noqa
+                        msg = f"Error ({e}) calling codes_set_array({bufr_msg}, {eccodes_key}, {value})"  # noqa
                         raise RuntimeError(msg)
                 else:
                     try:
@@ -600,8 +598,7 @@ class BUFRMessage:
             # set hash
             self._hash = hashlib.md5(self.bufr).hexdigest()
         except Exception as e:
-            msg = f"Error ({e}) calculating hash (md5) of BUFR string: {self.bufr}"
-            # LOGGER.error(f"{msg}") # noqa
+            msg = f"Error ({e}) calculating hash (md5) of BUFR string: {self.bufr}"  # noqa
             raise RuntimeError(msg)
 
         return self.bufr
