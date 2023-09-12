@@ -131,21 +131,19 @@ def transform(ctx, csv_file, mapping, output_dir, verbosity):  # noqa
         raise click.ClickException(err)
 
     click.echo("CLI:\t... Processing subsets:")
-    for item in result:
-        key = item['_meta']["id"]
-        bufr_filename = f"{output_dir}{os.sep}{key}.bufr4"
-        if item['bufr4'] is not None:
-            try:
+    try:
+        for item in result:
+            key = item['_meta']["id"]
+            bufr_filename = f"{output_dir}{os.sep}{key}.bufr4"
+            if item['bufr4'] is not None:
                 with open(bufr_filename, "wb") as fh:
                     fh.write(item["bufr4"])
                     nbytes = fh.tell()
-
                 click.echo(f"CLI:\t..... {nbytes} bytes written to {bufr_filename}")  # noqa
-            except Exception as err:
-                raise click.ClickException(err)
-        else:
-            click.echo("CLI:\t..... 'None' found in BUFR output, no data written")  # noqa
-
+            else:
+                click.echo("CLI:\t..... 'None' found in BUFR output, no data written")  # noqa
+    except Exception as err:
+        raise click.ClickException(err)
     click.echo("CLI:\tEnd of processing, exiting.\n")
 
 
