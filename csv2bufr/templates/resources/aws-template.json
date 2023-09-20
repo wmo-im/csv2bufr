@@ -54,7 +54,7 @@
         {"eccodes_key": "#1#totalSnowDepth", "value": "data:snow_depth", "valid_min": "const:-0.02", "valid_max": "const:655.33"},
         {"eccodes_key": "#1#precipitationIntensityHighAccuracy", "value": "data:precipitation_intensity", "valid_min": "const:-0.00001", "valid_max": "const:0.65534"},
         {"eccodes_key": "#8#heightOfSensorAboveLocalGroundOrDeckOfMarinePlatform", "value": "data:anemometer_height", "valid_min": "const:0", "valid_max": "const:655.35"},
-        {"eccodes_key": "#3#timeSignificance", "value": "const:2", "valid_min": "const:0", "valid_max": "const:0"},
+        {"eccodes_key": "#3#timeSignificance", "value": "const:2", "valid_min": "const:2", "valid_max": "const:2"},
         {"eccodes_key": "#6#timePeriod", "value": "data:time_period_of_wind", "valid_min": "const:-10", "valid_max": "const:0"},
         {"eccodes_key": "#1#windDirection", "value": "data:wind_direction", "valid_min": "const:0", "valid_max": "const:360"},
         {"eccodes_key": "#1#windSpeed", "value": "data:wind_speed", "valid_min": "const:0", "valid_max": "const:409.5"},
