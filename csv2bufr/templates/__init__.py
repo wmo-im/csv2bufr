@@ -90,7 +90,7 @@ def validate_template(mapping: dict) -> bool:
     """
     global _warnings
     # load internal file schema for mappings
-    file_schema = f"{SCHEMA}{os.sep}mapping_schema.json"
+    file_schema = f"{SCHEMA}{os.sep}csv2bufr-template-v2.json"
     with open(file_schema) as fh:
         schema = json.load(fh)
 
