@@ -38,7 +38,7 @@ from eccodes import (codes_bufr_new_from_samples,
                      codes_bufr_keys_iterator_delete,
                      codes_bufr_keys_iterator_get_name, CodesInternalError)
 
-from jsonschema import validate
+import csv2bufr.templates as c2bt
 
 # some 'constants'
 SUCCESS = True
@@ -55,9 +55,6 @@ else:
     NULLIFY_INVALID = True
 
 LOGGER = logging.getLogger(__name__)
-
-THISDIR = os.path.dirname(os.path.realpath(__file__))
-MAPPINGS = f"{THISDIR}{os.sep}resources{os.sep}mappings"
 
 BUFR_TABLE_VERSION = 38  # default BUFR table version
 # list of BUFR attributes
@@ -197,33 +194,6 @@ def get_(key: str, mapping: dict, data: dict):
         else:
             raise KeyError(msg)
     return value
-
-
-# function to validate mapping file against JSON schema
-def validate_mapping(mapping: dict) -> bool:
-    """
-    Validates dictionary containing mapping to BUFR against internal schema.
-    Returns True if the dictionary passes and raises an error otherwise.
-
-    :param mapping: dictionary containing mappings to specified BUFR
-                        sequence using ecCodes key.
-
-    :returns: `bool` of validation result
-    """
-    global _warnings
-    # load internal file schema for mappings
-    file_schema = f"{MAPPINGS}{os.sep}mapping_schema.json"
-    with open(file_schema) as fh:
-        schema = json.load(fh)
-
-    # now validate
-    try:
-        validate(mapping, schema)
-    except Exception as e:
-        msg = f"Warning ({e}). Invalid BUFR template mapping file: {mapping}"
-        raise RuntimeError(msg)
-
-    return SUCCESS
 
 
 def apply_scaling(value: Union[NUMBERS], scale: Union[NUMBERS],
@@ -767,7 +737,8 @@ def transform(data: str, mappings: dict) -> Iterator[dict]:
     # ======================
     # validate mapping files
     # ======================
-    e = validate_mapping(mappings)
+    e = c2bt.validate_template(mappings)
+
     if e is not SUCCESS:
         raise ValueError("Invalid mappings")
 

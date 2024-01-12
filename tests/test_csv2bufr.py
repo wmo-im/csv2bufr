@@ -26,7 +26,7 @@ import logging
 from eccodes import (codes_bufr_new_from_samples, codes_release)
 import pytest
 
-from csv2bufr import (validate_mapping, apply_scaling, validate_value,
+from csv2bufr import (apply_scaling, validate_value,
                       transform, SUCCESS)
 
 import csv2bufr.templates as c2bt
@@ -39,6 +39,17 @@ LOGGER.setLevel("DEBUG")
 @pytest.fixture
 def mapping_dict():
     return {
+        "conformsTo": "csv2bufr-template-v2.json",
+        "metadata": {
+            "label": "pytest",
+            "description": "pytest template",
+            "version": "2",
+            "author": "David I. Berry",
+            "editor": "",
+            "dateCreated": "2023-09-01",
+            "dateModified": "2024-01-12",
+            "id": "eb37ac4f-13ce-4254-b372-5c1d097ea857"
+        },
         "inputShortDelayedDescriptorReplicationFactor": [],
         "inputDelayedDescriptorReplicationFactor": [],
         "inputExtendedDelayedDescriptorReplicationFactor": [],
@@ -148,7 +159,7 @@ def test_eccodes():
 
 # test to check validate_mapping is not broken
 def test_validate_mapping_pass(mapping_dict):
-    success = validate_mapping(mapping_dict)
+    success = c2bt.validate_template(mapping_dict)
     assert success == SUCCESS
 
 
@@ -239,4 +250,4 @@ def test_transform(data_dict, mapping_dict):
 
 
 def test_templates():
-    assert c2bt.load_template('aws-template') is not None
+    assert c2bt.load_template('21327aac-46a6-437d-ae81-7a16a637dd2c') is not None

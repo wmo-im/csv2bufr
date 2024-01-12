@@ -77,9 +77,10 @@ def mappings():
 @click.command('list')
 @click.pass_context
 def list_mappings(ctx):
-    for mapping in os.listdir(MAPPINGS):
-        msg = f"{mapping} => {MAPPINGS}{os.sep}{mapping}"
-        click.echo(msg)
+    templates = c2bt.list_templates()
+    click.echo(json.dumps(templates))
+    for tmpl in templates.items():
+        click.echo(json.dumps(tmpl, indent=4))
 
 
 @click.command('create')
