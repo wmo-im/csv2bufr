@@ -178,7 +178,7 @@ def test_validate_mapping_fail():
         ]
     }
     try:
-        success = validate_mapping(test_data)
+        success = c2bt.validate_template(test_data)
     except Exception:
         success = False
     assert success != SUCCESS
@@ -250,4 +250,4 @@ def test_transform(data_dict, mapping_dict):
 
 
 def test_templates():
-    assert c2bt.load_template('21327aac-46a6-437d-ae81-7a16a637dd2c') is not None
+    assert c2bt.load_template('21327aac-46a6-437d-ae81-7a16a637dd2c') is not None  # noqa
