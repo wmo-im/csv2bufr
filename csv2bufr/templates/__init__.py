@@ -19,11 +19,12 @@
 #
 ###############################################################################
 import json
-from jsonschema import validate
 import logging
 import os
 from pathlib import Path
 from typing import Union
+
+from jsonschema import validate
 
 THISDIR = os.path.dirname(os.path.realpath(__file__))
 LOGGER = logging.getLogger(__name__)
