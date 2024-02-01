@@ -110,12 +110,12 @@ def load_template(template_name: str) -> Union[dict, None]:
 
         if not ocset:
             template['header'].append(
-                {"eccodes_key":"bufrHeaderCentre",
+                {"eccodes_key": "bufrHeaderCentre",
                  "value": f"const:{ORIGINATING_CENTRE}"})
 
         if not oscset:
             template['header'].append(
-                {"eccodes_key":"bufrHeaderSubCentre",
+                {"eccodes_key": "bufrHeaderSubCentre",
                  "value": f"const:{ORIGINATING_SUBCENTRE}"})
 
         return template
