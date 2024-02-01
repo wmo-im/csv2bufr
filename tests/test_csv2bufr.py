@@ -20,6 +20,7 @@
 ###############################################################################
 
 import csv
+import os
 from io import StringIO
 import logging
 
@@ -251,3 +252,20 @@ def test_transform(data_dict, mapping_dict):
 
 def test_templates():
     assert c2bt.load_template('21327aac-46a6-437d-ae81-7a16a637dd2c') is not None  # noqa
+    tmpl = c2bt.load_template('21327aac-46a6-437d-ae81-7a16a637dd2c')
+    # check header centre and sub centre set to env
+    ocset = False
+    ocenv = os.environ['BUFR_ORIGINATING_CENTRE']
+    oscset = False
+    oscenv = os.environ['BUFR_ORIGINATING_SUBCENTRE']
+    LOGGER.warning((tmpl['header']))
+    for hidx in range(len(tmpl['header'])):
+        LOGGER.warning(tmpl['header'][hidx]['eccodes_key'])
+        if tmpl['header'][hidx]['eccodes_key'] == 'bufrHeaderCentre':
+            assert tmpl['header'][hidx]['value'] == f"const:{ocenv}"
+            ocset = True
+        if tmpl['header'][hidx]['eccodes_key'] == 'bufrHeaderSubCentre':
+            assert tmpl['header'][hidx]['value'] == f"const:{oscenv}"
+            oscset = True
+    assert ocset
+    assert oscset

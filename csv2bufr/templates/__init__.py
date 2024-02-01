@@ -33,6 +33,25 @@ TEMPLATE_DIRS = [Path("./")]
 
 _SUCCESS_ = True
 
+
+# check env variables set
+ORIGINATING_CENTRE = None
+ORIGINATING_SUBCENTRE = None
+
+ORIGINATING_CENTRE = os.environ.get('BUFR_ORIGINATING_CENTRE')
+ORIGINATING_SUBCENTRE = os.environ.get('BUFR_ORIGINATING_SUBCENTRE')
+
+if ORIGINATING_CENTRE is None:
+    msg = "Invalid BUFR originating centre, please ensure the BUFR_ORIGINATING_CENTRE is set to a valid value"  # noqa
+    LOGGER.error(msg)
+    raise RuntimeError(msg)
+
+if ORIGINATING_SUBCENTRE is None:
+    msg = "Invalid BUFR originating subcentre, please ensure the BUFR_ORIGINATING_SUBCENTRE is set to a valid value"  # noqa
+    LOGGER.error(msg)
+    raise RuntimeError(msg)
+
+
 if Path("/opt/csv2bufr/templates").exists():
     TEMPLATE_DIRS.append(Path("/opt/csv2bufr/templates"))
 
@@ -68,7 +87,7 @@ def load_template(template_name: str) -> Union[dict, None]:
     else:
         fname = TEMPLATES[template_name].get('path')
         if fname is None:
-            msg = f"Error loading template {template.name}, no path found"
+            msg = f"Error loading template {template_name}, no path found"
         else:
             with open(fname) as fh:
                 template = json.load(fh)
@@ -76,6 +95,29 @@ def load_template(template_name: str) -> Union[dict, None]:
     if msg:
         raise RuntimeError(msg)
     else:
+        # update template originating centre and subcentre
+        ocset = False
+        oscset = False
+        for hidx in range(len(template['header'])):
+            if template['header'][hidx]["eccodes_key"] == "bufrHeaderCentre":
+                template['header'][hidx]["eccodes_key"]["value"] = \
+                    f"const:{ORIGINATING_CENTRE}"
+                ocset = True
+            if template['header'][hidx]["eccodes_key"] == "bufrHeaderSubCentre":  # noqa
+                template['header'][hidx]["eccodes_key"]["value"] = \
+                    f"const:{ORIGINATING_SUBCENTRE}"
+                oscset = True
+
+        if not ocset:
+            template['header'].append(
+                {"eccodes_key":"bufrHeaderCentre",
+                 "value": f"const:{ORIGINATING_CENTRE}"})
+
+        if not oscset:
+            template['header'].append(
+                {"eccodes_key":"bufrHeaderSubCentre",
+                 "value": f"const:{ORIGINATING_SUBCENTRE}"})
+
         return template
 
 
