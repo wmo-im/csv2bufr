@@ -6,7 +6,7 @@ BUFR template mapping
 =====================
 
 The mapping between the input CSV data and the output BUFR data is specified in a JSON file.
-The csv2bufr module validates the mapping file against the schema shown at the bottom of this page prior to attempted the transformation to BUFR.
+The csv2bufr module validates the mapping file against the schema shown at the bottom of this page prior to attempting the transformation to BUFR.
 This schema specifies 7 primary properties all of which are mandatory:
 
 - ``inputDelayedDescriptorReplicationFactor`` - array of integers, values for the delayed descriptor replication factors to use
@@ -66,7 +66,7 @@ Similarly the keys for the different data elements can be found at:
 - `<https://confluence.ecmwf.int/display/ECC/WMO%3D37+element+table>`_
 
 input<Short|Extended>DelayedDescriptorReplicationFactor
----------------------------------------
+-------------------------------------------------------
 Due to the way that eccodes works any delayed replication factors need to be specified before encoding and included in the mapping file.
 This currently limits the use of the delayed replication factors to static values for a given mapping. For example
 every data file that uses a given mapping file has the same optional elements present or the same number of levels in an
@@ -196,4 +196,15 @@ the ``scale`` and ``offset`` fields. Some additional examples are given below.
 Schema
 ------
 
-.. literalinclude:: ../../csv2bufr/resources/mappings/mapping_schema.json
+.. literalinclude:: ../../csv2bufr/resources/mappings/csv2bufr-template-v2.json
+
+Built in templates and search path
+----------------------------------
+
+Several preconfigured templates are available from the csv2bufr-templates repository:
+
+- https://github.com/wmo-im/csv2bufr-templates
+
+By default, ``csv2bufr`` searches in the current working directory and the
+``/opt/csv2bufr/templates`` directory, additional search paths can be added by setting
+the ``CSV2BUFR_TEMPLATES`` environment variable.
