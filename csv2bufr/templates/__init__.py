@@ -33,13 +33,9 @@ TEMPLATE_DIRS = [Path("./")]
 
 _SUCCESS_ = True
 
-
-# check env variables set
-ORIGINATING_CENTRE = None
-ORIGINATING_SUBCENTRE = None
-
-ORIGINATING_CENTRE = os.environ.get('BUFR_ORIGINATING_CENTRE')
-ORIGINATING_SUBCENTRE = os.environ.get('BUFR_ORIGINATING_SUBCENTRE')
+# check if originating centre and subcentre are set as env , default to 255
+ORIGINATING_CENTRE = os.environ.get('BUFR_ORIGINATING_CENTRE', 65535)
+ORIGINATING_SUBCENTRE = os.environ.get('BUFR_ORIGINATING_SUBCENTRE', 65535)
 
 if ORIGINATING_CENTRE is None:
     msg = "Invalid BUFR originating centre, please ensure the BUFR_ORIGINATING_CENTRE is set to a valid value"  # noqa

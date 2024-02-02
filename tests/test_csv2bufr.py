@@ -251,13 +251,13 @@ def test_transform(data_dict, mapping_dict):
 
 
 def test_templates():
-    assert c2bt.load_template('21327aac-46a6-437d-ae81-7a16a637dd2c') is not None  # noqa
     tmpl = c2bt.load_template('21327aac-46a6-437d-ae81-7a16a637dd2c')
+    assert tmpl is not None
     # check header centre and sub centre set to env
     ocset = False
-    ocenv = os.environ['BUFR_ORIGINATING_CENTRE']
+    ocenv = os.environ.get('BUFR_ORIGINATING_CENTRE', 65535)
     oscset = False
-    oscenv = os.environ['BUFR_ORIGINATING_SUBCENTRE']
+    oscenv = os.environ.get('BUFR_ORIGINATING_SUBCENTRE', 65535)
     LOGGER.warning((tmpl['header']))
     for hidx in range(len(tmpl['header'])):
         LOGGER.warning(tmpl['header'][hidx]['eccodes_key'])
