@@ -6,7 +6,7 @@
         "conformsTo": {},
         "metadata": {
             "type": "object",
-            "requiered": ["label","description","version","author","editor","dateCreated","dateModified","id"],
+            "required": ["label","description","version","author","editor","dateCreated","dateModified","id"],
             "properties": {
                 "label": {
                     "type": "string"
