@@ -22,9 +22,9 @@
 import csv
 import os
 import threading
+
 from io import StringIO
 import logging
-import threading
 
 from eccodes import (codes_bufr_new_from_samples, codes_release)
 import pytest
@@ -40,6 +40,7 @@ LOGGER.setLevel("DEBUG")
 # set up warnings dict
 tidx = f"t-{threading.get_ident()}"
 _warnings_global[tidx] = []
+
 
 # test data
 @pytest.fixture
@@ -230,6 +231,7 @@ def test_validate_value_nullify():
         assert False
     assert value is None
     del _warnings_global[tid]
+
 
 # check that test transform works
 def test_transform(data_dict, mapping_dict):
