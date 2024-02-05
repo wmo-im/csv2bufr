@@ -196,7 +196,7 @@ the ``scale`` and ``offset`` fields. Some additional examples are given below.
 Schema
 ------
 
-.. literalinclude:: ../../csv2bufr/resources/mappings/csv2bufr-template-v2.json
+.. literalinclude:: ../../csv2bufr/templates/resources/schema/csv2bufr-template-v2.json
 
 Built in templates and search path
 ----------------------------------
