@@ -127,7 +127,6 @@ def validate_template(mapping: dict) -> bool:
 
     :returns: `bool` of validation result
     """
-    global _warnings
     # load internal file schema for mappings
     file_schema = f"{SCHEMA}{os.sep}csv2bufr-template-v2.json"
     with open(file_schema) as fh:
