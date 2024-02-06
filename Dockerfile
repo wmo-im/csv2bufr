@@ -25,11 +25,18 @@ FROM wmoim/dim_eccodes_baseimage:2.28.0
 ENV DEBIAN_FRONTEND="noninteractive" \
     TZ="Etc/UTC" \
     ECCODES_DIR=/opt/eccodes \
-    PATH="${PATH}:/opt/eccodes/bin"
+    PATH="${PATH}:/opt/eccodes/bin" \
+    BUFR_ORIGINATING_CENTRE=65535 \
+    BUFR_ORIGINATING_SUBCENTRE=65535
 
 RUN apt-get update -y \
-    && apt-get install -y vim emacs nedit nano git \
-    && pip3 install --no-cache-dir git+https://github.com/wmo-im/csv2bufr-templates@main  # ToDo - move to requirements.txt
+    && apt-get install -y vim emacs nedit nano git wget
+
+# install csv2bufr templates
+RUN mkdir /opt/csv2bufr &&  \
+    cd /opt/csv2bufr && \
+    wget https://github.com/wmo-im/csv2bufr-templates/archive/refs/tags/v0.1.tar.gz && \
+    tar -zxf v0.1.tar.gz --strip-components=1 csv2bufr-templates-0.1/templates
 
 WORKDIR /tmp
 
@@ -37,10 +44,4 @@ COPY . /tmp/csv2bufr
 
 RUN cd /tmp/csv2bufr && python3 setup.py install
 
-RUN groupadd -g 1001 wis2users
-RUN useradd -u 1001 wis2user
-RUN usermod -aG wis2users wis2user
-
-USER wis2user
-WORKDIR /home/wis2user
 
