@@ -24,18 +24,45 @@ import os
 from pathlib import Path
 from typing import Union
 
-TEMPLATE_DIRS = []
+from jsonschema import validate
 
+THISDIR = os.path.dirname(os.path.realpath(__file__))
 LOGGER = logging.getLogger(__name__)
+SCHEMA = f"{THISDIR}{os.sep}resources{os.sep}schema"
+TEMPLATE_DIRS = [Path("./")]
+
+_SUCCESS_ = True
+
+# check if originating centre and subcentre are set as env , default to 255
+ORIGINATING_CENTRE = os.environ.get('BUFR_ORIGINATING_CENTRE', 65535)
+ORIGINATING_SUBCENTRE = os.environ.get('BUFR_ORIGINATING_SUBCENTRE', 65535)
+
+if ORIGINATING_CENTRE is None:
+    msg = "Invalid BUFR originating centre, please ensure the BUFR_ORIGINATING_CENTRE is set to a valid value"  # noqa
+    LOGGER.error(msg)
+    raise RuntimeError(msg)
+
+if ORIGINATING_SUBCENTRE is None:
+    msg = "Invalid BUFR originating subcentre, please ensure the BUFR_ORIGINATING_SUBCENTRE is set to a valid value"  # noqa
+    LOGGER.error(msg)
+    raise RuntimeError(msg)
+
+
+if Path("/opt/csv2bufr/templates").exists():
+    TEMPLATE_DIRS.append(Path("/opt/csv2bufr/templates"))
 
 # Set user defined location first
 if 'CSV2BUFR_TEMPLATES' in os.environ:
     TEMPLATE_DIRS.append(Path(os.environ['CSV2BUFR_TEMPLATES']))
+else:
+    LOGGER.warning(f"""CSV2BUFR_TEMPLATES is not set, default search path(s)
+        will be used ({TEMPLATE_DIRS}).""")
 
-# Now add defaults
-TEMPLATE_DIRS.append(Path(__file__).resolve().parent / 'resources')
+# Dictionary to store template filename and label (if assigned)
+TEMPLATES = {}
 
 
+# function to load template by name
 def load_template(template_name: str) -> Union[dict, None]:
     """
     Checks whether specified template exists and loads file.
@@ -48,39 +75,117 @@ def load_template(template_name: str) -> Union[dict, None]:
               not found.
     """
     template = None
-    # iterate over directories and load file
-    for dir_ in TEMPLATE_DIRS:
-        try:
-            template_file = dir_ / f"{template_name}.json"
-            if template_file.is_file():
-                with template_file.open() as fh:
-                    template = json.load(fh)
-                    break
-        except Exception as e:
-            LOGGER.warning(f"Error raised loading csv2bufr templates: {e}.")
-
-    if template is None:
-        LOGGER.warning(f"Requested template '{template_name}' not found." +
-                       f" Search path = {TEMPLATE_DIRS}. Please update " +
+    msg = False
+    if template_name not in TEMPLATES:
+        msg = f"Requested template '{template_name}' not found." +\
+                       f" Search path = {TEMPLATE_DIRS}. Please update " +\
                        "search path (e.g. 'export CSV2BUFR_TEMPLATE=...')"
-                       )
+    else:
+        fname = TEMPLATES[template_name].get('path')
+        if fname is None:
+            msg = f"Error loading template {template_name}, no path found"
+        else:
+            with open(fname) as fh:
+                template = json.load(fh)
 
-    return template
+    if msg:
+        raise RuntimeError(msg)
+    else:
+        # update template originating centre and subcentre
+        ocset = False
+        oscset = False
+        for hidx in range(len(template['header'])):
+            if template['header'][hidx]["eccodes_key"] == "bufrHeaderCentre":
+                template['header'][hidx]["eccodes_key"]["value"] = \
+                    f"const:{ORIGINATING_CENTRE}"
+                ocset = True
+            if template['header'][hidx]["eccodes_key"] == "bufrHeaderSubCentre":  # noqa
+                template['header'][hidx]["eccodes_key"]["value"] = \
+                    f"const:{ORIGINATING_SUBCENTRE}"
+                oscset = True
+
+        if not ocset:
+            template['header'].append(
+                {"eccodes_key": "bufrHeaderCentre",
+                 "value": f"const:{ORIGINATING_CENTRE}"})
+
+        if not oscset:
+            template['header'].append(
+                {"eccodes_key": "bufrHeaderSubCentre",
+                 "value": f"const:{ORIGINATING_SUBCENTRE}"})
+
+        return template
 
 
-def list_templates() -> list:
+def validate_template(mapping: dict) -> bool:
     """
-    :returns: List of known templates in search path (CSV2BUFR_TEMPLATES).
-              An empty list is return if no templates are found.
+    Validates dictionary containing mapping to BUFR against internal schema.
+    Returns True if the dictionary passes and raises an error otherwise.
+
+    :param mapping: dictionary containing mappings to specified BUFR
+                        sequence using ecCodes key.
+
+    :returns: `bool` of validation result
     """
-    templates = []
+    # load internal file schema for mappings
+    file_schema = f"{SCHEMA}{os.sep}csv2bufr-template-v2.json"
+    with open(file_schema) as fh:
+        schema = json.load(fh)
+
+    # now validate
+    try:
+        validate(mapping, schema)
+    except Exception as e:
+        msg = f"Exception ({e}). Invalid BUFR template mapping file: {mapping}"
+        raise RuntimeError(msg)
+
+    return _SUCCESS_
+
+
+def index_templates() -> bool:
     for dir_ in TEMPLATE_DIRS:
-        try:
-            for template in dir_.iterdir():
+        for template in dir_.iterdir():
+            try:
                 if template.suffix == ".json":
-                    templates.append(template.stem)
-        except Exception as e:
-            LOGGER.warning(f"Error raised listing csv2bufr templates: {e}." +
-                           "Directory skipped.")
+                    # check if valid mapping file
+                    with template.open() as fh:
+                        tmpl = json.load(fh)
+                    if 'csv2bufr-template-v2.json' not in tmpl.get("conformsTo",[]):  # noqa
+                        LOGGER.warning("'csv2bufr-template-v2.json' not found in " +  # noqa
+                                       f"conformsTo for file {template}, skipping")  # noqa
+                        continue
+                    if validate_template(tmpl) == _SUCCESS_:
+                        # get label if exists else set to empty string
+                        fname = str(template)
+                        id = tmpl['metadata'].get("id", "")
+                        if id in TEMPLATES:
+                            pass
+                        else:
+                            TEMPLATES[id] = {
+                                "label": tmpl['metadata'].get("label", ""),
+                                "description": tmpl['metadata'].get("description", ""),  # noqa
+                                "version": tmpl['metadata'].get("version", ""),
+                                "author": tmpl['metadata'].get("author", ""),
+                                "dateCreated": tmpl['metadata'].get("dateCreated", ""),  # noqa
+                                "id": tmpl['metadata'].get("id", ""),
+                                "path": fname
+                            }
 
-    return templates
+            except Exception as e:
+                print(dir_)
+                LOGGER.warning(f"Warning raised indexing csv2bufr templates: {e}, skipping file {template}.")  # noqa
+
+    return _SUCCESS_
+
+
+def list_templates() -> dict:
+    """
+    :returns: Dictionary of known templates in search path
+              (CSV2BUFR_TEMPLATES). An empty dictionary is return if no
+              templates are found.
+    """
+    return TEMPLATES
+
+
+if index_templates() != _SUCCESS_:
+    LOGGER.error("Error indexing csv2bufr templates, see logs")

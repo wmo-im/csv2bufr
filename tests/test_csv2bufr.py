@@ -20,25 +20,43 @@
 ###############################################################################
 
 import csv
+import os
+import threading
+
 from io import StringIO
 import logging
 
 from eccodes import (codes_bufr_new_from_samples, codes_release)
 import pytest
 
-from csv2bufr import (validate_mapping, apply_scaling, validate_value,
-                      transform, SUCCESS)
+from csv2bufr import (apply_scaling, validate_value,
+                      transform, SUCCESS, _warnings_global)
 
 import csv2bufr.templates as c2bt
 
 LOGGER = logging.getLogger(__name__)
 LOGGER.setLevel("DEBUG")
 
+# set up warnings dict
+tidx = f"t-{threading.get_ident()}"
+_warnings_global[tidx] = []
+
 
 # test data
 @pytest.fixture
 def mapping_dict():
     return {
+        "conformsTo": "csv2bufr-template-v2.json",
+        "metadata": {
+            "label": "pytest",
+            "description": "pytest template",
+            "version": "2",
+            "author": "David I. Berry",
+            "editor": "",
+            "dateCreated": "2023-09-01",
+            "dateModified": "2024-01-12",
+            "id": "eb37ac4f-13ce-4254-b372-5c1d097ea857"
+        },
         "inputShortDelayedDescriptorReplicationFactor": [],
         "inputDelayedDescriptorReplicationFactor": [],
         "inputExtendedDelayedDescriptorReplicationFactor": [],
@@ -148,7 +166,7 @@ def test_eccodes():
 
 # test to check validate_mapping is not broken
 def test_validate_mapping_pass(mapping_dict):
-    success = validate_mapping(mapping_dict)
+    success = c2bt.validate_template(mapping_dict)
     assert success == SUCCESS
 
 
@@ -167,7 +185,7 @@ def test_validate_mapping_fail():
         ]
     }
     try:
-        success = validate_mapping(test_data)
+        success = c2bt.validate_template(test_data)
     except Exception:
         success = False
     assert success != SUCCESS
@@ -204,11 +222,15 @@ def test_validate_value_fail():
 # test to check that valid_value returns null value when we expect it to
 def test_validate_value_nullify():
     input_value = 10.0
+    tid = f"t-{threading.get_ident()}"
+    if tid not in _warnings_global:
+        _warnings_global[tid] = []
     try:
         value = validate_value("test value", input_value, 0.0, 9.9, True)
     except Exception:
         assert False
     assert value is None
+    del _warnings_global[tid]
 
 
 # check that test transform works
@@ -239,4 +261,21 @@ def test_transform(data_dict, mapping_dict):
 
 
 def test_templates():
-    assert c2bt.load_template('aws-template') is not None
+    tmpl = c2bt.load_template('21327aac-46a6-437d-ae81-7a16a637dd2c')
+    assert tmpl is not None
+    # check header centre and sub centre set to env
+    ocset = False
+    ocenv = os.environ.get('BUFR_ORIGINATING_CENTRE', 65535)
+    oscset = False
+    oscenv = os.environ.get('BUFR_ORIGINATING_SUBCENTRE', 65535)
+    LOGGER.warning((tmpl['header']))
+    for hidx in range(len(tmpl['header'])):
+        LOGGER.warning(tmpl['header'][hidx]['eccodes_key'])
+        if tmpl['header'][hidx]['eccodes_key'] == 'bufrHeaderCentre':
+            assert tmpl['header'][hidx]['value'] == f"const:{ocenv}"
+            ocset = True
+        if tmpl['header'][hidx]['eccodes_key'] == 'bufrHeaderSubCentre':
+            assert tmpl['header'][hidx]['value'] == f"const:{oscenv}"
+            oscset = True
+    assert ocset
+    assert oscset
