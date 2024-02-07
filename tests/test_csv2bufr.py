@@ -280,6 +280,7 @@ def test_templates():
     assert ocset
     assert oscset
 
+
 def test_load_template_by_name():
     tmpl = c2bt.load_template('aws-template')
     assert tmpl is not None
