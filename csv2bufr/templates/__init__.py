@@ -47,16 +47,15 @@ if ORIGINATING_SUBCENTRE is None:
     LOGGER.error(msg)
     raise RuntimeError(msg)
 
-
-if Path("/opt/csv2bufr/templates").exists():
-    TEMPLATE_DIRS.append(Path("/opt/csv2bufr/templates"))
-
 # Set user defined location first
 if 'CSV2BUFR_TEMPLATES' in os.environ:
     TEMPLATE_DIRS.append(Path(os.environ['CSV2BUFR_TEMPLATES']))
 else:
     LOGGER.warning(f"""CSV2BUFR_TEMPLATES is not set, default search path(s)
         will be used ({TEMPLATE_DIRS}).""")
+
+if Path("/opt/csv2bufr/templates").exists():
+    TEMPLATE_DIRS.append(Path("/opt/csv2bufr/templates"))
 
 # Dictionary to store template filename and label (if assigned)
 TEMPLATES = {}
@@ -76,19 +75,31 @@ def load_template(template_name: str) -> Union[dict, None]:
     """
     template = None
     msg = False
+    fname = None
+    error_flag = False
     if template_name not in TEMPLATES:
-        msg = f"Requested template '{template_name}' not found." +\
-                       f" Search path = {TEMPLATE_DIRS}. Please update " +\
-                       "search path (e.g. 'export CSV2BUFR_TEMPLATE=...')"
+        msg = f"Requested template {template_name} not found, " +\
+              "searching by file name"
+        for _template in TEMPLATES.values():
+            if template_name in _template.get('path'):
+                fname = _template.get('path')
+                break
+        if fname is None:
+            msg = f"Requested template '{template_name}' not found. " +\
+                  f"Search path = {TEMPLATE_DIRS}. Please update " +\
+                  "search path (e.g. 'export CSV2BUFR_TEMPLATE=...')"
+            error_flag = True
     else:
         fname = TEMPLATES[template_name].get('path')
-        if fname is None:
-            msg = f"Error loading template {template_name}, no path found"
-        else:
-            with open(fname) as fh:
-                template = json.load(fh)
 
-    if msg:
+    if fname is None:
+        msg = f"Error loading template {template_name}, no path found"
+        error_flag = True
+    else:
+        with open(fname) as fh:
+            template = json.load(fh)
+
+    if error_flag:
         raise RuntimeError(msg)
     else:
         # update template originating centre and subcentre
@@ -113,6 +124,9 @@ def load_template(template_name: str) -> Union[dict, None]:
             template['header'].append(
                 {"eccodes_key": "bufrHeaderSubCentre",
                  "value": f"const:{ORIGINATING_SUBCENTRE}"})
+
+        if msg:
+            LOGGER.warning(msg)
 
         return template
 
