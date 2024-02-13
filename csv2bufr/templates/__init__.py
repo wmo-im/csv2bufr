@@ -182,7 +182,8 @@ def index_templates() -> bool:
                                 "author": tmpl['metadata'].get("author", ""),
                                 "dateCreated": tmpl['metadata'].get("dateCreated", ""),  # noqa
                                 "id": tmpl['metadata'].get("id", ""),
-                                "path": fname
+                                "path": fname,
+                                "basename": Path(fname).name.replace(".json","")  # noqa
                             }
 
             except Exception as e:
