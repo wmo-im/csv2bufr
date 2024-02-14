@@ -81,7 +81,7 @@ def load_template(template_name: str) -> Union[dict, None]:
         msg = f"Requested template {template_name} not found, " +\
               "searching by file name"
         for _template in TEMPLATES.values():
-            if template_name in _template.get('path'):
+            if template_name == _template.get('name'):
                 fname = _template.get('path')
                 break
         if fname is None:
@@ -183,7 +183,7 @@ def index_templates() -> bool:
                                 "dateCreated": tmpl['metadata'].get("dateCreated", ""),  # noqa
                                 "id": tmpl['metadata'].get("id", ""),
                                 "path": fname,
-                                "basename": Path(fname).name.replace(".json", "")  # noqa
+                                "name": Path(fname).name.replace(".json", "")  # noqa
                             }
 
             except Exception as e:
