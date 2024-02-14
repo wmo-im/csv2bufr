@@ -29,7 +29,7 @@ from jsonschema import validate
 THISDIR = os.path.dirname(os.path.realpath(__file__))
 LOGGER = logging.getLogger(__name__)
 SCHEMA = f"{THISDIR}{os.sep}resources{os.sep}schema"
-TEMPLATE_DIRS = [Path("./")]
+TEMPLATE_DIRS = []  # [Path("./")]
 
 _SUCCESS_ = True
 
@@ -47,10 +47,20 @@ if ORIGINATING_SUBCENTRE is None:
     LOGGER.error(msg)
     raise RuntimeError(msg)
 
+_template_flag = False
 # Set user defined location first
 if 'CSV2BUFR_TEMPLATES' in os.environ:
     TEMPLATE_DIRS.append(Path(os.environ['CSV2BUFR_TEMPLATES']))
 else:
+    TEMPLATE_DIRS.append(Path("./"))
+    _template_flag = True
+
+# Check if /opt/csv2bur/templates exists and add to search path
+if Path("/opt/csv2bufr/templates").exists() and \
+        "/opt/csv2bufr/templates" not in TEMPLATE_DIRS:
+    TEMPLATE_DIRS.append(Path("/opt/csv2bufr/templates"))
+
+if _template_flag:
     LOGGER.warning(f"""CSV2BUFR_TEMPLATES is not set, default search path(s)
         will be used ({TEMPLATE_DIRS}).""")
 
@@ -81,7 +91,7 @@ def load_template(template_name: str) -> Union[dict, None]:
         msg = f"Requested template {template_name} not found, " +\
               "searching by file name"
         for _template in TEMPLATES.values():
-            if template_name in _template.get('path'):
+            if template_name == _template.get('name'):
                 fname = _template.get('path')
                 break
         if fname is None:
@@ -182,7 +192,8 @@ def index_templates() -> bool:
                                 "author": tmpl['metadata'].get("author", ""),
                                 "dateCreated": tmpl['metadata'].get("dateCreated", ""),  # noqa
                                 "id": tmpl['metadata'].get("id", ""),
-                                "path": fname
+                                "path": fname,
+                                "name": Path(fname).stem
                             }
 
             except Exception as e:
