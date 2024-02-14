@@ -20,7 +20,7 @@
 ###############################################################################
 
 #FROM ubuntu:latest
-FROM wmoim/dim_eccodes_baseimage:2.28.0
+FROM wmoim/dim_eccodes_baseimage:2.31.0
 
 ENV DEBIAN_FRONTEND="noninteractive" \
     TZ="Etc/UTC" \
