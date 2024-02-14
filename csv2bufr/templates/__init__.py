@@ -29,7 +29,7 @@ from jsonschema import validate
 THISDIR = os.path.dirname(os.path.realpath(__file__))
 LOGGER = logging.getLogger(__name__)
 SCHEMA = f"{THISDIR}{os.sep}resources{os.sep}schema"
-TEMPLATE_DIRS = [Path("./")]
+TEMPLATE_DIRS = []  # [Path("./")]
 
 _SUCCESS_ = True
 
@@ -47,10 +47,20 @@ if ORIGINATING_SUBCENTRE is None:
     LOGGER.error(msg)
     raise RuntimeError(msg)
 
+_template_flag = False
 # Set user defined location first
 if 'CSV2BUFR_TEMPLATES' in os.environ:
     TEMPLATE_DIRS.append(Path(os.environ['CSV2BUFR_TEMPLATES']))
 else:
+    TEMPLATE_DIRS.append(Path("./"))
+    _template_flag = True
+
+# Check if /opt/csv2bur/templates exists and add to search path
+if Path("/opt/csv2bufr/templates").exists() and \
+        "/opt/csv2bufr/templates" not in TEMPLATE_DIRS:
+    TEMPLATE_DIRS.append(Path("/opt/csv2bufr/templates"))
+
+if _template_flag:
     LOGGER.warning(f"""CSV2BUFR_TEMPLATES is not set, default search path(s)
         will be used ({TEMPLATE_DIRS}).""")
 
