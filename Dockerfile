@@ -35,8 +35,8 @@ RUN apt-get update -y \
 # install csv2bufr templates
 RUN mkdir /opt/csv2bufr &&  \
     cd /opt/csv2bufr && \
-    wget https://github.com/wmo-im/csv2bufr-templates/archive/refs/tags/v0.1.tar.gz && \
-    tar -zxf v0.1.tar.gz --strip-components=1 csv2bufr-templates-0.1/templates
+    wget https://github.com/wmo-im/csv2bufr-templates/archive/refs/tags/v0.2.tar.gz && \
+    tar -zxf v0.1.tar.gz --strip-components=1 csv2bufr-templates-0.2/templates
 
 WORKDIR /tmp
 
