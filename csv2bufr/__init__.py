@@ -518,7 +518,7 @@ class BUFRMessage:
                                 "inputDelayedDescriptorReplicationFactor",
                                 self.delayed_replications)
             except Exception as e:
-                msg = "Error ({e}) setting inputDelayedDescriptorReplicationFactor"  # noqa
+                msg = f"Error ({e}) setting inputDelayedDescriptorReplicationFactor"  # noqa
                 raise RuntimeError(msg)
         # ============================
         # iterate over keys and encode
