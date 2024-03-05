@@ -88,8 +88,6 @@ def load_template(template_name: str) -> Union[dict, None]:
     fname = None
     error_flag = False
     if template_name not in TEMPLATES:
-        msg = f"Requested template {template_name} not found, " +\
-              "searching by file name"
         for _template in TEMPLATES.values():
             if template_name == _template.get('name'):
                 fname = _template.get('path')

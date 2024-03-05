@@ -513,9 +513,13 @@ class BUFRMessage:
         # set delayed replications, this is needed again as we only used it the
         # first time to set the keys
         if len(self.delayed_replications) > 0:
-            codes_set_array(bufr_msg,
-                            "inputDelayedDescriptorReplicationFactor",
-                            self.delayed_replications)
+            try:
+                codes_set_array(bufr_msg,
+                                "inputDelayedDescriptorReplicationFactor",
+                                self.delayed_replications)
+            except Exception as e:
+                msg = f"Error ({e}) setting inputDelayedDescriptorReplicationFactor"  # noqa
+                raise RuntimeError(msg)
         # ============================
         # iterate over keys and encode
         # ============================
@@ -973,6 +977,6 @@ def transform(data: str, mappings: dict) -> Iterator[dict]:
         # now yield result back to caller
         yield result
         # clear warnings
-        del _warnings_global[job_id]
+        _warnings_global[job_id] = []
 
     fh.close()
