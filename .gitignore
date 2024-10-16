@@ -43,3 +43,6 @@ logs
 
 # pycharm
 .idea
+
+# scratch directory
+scratch
