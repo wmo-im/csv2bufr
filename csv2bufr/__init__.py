@@ -19,7 +19,7 @@
 #
 ###############################################################################
 
-__version__ = '0.8.2'
+__version__ = '0.8.dev3'
 
 import csv
 from datetime import timezone, datetime
@@ -512,6 +512,15 @@ class BUFRMessage:
         bufr_msg = codes_bufr_new_from_samples("BUFR4")
         # set delayed replications, this is needed again as we only used it the
         # first time to set the keys
+        if len(self.short_delayed_replications) > 0:
+            try:
+                codes_set_array(bufr_msg,
+                                "inputShortDelayedDescriptorReplicationFactor",
+                                self.short_delayed_replications)
+            except Exception as e:
+                msg = f"Error ({e}) setting inputShortDelayedDescriptorReplicationFactor"  # noqa
+                raise RuntimeError(msg)
+
         if len(self.delayed_replications) > 0:
             try:
                 codes_set_array(bufr_msg,
@@ -520,6 +529,16 @@ class BUFRMessage:
             except Exception as e:
                 msg = f"Error ({e}) setting inputDelayedDescriptorReplicationFactor"  # noqa
                 raise RuntimeError(msg)
+
+        if len(self.extended_delayed_replications) > 0:
+            try:
+                codes_set_array(bufr_msg,
+                                "inputExtendedDelayedDescriptorReplicationFactor",  # noqa
+                                self.extended_delayed_replications)
+            except Exception as e:
+                msg = f"Error ({e}) setting inputExtendedDelayedDescriptorReplicationFactor"  # noqa
+                raise RuntimeError(msg)
+
         # ============================
         # iterate over keys and encode
         # ============================
