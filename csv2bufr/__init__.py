@@ -533,12 +533,11 @@ class BUFRMessage:
         if len(self.extended_delayed_replications) > 0:
             try:
                 codes_set_array(bufr_msg,
-                                "inputExtendedDelayedDescriptorReplicationFactor",
+                                "inputExtendedDelayedDescriptorReplicationFactor",  # noqa
                                 self.extended_delayed_replications)
             except Exception as e:
                 msg = f"Error ({e}) setting inputExtendedDelayedDescriptorReplicationFactor"  # noqa
                 raise RuntimeError(msg)
-
 
         # ============================
         # iterate over keys and encode
