@@ -19,7 +19,7 @@
 #
 ###############################################################################
 
-__version__ = '0.8.3'
+__version__ = '0.8.dev4'
 
 import csv
 from datetime import timezone, datetime
@@ -31,7 +31,7 @@ import os.path
 import threading
 from typing import Any, Iterator, Union
 
-from eccodes import (codes_bufr_new_from_samples,
+from eccodes import (codes_bufr_new_from_samples, codes_definition_path,
                      codes_set_array, codes_set, codes_get_native_type,
                      codes_write, codes_release, codes_get,
                      codes_bufr_keys_iterator_new,
@@ -57,7 +57,7 @@ else:
 
 LOGGER = logging.getLogger(__name__)
 
-BUFR_TABLE_VERSION = 38  # default BUFR table version
+BUFR_TABLE_VERSION = 42  # default BUFR table version
 # list of BUFR attributes
 ATTRIBUTES = ['code', 'units', 'scale', 'reference', 'width']
 # list of ecCodes keys for BUFR headers
