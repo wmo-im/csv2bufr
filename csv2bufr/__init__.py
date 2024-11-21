@@ -31,7 +31,7 @@ import os.path
 import threading
 from typing import Any, Iterator, Union
 
-from eccodes import (codes_bufr_new_from_samples, codes_definition_path,
+from eccodes import (codes_bufr_new_from_samples,
                      codes_set_array, codes_set, codes_get_native_type,
                      codes_write, codes_release, codes_get,
                      codes_bufr_keys_iterator_new,
