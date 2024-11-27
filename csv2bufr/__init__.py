@@ -19,9 +19,10 @@
 #
 ###############################################################################
 
-__version__ = '0.8.3'
+__version__ = '0.8.dev4'
 
 import csv
+import uuid
 from datetime import timezone, datetime
 import hashlib
 from io import StringIO, BytesIO
@@ -57,7 +58,7 @@ else:
 
 LOGGER = logging.getLogger(__name__)
 
-BUFR_TABLE_VERSION = 38  # default BUFR table version
+BUFR_TABLE_VERSION = 42  # default BUFR table version
 # list of BUFR attributes
 ATTRIBUTES = ['code', 'units', 'scale', 'reference', 'width']
 # list of ecCodes keys for BUFR headers
@@ -357,6 +358,17 @@ class BUFRMessage:
 
     def create_template(self) -> None:
         template = {}
+        template["conformsTo"] = "csv2bufr-template-v2.json"
+        template["metadata"] = {
+            "label": "",
+            "description": "",
+            "version": "0",
+            "author": "",
+            "editor": "",
+            "dateCreated": datetime.now().strftime("%Y-%m-%d"),
+            "dateModified": datetime.now().strftime("%Y-%m-%d"),
+            "id": str(uuid.uuid4())
+        }
         template["inputDelayedDescriptorReplicationFactor"] = \
             self.delayed_replications
 
