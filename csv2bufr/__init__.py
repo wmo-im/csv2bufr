@@ -19,7 +19,7 @@
 #
 ###############################################################################
 
-__version__ = '0.8.3'
+__version__ = '0.8.dev4'
 
 import csv
 import uuid
@@ -58,7 +58,7 @@ else:
 
 LOGGER = logging.getLogger(__name__)
 
-BUFR_TABLE_VERSION = 38  # default BUFR table version
+BUFR_TABLE_VERSION = 42  # default BUFR table version
 # list of BUFR attributes
 ATTRIBUTES = ['code', 'units', 'scale', 'reference', 'width']
 # list of ecCodes keys for BUFR headers

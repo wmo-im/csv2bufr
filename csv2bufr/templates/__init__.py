@@ -72,7 +72,7 @@ TEMPLATES = {}
 
 
 # function to load template by name
-def load_template(template_name: str) -> Union[dict, None]:
+def load_template(template_name: str, isFile=False) -> Union[dict, None]:
     """
     Checks whether specified template exists and loads file.
     Returns none and prints a warning if no template found.
@@ -87,7 +87,9 @@ def load_template(template_name: str) -> Union[dict, None]:
     msg = False
     fname = None
     error_flag = False
-    if template_name not in TEMPLATES:
+    if isFile:
+        fname = template_name
+    elif (template_name not in TEMPLATES) and (not isFile):
         for _template in TEMPLATES.values():
             if template_name == _template.get('name'):
                 fname = _template.get('path')
@@ -115,12 +117,8 @@ def load_template(template_name: str) -> Union[dict, None]:
         oscset = False
         for hidx in range(len(template['header'])):
             if template['header'][hidx]["eccodes_key"] == "bufrHeaderCentre":
-                template['header'][hidx]["eccodes_key"]["value"] = \
-                    f"const:{ORIGINATING_CENTRE}"
                 ocset = True
             if template['header'][hidx]["eccodes_key"] == "bufrHeaderSubCentre":  # noqa
-                template['header'][hidx]["eccodes_key"]["value"] = \
-                    f"const:{ORIGINATING_SUBCENTRE}"
                 oscset = True
 
         if not ocset:

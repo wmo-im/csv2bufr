@@ -121,8 +121,7 @@ def transform(ctx, csv_file, mapping, output_dir, verbosity):  # noqa
             raise click.ClickException(err)
     else:
         try:
-            with open(mapping) as fh:
-                mappings = json.load(fh)
+            mappings = c2bt.load_template(mapping, isFile=True)
         except Exception as err:
             raise click.ClickException(err)
 
