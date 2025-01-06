@@ -88,3 +88,6 @@ sub centre of the generated BUFR files and the system search path used to find B
 - ``BUFR_ORIGINATING_CENTRE``: Specifies the originating centre of the BUFR data, Common Code Table C-11
 - ``BUFR_ORIGINATING_SUBCENTRE``: Specifies the originating sub centre of the BUFR data, Common Code Table C-12
 - ``CSV2BUFR_TEMPLATES``: Path to search for BUFR templates
+
+Note: the ``BUFR_ORIGINATING_CENTRE`` and ``BUFR_ORIGINATING_SUBCENTRE`` are only used if missing from the
+specified :ref:`mapping file <mapping>`).
