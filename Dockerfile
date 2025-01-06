@@ -18,30 +18,21 @@
 # under the License.
 #
 ###############################################################################
+FROM wmoim/dim_eccodes_baseimage:jammy-2.36.0
 
-#FROM ubuntu:latest
-FROM wmoim/dim_eccodes_baseimage:2.28.0
+# update image
+RUN apt-get update -y && \
+    apt-get upgrade -y && \
+    apt-get install -y wget git
 
-ENV DEBIAN_FRONTEND="noninteractive" \
-    TZ="Etc/UTC" \
-    ECCODES_DIR=/opt/eccodes \
-    PATH="${PATH}:/opt/eccodes/bin" \
-    BUFR_ORIGINATING_CENTRE=65535 \
-    BUFR_ORIGINATING_SUBCENTRE=65535
-
-RUN apt-get update -y \
-    && apt-get install -y vim emacs nedit nano git wget
-
-# install csv2bufr templates
-RUN mkdir /opt/csv2bufr &&  \
-    cd /opt/csv2bufr && \
-    wget https://github.com/wmo-im/csv2bufr-templates/archive/refs/tags/v0.1.tar.gz && \
-    tar -zxf v0.1.tar.gz --strip-components=1 csv2bufr-templates-0.1/templates
-
+# install csv2bufr
 WORKDIR /tmp
-
 COPY . /tmp/csv2bufr
+RUN cd /tmp/csv2bufr && python3 setup.py install && cd /tmp && rm -R csv2bufr
 
-RUN cd /tmp/csv2bufr && python3 setup.py install
-
-
+# get latest version of csv2bufr templates and install
+RUN export c2bt=`git -c 'versionsort.suffix=-' ls-remote --tags --sort='v:refname' https://github.com/wmo-im/csv2bufr-templates.git | tail -1 | cut -d '/' -f 3|sed 's/v//'` && \
+    mkdir /opt/csv2bufr &&  \
+    cd /opt/csv2bufr && \
+    wget https://github.com/wmo-im/csv2bufr-templates/archive/refs/tags/v${c2bt}.tar.gz && \
+    tar -zxf v${c2bt}.tar.gz --strip-components=1 csv2bufr-templates-${c2bt}/templates \
