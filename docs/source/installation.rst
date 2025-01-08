@@ -85,10 +85,11 @@ Three environment variables are defined and can be used to set the originating c
 sub centre of the generated BUFR files and the system search path used to find BUFR mapping templates(see
 :ref:`BUFR template page <mapping>`)
 
-- ``BUFR_ORIGINATING_CENTRE``: Specifies the originating centre of the BUFR data, Common Code Table C-11, defaults to missing value.
-- ``BUFR_ORIGINATING_SUBCENTRE``: Specifies the originating sub centre of the BUFR data, Common Code Table C-12, defaults to missing value.
+- ``BUFR_ORIGINATING_CENTRE``: Specifies the originating centre of the BUFR data, Common Code Table C-11, defaults to BUFR missing value.
+- ``BUFR_ORIGINATING_SUBCENTRE``: Specifies the originating sub centre of the BUFR data, Common Code Table C-12, defaults to BUFR missing value.
 - ``BUFR_TABLE_VERSION``: Default BUFR table version number to use if not specified in mapping template, defaults to 41.
 - ``CSV2BUFR_MISSING_VALUE``: Value used to indicate missing value in csv input file if not in ("NA", "NaN", "NAN", "None", "", None).
+- ``CSV2BUFR_NULLIFY_INVALID``: True|False. If True invalid values are set to missing (with warning), otherwise error raised. Defaults to True if not set.
 - ``CSV2BUFR_TEMPLATES``: Path to search for BUFR templates, defaults to /opt/csv2bufr/templates.
 
 Note: the ``BUFR_ORIGINATING_CENTRE`` and ``BUFR_ORIGINATING_SUBCENTRE`` are only used if missing from the
