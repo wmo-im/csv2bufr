@@ -45,7 +45,10 @@ import csv2bufr.templates as c2bt
 # some 'constants'
 SUCCESS = True
 NUMBERS = (float, int, complex)
-MISSING = ("NA", "NaN", "NAN", "None", "", None)
+MISSING = ["NA", "NaN", "NAN", "None", "", None]
+
+if os.environ.get("CSV2BUFR_MISSING_VALUE") is not None:
+    MISSING.append(os.environ.get("CSV2BUFR_MISSING_VALUE"))
 
 if 'CSV2BUFR_NULLIFY_INVALID' in os.environ:
     NULLIFY_INVALID = os.environ['CSV2BUFR_NULLIFY_INVALID']
@@ -58,7 +61,7 @@ else:
 
 LOGGER = logging.getLogger(__name__)
 
-BUFR_TABLE_VERSION = 42  # default BUFR table version
+BUFR_TABLE_VERSION = os.environ.get("BUFR_TABLE_VERSION", 41)  # noqa default BUFR table version
 # list of BUFR attributes
 ATTRIBUTES = ['code', 'units', 'scale', 'reference', 'width']
 # list of ecCodes keys for BUFR headers
