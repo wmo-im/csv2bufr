@@ -106,8 +106,12 @@ def load_template(template_name: str, isFile=False) -> Union[dict, None]:
         msg = f"Error loading template {template_name}, no path found"
         error_flag = True
     else:
-        with open(fname) as fh:
-            template = json.load(fh)
+        try:
+            with open(fname) as fh:
+                template = json.load(fh)
+        except Exception as e:
+            LOGGER.error(f"Error: Exception raised whilst loading json mapping file {fname}, see additional error messages")  # noqa
+            raise e
 
     if error_flag:
         raise RuntimeError(msg)
@@ -149,8 +153,12 @@ def validate_template(mapping: dict) -> bool:
     """
     # load internal file schema for mappings
     file_schema = f"{SCHEMA}{os.sep}csv2bufr-template-v2.json"
-    with open(file_schema) as fh:
-        schema = json.load(fh)
+    try:
+        with open(file_schema) as fh:
+            schema = json.load(fh)
+    except Exception as e:
+        LOGGER.error("Error: Exception loading mapping schema file")
+        raise e
 
     # now validate
     try:
@@ -193,7 +201,6 @@ def index_templates() -> bool:
                             }
 
             except Exception as e:
-                print(dir_)
                 LOGGER.warning(f"Warning raised indexing csv2bufr templates: {e}, skipping file {template}.")  # noqa
 
     return _SUCCESS_
