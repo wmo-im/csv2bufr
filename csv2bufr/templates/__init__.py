@@ -110,8 +110,7 @@ def load_template(template_name: str, isFile=False) -> Union[dict, None]:
             with open(fname) as fh:
                 template = json.load(fh)
         except Exception as e:
-            LOGGER.error(f"Error: Exception raised whilst loading json" \
-                f" mapping file {fname}, see additional error messages")
+            LOGGER.error(f"Error: Exception raised whilst loading json mapping file {fname}, see additional error messages")  # noqa
             raise e
 
     if error_flag:
