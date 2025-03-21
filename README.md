@@ -11,7 +11,7 @@ More information on the BUFR format can be found in the [WMO Manual on Codes, Vo
 
 ### Dependencies
 
-Dependencies are listed in [requirements.txt](https://github.com/wmo-im/csv2bufr/blob/main/requirements.txt). Dependencies are automatically installed during csv2bufr installation.
+Dependencies are listed in [requirements.txt](https://github.com/World-Meteorological-Organization/csv2bufr/blob/main/requirements.txt). Dependencies are automatically installed during csv2bufr installation.
 
 ```bash
 docker pull wmoim/csv2bufr
@@ -46,7 +46,7 @@ rm -fr build dist *.egg-info
 python setup.py sdist bdist_wheel --universal
 twine upload dist/*
 
-# publish release on GitHub (https://github.com/wmo-im/csv2bufr/releases/new)
+# publish release on GitHub (https://github.com/World-Meteorological-Organization/csv2bufr/releases/new)
 
 # bump version back to dev
 vi csv2bufr/__init__.py  # update __version__
@@ -63,7 +63,7 @@ The full documentation for csv2bufr can be found at [https://csv2bufr.readthedoc
 
 ### Bugs and Issues
 
-All bugs, enhancements and issues are managed on [GitHub](https://github.com/wmo-im/csv2bufr/issues).
+All bugs, enhancements and issues are managed on [GitHub](https://github.com/World-Meteorological-Organization/csv2bufr/issues).
 
 ## Contact
 
