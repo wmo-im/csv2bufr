@@ -31,8 +31,8 @@ COPY . /tmp/csv2bufr
 RUN cd /tmp/csv2bufr && python3 setup.py install && cd /tmp && rm -R csv2bufr
 
 # get latest version of csv2bufr templates and install
-RUN export c2bt=`git -c 'versionsort.suffix=-' ls-remote --tags --sort='v:refname' https://github.com/wmo-im/csv2bufr-templates.git | tail -1 | cut -d '/' -f 3|sed 's/v//'` && \
+RUN export c2bt=`git -c 'versionsort.suffix=-' ls-remote --tags --sort='v:refname' https://github.com/World-Meteorological-Organization/csv2bufr-templates.git | tail -1 | cut -d '/' -f 3|sed 's/v//'` && \
     mkdir /opt/csv2bufr &&  \
     cd /opt/csv2bufr && \
-    wget https://github.com/wmo-im/csv2bufr-templates/archive/refs/tags/v${c2bt}.tar.gz && \
+    wget https://github.com/World-Meteorological-Organization/csv2bufr-templates/archive/refs/tags/v${c2bt}.tar.gz && \
     tar -zxf v${c2bt}.tar.gz --strip-components=1 csv2bufr-templates-${c2bt}/templates \

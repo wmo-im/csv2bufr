@@ -45,7 +45,7 @@ Alternatively, csv2bufr can be installed from source. First clone the repository
 
 .. code-block:: bash
 
-   git clone https://github.com/wmo-im/csv2bufr.git -b dev
+   git clone https://github.com/World-Meteorological-Organization/csv2bufr.git -b dev
    cd csv2bufr
 
 If running in a Docker environment, build the Docker image and run the container:

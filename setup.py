@@ -87,7 +87,7 @@ setup(
     author_email='DBerry@wmo.int',
     maintainer='David I. Berry',
     maintainer_email='DBerry@wmo.int',
-    url='https://github.com/wmo-im/csv2bufr',
+    url='https://github.com/World-Meteorological-Organization/csv2bufr',
     install_requires=read('requirements.txt').splitlines(),
     packages=find_packages(),
     include_package_data=True,

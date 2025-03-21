@@ -4,7 +4,7 @@ csv2bufr |release| documentation
 ====================================
 
 :Author: World Meteorological Organization (WMO)
-:Contact: https://github.com/wmo-im/csv2bufr
+:Contact: https://github.com/World-Meteorological-Organization/csv2bufr
 :Release: |release|
 :Date: |today|
 

@@ -203,7 +203,7 @@ Built in templates and search path
 
 Several preconfigured templates are available from the csv2bufr-templates repository:
 
-- https://github.com/wmo-im/csv2bufr-templates
+- https://github.com/World-Meteorological-Organization/csv2bufr-templates
 
 By default, ``csv2bufr`` searches in the current working directory and the
 ``/opt/csv2bufr/templates`` directory, additional search paths can be added by setting
